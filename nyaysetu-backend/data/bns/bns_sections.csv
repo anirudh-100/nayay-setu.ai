@@ -1,0 +1,34 @@
+section,offence,punishment,maps_from_ipc
+103(1),Murder,"Death or imprisonment for life, and fine.",302
+105,Culpable homicide not amounting to murder,"Imprisonment for life, or imprisonment of either description up to 10 years, and fine.",304
+106(1),Causing death by negligence,"Imprisonment up to 5 years and fine. (For a registered medical practitioner acting in good faith: up to 2 years and fine.)",304A
+108,Abetment of suicide,"Imprisonment up to 10 years and fine.",306
+109,Attempt to murder,"Imprisonment up to 10 years and fine; if hurt is caused, up to imprisonment for life.",307
+115(2),Voluntarily causing hurt,"Imprisonment up to 1 year, or fine up to Rs. 10,000, or both.",323
+117(2),Voluntarily causing grievous hurt,"Imprisonment up to 7 years and fine.",325
+118(1),Voluntarily causing hurt by dangerous weapons or means,"Imprisonment up to 3 years, or fine up to Rs. 20,000, or both.",324
+118(2),Voluntarily causing grievous hurt by dangerous weapons or means,"Imprisonment up to 7 years and fine.",326
+124(1),Voluntarily causing grievous hurt by use of acid,"Imprisonment not less than 10 years, extendable to imprisonment for life, and fine.",326A
+64,Punishment for rape,"Rigorous imprisonment not less than 10 years, extendable to imprisonment for life, and fine.",376
+70,Gang rape,"Rigorous imprisonment not less than 20 years, extendable to imprisonment for life, and fine.",376D
+69,Sexual intercourse by deceitful means or false promise of marriage,"Imprisonment up to 10 years and fine.",
+74,Assault or criminal force to woman with intent to outrage her modesty,"Imprisonment not less than 1 year, extendable to 5 years, and fine.",354
+75,Sexual harassment,"Varies by act: rigorous imprisonment up to 3 years, or fine, or both (lesser for certain acts).",354A
+78,Stalking,"First conviction: imprisonment up to 3 years and fine; subsequent: up to 5 years and fine.",354D
+80,Dowry death,"Imprisonment not less than 7 years, extendable to imprisonment for life.",304B
+85,Cruelty by husband or relatives of husband,"Imprisonment up to 3 years and fine.",498A
+137(2),Kidnapping,"Imprisonment up to 7 years and fine.",363
+303(2),Theft,"Imprisonment up to 3 years, or fine, or both. (For a first-time petty offender who returns the property, community service may be ordered.)",379
+305,Theft in a dwelling house or means of transport,"Imprisonment up to 7 years and fine.",380
+308(2),Extortion,"Imprisonment up to 7 years, or fine, or both.",384
+309(4),Robbery,"Rigorous imprisonment up to 10 years and fine (up to 14 years if committed on a highway between sunset and sunrise).",392
+310(2),Dacoity,"Imprisonment for life, or rigorous imprisonment up to 10 years, and fine.",395
+316(2),Criminal breach of trust,"Imprisonment up to 5 years, or fine, or both.",406
+318(4),Cheating and dishonestly inducing delivery of property,"Imprisonment up to 7 years and fine.",420
+351(2),Criminal intimidation,"Imprisonment up to 2 years, or fine, or both.",506
+351(3),Criminal intimidation by threat to cause death or grievous hurt,"Imprisonment up to 7 years, or fine, or both.",506
+356(2),Punishment for defamation,"Simple imprisonment up to 2 years, or fine, or both, or community service.",500
+152,"Act endangering sovereignty, unity and integrity of India","Imprisonment for life or up to 7 years, and fine.",124A
+196,Promoting enmity between different groups,"Imprisonment up to 3 years, or fine, or both.",153A
+304,Snatching,"Imprisonment up to 3 years and fine.",
+113,Terrorist act,"Death or imprisonment for life where it results in death; otherwise not less than 5 years extendable to life, and fine.",

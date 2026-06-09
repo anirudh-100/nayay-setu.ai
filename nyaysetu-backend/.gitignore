@@ -1,0 +1,22 @@
+# --- secrets ---
+kaggle.json
+.kaggle/
+.env
+*.pem
+*.key
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# --- project artifacts ---
+models/faiss_index/
+
+# --- editor ---
+.vscode/
+.idea/
+.DS_Store

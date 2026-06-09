@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "note": "Single source of truth for every bare act the engine ingests. To ADD an act: (1) drop a CSV with a 'section'/'article' column plus any of offence/description/punishment, (2) add an entry below. No code changes. See data/acts/README.md.",
+    "verified": false,
+    "verification_note": "Acts flagged verified:false carry curated starter text — replace with the official bare act and verify before production."
+  },
+  "acts": [
+    {
+      "code": "BNS",
+      "title": "Bharatiya Nyaya Sanhita, 2023",
+      "unit": "Section",
+      "code_status": "current",
+      "effective_date": "2024-07-01",
+      "path": "data/bns/bns_sections.csv",
+      "url_template": "https://devgan.in/bns/section/{base}/",
+      "maps_to_act": "IPC",
+      "verified": false
+    },
+    {
+      "code": "IPC",
+      "title": "Indian Penal Code, 1860",
+      "unit": "Section",
+      "code_status": "repealed",
+      "path": "data/ipc/ipc_sections.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": true
+    },
+    {
+      "code": "MVA",
+      "title": "Motor Vehicles Act, 1988",
+      "unit": "Section",
+      "code_status": "current",
+      "path": "data/acts/motor_vehicles_act.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": false
+    },
+    {
+      "code": "ITA",
+      "title": "Information Technology Act, 2000",
+      "unit": "Section",
+      "code_status": "current",
+      "path": "data/acts/it_act.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": false
+    },
+    {
+      "code": "PWDVA",
+      "title": "Protection of Women from Domestic Violence Act, 2005",
+      "unit": "Section",
+      "code_status": "current",
+      "path": "data/acts/domestic_violence_act.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": false
+    },
+    {
+      "code": "Constitution",
+      "title": "Constitution of India",
+      "unit": "Article",
+      "code_status": "current",
+      "path": "data/acts/constitution.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": false
+    }
+  ]
+}

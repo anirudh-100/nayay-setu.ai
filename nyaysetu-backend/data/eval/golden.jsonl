@@ -1,0 +1,18 @@
+{"query": "What is the punishment for cheating someone of money?", "expect": ["420", "318"], "topic": "cheating"}
+{"query": "punishment for murder in India", "expect": ["302", "103"], "topic": "murder"}
+{"query": "what happens if someone is caught stealing", "expect": ["379", "303"], "topic": "theft"}
+{"query": "punishment for rape", "expect": ["376", "64"], "topic": "rape"}
+{"query": "dowry death law", "expect": ["304B", "80"], "topic": "dowry death"}
+{"query": "my husband and in-laws are harassing me for dowry", "expect": ["498A", "85"], "topic": "cruelty"}
+{"query": "someone is threatening to kill me", "expect": ["506", "351"], "topic": "criminal intimidation"}
+{"query": "defamation punishment for false statements", "expect": ["499", "500", "356"], "topic": "defamation"}
+{"query": "acid attack punishment", "expect": ["326A", "124"], "topic": "acid attack"}
+{"query": "a man keeps following and stalking a woman", "expect": ["354D", "78"], "topic": "stalking"}
+{"query": "punishment for abetment of suicide", "expect": ["306", "108"], "topic": "abetment of suicide"}
+{"query": "death caused by rash and negligent driving", "expect": ["304A", "106"], "topic": "negligence"}
+{"query": "punishment for robbery", "expect": ["392", "309"], "topic": "robbery"}
+{"query": "criminal breach of trust by an employee", "expect": ["406", "316"], "topic": "breach of trust"}
+{"query": "what is sedition law in India", "expect": ["124A", "152"], "topic": "sedition"}
+{"query": "outraging the modesty of a woman", "expect": ["354", "74"], "topic": "outrage modesty"}
+{"query": "attempt to murder punishment", "expect": ["307", "109"], "topic": "attempt to murder"}
+{"query": "grievous hurt by dangerous weapon", "expect": ["326", "118"], "topic": "grievous hurt"}
