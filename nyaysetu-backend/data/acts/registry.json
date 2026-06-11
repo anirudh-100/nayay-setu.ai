@@ -38,6 +38,36 @@
       }
     },
     {
+      "code": "CrPC",
+      "title": "Code of Criminal Procedure, 1973",
+      "unit": "Section",
+      "code_status": "repealed",
+      "path": "data/crpc/crpc_sections.csv",
+      "url_template": "ik",
+      "maps_to_act": "BNSS",
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public CrPC summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/15272",
+        "retrieved_at": null
+      }
+    },
+    {
+      "code": "IEA",
+      "title": "Indian Evidence Act, 1872",
+      "unit": "Section",
+      "code_status": "repealed",
+      "path": "data/evidence/evidence_sections.csv",
+      "url_template": "ik",
+      "maps_to_act": "BSA",
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public Evidence Act summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/15351",
+        "retrieved_at": null
+      }
+    },
+    {
       "code": "MVA",
       "title": "Motor Vehicles Act, 1988",
       "unit": "Section",
