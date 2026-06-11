@@ -2,70 +2,2106 @@
   "_meta": {
     "from_code": "IPC",
     "to_code": "BNS",
-    "description": "Curated IPC (1860) -> BNS (Bharatiya Nyaya Sanhita, 2023) section correspondence for the offences citizens most commonly ask about.",
+    "description": "Official IPC (Indian Penal Code, 1860) -> BNS (Bharatiya Nyaya Sanhita, 2023) correspondence, parsed from the NCRB Corresponding Section Table.",
     "transition_date": "2024-07-01",
-    "transition_rule": "Offences committed on or after 2024-07-01 are charged under the BNS. Offences before that date remain under the IPC. Use this to present the correct current reference while still answering about historic matters.",
-    "source": "Compiled from publicly published IPC<->BNS correspondence tables (MHA / legislative summaries).",
-    "verified": false,
-    "verification_note": "VERIFY every entry against the official Bharatiya Nyaya Sanhita, 2023 bare act before relying on it. Subsection numbers in particular should be confirmed."
+    "transition_rule": "Matters on or after 2024-07-01 fall under the BNS; earlier matters remain under the IPC.",
+    "source": "NCRB / MHA — Corresponding Section Tables (cytrain.ncrb.gov.in)",
+    "source_url": "https://cytrain.ncrb.gov.in/staticpage/web_pages/SectionTableBNS.html",
+    "authority_of_record": "https://www.indiacode.nic.in",
+    "retrieved_at": "2026-06-11",
+    "verified": true,
+    "verification_note": "Mapping data is from the official NCRB Corresponding Section Table; 5 human clarifying note(s) merged from _curated_overlay.json."
   },
   "ipc_to_bns": {
-    "34":  {"bns": "3(5)",   "offence": "Acts done by several persons in furtherance of common intention"},
-    "120B":{"bns": "61(2)",  "offence": "Criminal conspiracy"},
-    "124A":{"bns": "152",    "offence": "Sedition", "note": "Reframed in BNS as acts endangering sovereignty, unity and integrity of India; not a one-to-one re-enactment."},
-    "153A":{"bns": "196",    "offence": "Promoting enmity between groups on grounds of religion, race, etc."},
-    "295A":{"bns": "299",    "offence": "Deliberate acts to outrage religious feelings"},
-    "302": {"bns": "103(1)", "offence": "Murder"},
-    "304": {"bns": "105",    "offence": "Culpable homicide not amounting to murder"},
-    "304A":{"bns": "106(1)", "offence": "Causing death by negligence"},
-    "304B":{"bns": "80",     "offence": "Dowry death"},
-    "306": {"bns": "108",    "offence": "Abetment of suicide"},
-    "307": {"bns": "109",    "offence": "Attempt to murder"},
-    "309": {"bns": null,     "offence": "Attempt to commit suicide", "note": "Not retained as a general offence (see Mental Healthcare Act, 2017). BNS s.226 covers attempt to suicide to compel or restrain a public servant."},
-    "323": {"bns": "115(2)", "offence": "Voluntarily causing hurt"},
-    "324": {"bns": "118(1)", "offence": "Voluntarily causing hurt by dangerous weapons or means"},
-    "325": {"bns": "117(2)", "offence": "Voluntarily causing grievous hurt"},
-    "326": {"bns": "118(2)", "offence": "Voluntarily causing grievous hurt by dangerous weapons or means"},
-    "326A":{"bns": "124(1)", "offence": "Voluntarily causing grievous hurt by use of acid"},
-    "326B":{"bns": "124(2)", "offence": "Voluntarily throwing or attempting to throw acid"},
-    "354": {"bns": "74",     "offence": "Assault or criminal force to woman with intent to outrage her modesty"},
-    "354A":{"bns": "75",     "offence": "Sexual harassment"},
-    "354B":{"bns": "76",     "offence": "Assault or use of criminal force to woman with intent to disrobe"},
-    "354C":{"bns": "77",     "offence": "Voyeurism"},
-    "354D":{"bns": "78",     "offence": "Stalking"},
-    "363": {"bns": "137(2)", "offence": "Kidnapping"},
-    "366": {"bns": "87",     "offence": "Kidnapping or abducting a woman to compel marriage, etc."},
-    "375": {"bns": "63",     "offence": "Rape (definition)"},
-    "376": {"bns": "64",     "offence": "Punishment for rape"},
-    "376D":{"bns": "70",     "offence": "Gang rape"},
-    "377": {"bns": null,     "offence": "Unnatural offences", "note": "No direct equivalent retained in the BNS."},
-    "379": {"bns": "303(2)", "offence": "Theft"},
-    "380": {"bns": "305",    "offence": "Theft in a dwelling house, etc."},
-    "384": {"bns": "308(2)", "offence": "Extortion"},
-    "392": {"bns": "309(4)", "offence": "Robbery"},
-    "395": {"bns": "310(2)", "offence": "Dacoity"},
-    "406": {"bns": "316(2)", "offence": "Criminal breach of trust"},
-    "411": {"bns": "317(2)", "offence": "Dishonestly receiving stolen property"},
-    "415": {"bns": "318(1)", "offence": "Cheating (definition)"},
-    "420": {"bns": "318(4)", "offence": "Cheating and dishonestly inducing delivery of property"},
-    "447": {"bns": "329(3)", "offence": "Criminal trespass"},
-    "448": {"bns": "331(1)", "offence": "House-trespass"},
-    "465": {"bns": "336(2)", "offence": "Forgery"},
-    "468": {"bns": "336(3)", "offence": "Forgery for the purpose of cheating"},
-    "471": {"bns": "340(2)", "offence": "Using as genuine a forged document"},
-    "498A":{"bns": "85",     "offence": "Cruelty by husband or his relatives", "note": "BNS s.86 defines 'cruelty'."},
-    "499": {"bns": "356(1)", "offence": "Defamation (definition)"},
-    "500": {"bns": "356(2)", "offence": "Punishment for defamation"},
-    "504": {"bns": "352",    "offence": "Intentional insult to provoke breach of peace"},
-    "506": {"bns": "351(2)", "offence": "Criminal intimidation", "note": "Aggravated forms fall under s.351(3)."},
-    "509": {"bns": "79",     "offence": "Word, gesture or act intended to insult the modesty of a woman"},
-    "511": {"bns": "62",     "offence": "Attempt to commit offences"}
-  },
-  "bns_new_offences": {
-    "69":  {"offence": "Sexual intercourse by employing deceitful means or false promise of marriage"},
-    "111": {"offence": "Organised crime"},
-    "112": {"offence": "Petty organised crime"},
-    "113": {"offence": "Terrorist act"},
-    "304": {"offence": "Snatching"}
+    "1": {
+      "bns": "1",
+      "offence": "Short title, commencement and application"
+    },
+    "2": {
+      "bns": "1(3)",
+      "offence": "Short title, commencement and application"
+    },
+    "3": {
+      "bns": "1(4)",
+      "offence": "Short title, commencement and application"
+    },
+    "4": {
+      "bns": "1(5)",
+      "offence": "Short title, commencement and application"
+    },
+    "5": {
+      "bns": "1(6)",
+      "offence": "Short title, commencement and application"
+    },
+    "6": {
+      "bns": "3",
+      "offence": "General explanations"
+    },
+    "7": {
+      "bns": "3(2)",
+      "offence": "General explanations"
+    },
+    "8": {
+      "bns": "2(10)",
+      "offence": "Definitions"
+    },
+    "9": {
+      "bns": "2(22)",
+      "offence": "Definitions"
+    },
+    "10": {
+      "bns": "2(19)",
+      "offence": "Definitions"
+    },
+    "11": {
+      "bns": "2(26)",
+      "offence": "Definitions"
+    },
+    "12": {
+      "bns": "2(27)",
+      "offence": "Definitions"
+    },
+    "14": {
+      "bns": null,
+      "offence": "",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "17": {
+      "bns": "2(12)",
+      "offence": "Definitions"
+    },
+    "18": {
+      "bns": null,
+      "offence": "“India”",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "19": {
+      "bns": "2(16)",
+      "offence": "Definitions"
+    },
+    "20": {
+      "bns": "2(5)",
+      "offence": "Definitions"
+    },
+    "21": {
+      "bns": "2(28)",
+      "offence": "Definitions"
+    },
+    "22": {
+      "bns": "2(21)",
+      "offence": "Definitions"
+    },
+    "23": {
+      "bns": "2(36)",
+      "offence": "Definitions"
+    },
+    "24": {
+      "bns": "2(7)",
+      "offence": "Definitions"
+    },
+    "25": {
+      "bns": "2(9)",
+      "offence": "Definitions"
+    },
+    "26": {
+      "bns": "2(29)",
+      "offence": "Definitions"
+    },
+    "27": {
+      "bns": "3(3)",
+      "offence": "General explanations"
+    },
+    "28": {
+      "bns": "2(4)",
+      "offence": "Definitions"
+    },
+    "29": {
+      "bns": "2(8)",
+      "offence": "Definitions"
+    },
+    "30": {
+      "bns": "2(31)",
+      "offence": "Definitions"
+    },
+    "31": {
+      "bns": "2(34)",
+      "offence": "Definitions"
+    },
+    "32": {
+      "bns": "3(4)",
+      "offence": "General explanations"
+    },
+    "33": {
+      "bns": "2(1)",
+      "offence": "Definitions"
+    },
+    "34": {
+      "bns": "3(5)",
+      "offence": "General explanations"
+    },
+    "35": {
+      "bns": "3(6)",
+      "offence": "General explanations"
+    },
+    "36": {
+      "bns": "3(7)",
+      "offence": "General explanations"
+    },
+    "37": {
+      "bns": "3(8)",
+      "offence": "General explanations"
+    },
+    "38": {
+      "bns": "3(9)",
+      "offence": "General explanations"
+    },
+    "39": {
+      "bns": "2(33)",
+      "offence": "Definitions"
+    },
+    "40": {
+      "bns": "2(24)",
+      "offence": "Definitions"
+    },
+    "41": {
+      "bns": "2(30)",
+      "offence": "Definitions"
+    },
+    "42": {
+      "bns": "2(18)",
+      "offence": "Definitions"
+    },
+    "43": {
+      "bns": "2(15)",
+      "offence": "Definitions"
+    },
+    "44": {
+      "bns": "2(14)",
+      "offence": "Definitions"
+    },
+    "45": {
+      "bns": "2(17)",
+      "offence": "Definitions"
+    },
+    "46": {
+      "bns": "2(6)",
+      "offence": "Definitions"
+    },
+    "47": {
+      "bns": "2(2)",
+      "offence": "Definitions"
+    },
+    "48": {
+      "bns": "2(32)",
+      "offence": "Definitions"
+    },
+    "49": {
+      "bns": "2(20)",
+      "offence": "Definitions"
+    },
+    "50": {
+      "bns": null,
+      "offence": "“Section”",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "51": {
+      "bns": "2(23)",
+      "offence": "Definitions"
+    },
+    "52": {
+      "bns": "2(11)",
+      "offence": "Definitions"
+    },
+    "53": {
+      "bns": "4",
+      "offence": "Punishments"
+    },
+    "54": {
+      "bns": "5",
+      "offence": "Commutation of sentence"
+    },
+    "55": {
+      "bns": "5",
+      "offence": "Commutation of sentence"
+    },
+    "57": {
+      "bns": "6",
+      "offence": "Fractions of terms of punishment"
+    },
+    "60": {
+      "bns": "7",
+      "offence": "Sentence may be (in certain cases of imprisonment) wholly or partly rigorous or simple"
+    },
+    "63": {
+      "bns": "8",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "64": {
+      "bns": "8(2)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "65": {
+      "bns": "8(3)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "66": {
+      "bns": "8(4)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "67": {
+      "bns": "8(5)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "68": {
+      "bns": "8(6)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "69": {
+      "bns": "8(6)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "70": {
+      "bns": "8(7)",
+      "offence": "Amount of fine, liability in default of payment of fine, etc"
+    },
+    "71": {
+      "bns": "9",
+      "offence": "Limit of punishment of offence made up of several offences"
+    },
+    "72": {
+      "bns": "10",
+      "offence": "Punishment of person guilty of one of several offences, judgment stating that it is doubtful of which"
+    },
+    "73": {
+      "bns": "11",
+      "offence": "Solitary confinement"
+    },
+    "74": {
+      "bns": "12",
+      "offence": "Limit of solitary confinement"
+    },
+    "75": {
+      "bns": "13",
+      "offence": "Enhanced punishment for certain offences after previous conviction"
+    },
+    "76": {
+      "bns": "14",
+      "offence": "Act done by a person bound, or by mistake of fact believing himself bound, by law"
+    },
+    "77": {
+      "bns": "15",
+      "offence": "Act of Judge when acting judicially"
+    },
+    "78": {
+      "bns": "16",
+      "offence": "Act done pursuant to judgment or order of Court"
+    },
+    "79": {
+      "bns": "17",
+      "offence": "Act done by a person justified, or by mistake of fact believing himself justified, by law"
+    },
+    "80": {
+      "bns": "18",
+      "offence": "Accident in doing a lawful act"
+    },
+    "81": {
+      "bns": "19",
+      "offence": "Act likely to cause harm, but done without criminal intent, and to prevent other harm"
+    },
+    "82": {
+      "bns": "20",
+      "offence": "Act of a child under seven years of age"
+    },
+    "83": {
+      "bns": "21",
+      "offence": "Act of a child above seven and under twelve years of age of immature understanding"
+    },
+    "84": {
+      "bns": "22",
+      "offence": "Act of a person of unsound mind"
+    },
+    "85": {
+      "bns": "23",
+      "offence": "Act of a person incapable of judgment by reason of intoxication caused against his will"
+    },
+    "86": {
+      "bns": "24",
+      "offence": "Offence requiring a particular intent or knowledge committed by one who is intoxicated"
+    },
+    "87": {
+      "bns": "25",
+      "offence": "Act not intended and not known to be likely to cause death or grievous hurt, done by consent"
+    },
+    "88": {
+      "bns": "26",
+      "offence": "Act not intended to cause death, done by consent in good faith for person’s benefit"
+    },
+    "89": {
+      "bns": "27",
+      "offence": "Act done in good faith for benefit of child or person of unsound mind, by or by consent of guardian"
+    },
+    "90": {
+      "bns": "28",
+      "offence": "Consent known to be given under fear or misconception"
+    },
+    "91": {
+      "bns": "29",
+      "offence": "Exclusion of acts which are offences independently of harm caused"
+    },
+    "92": {
+      "bns": "30",
+      "offence": "Act done in good faith for benefit of a person without consent"
+    },
+    "93": {
+      "bns": "31",
+      "offence": "Communication made in good faith"
+    },
+    "94": {
+      "bns": "32",
+      "offence": "Act to which a person is compelled by threats"
+    },
+    "95": {
+      "bns": "33",
+      "offence": "Act causing slight harm"
+    },
+    "96": {
+      "bns": "34",
+      "offence": "Things done in private defence"
+    },
+    "97": {
+      "bns": "35",
+      "offence": "Right of private defence of body and of property"
+    },
+    "98": {
+      "bns": "36",
+      "offence": "Right of private defence against act of a person of unsound mind, etc"
+    },
+    "99": {
+      "bns": "37",
+      "offence": "Acts against which there is no right of private defence"
+    },
+    "100": {
+      "bns": "38",
+      "offence": "When right of private defence of body extends to causing death"
+    },
+    "101": {
+      "bns": "39",
+      "offence": "When such right extends to causing any harm other than death"
+    },
+    "102": {
+      "bns": "40",
+      "offence": "Commencement and continuance of right of private defence of body"
+    },
+    "103": {
+      "bns": "41",
+      "offence": "When right of private defence of property extends to causing death"
+    },
+    "104": {
+      "bns": "42",
+      "offence": "When such right extends to causing any harm other than death"
+    },
+    "105": {
+      "bns": "43",
+      "offence": "Commencement and continuance of right of private defence of property"
+    },
+    "106": {
+      "bns": "44",
+      "offence": "Right of private defence against deadly assault when there is risk of harm to innocent person"
+    },
+    "107": {
+      "bns": "45",
+      "offence": "Abetment of a thing"
+    },
+    "108": {
+      "bns": "46",
+      "offence": "Abettor"
+    },
+    "109": {
+      "bns": "49",
+      "offence": "Punishment of abetment if act abetted is committed in consequence and where no express provision is made for its punishment"
+    },
+    "110": {
+      "bns": "50",
+      "offence": "Punishment of abetment if person abetted does act with different intention from that of abettor"
+    },
+    "111": {
+      "bns": "51",
+      "offence": "Liability of abettor when one act abetted and different act done"
+    },
+    "112": {
+      "bns": "52",
+      "offence": "Abettor when liable to cumulative punishment for act abetted and for act done"
+    },
+    "113": {
+      "bns": "53",
+      "offence": "Liability of abettor for an effect caused by act abetted different from that intended by abettor"
+    },
+    "114": {
+      "bns": "54",
+      "offence": "Abettor present when offence is committed"
+    },
+    "115": {
+      "bns": "55",
+      "offence": "Abetment of offence punishable with death or imprisonment for life"
+    },
+    "116": {
+      "bns": "56",
+      "offence": "Abetment of offence punishable with imprisonment"
+    },
+    "117": {
+      "bns": "57",
+      "offence": "Abetting commission of offence by public or by more than ten persons"
+    },
+    "118": {
+      "bns": "58",
+      "offence": "Concealing design to commit offence punishable with death or imprisonment for life"
+    },
+    "119": {
+      "bns": "59",
+      "offence": "Public servant concealing design to commit offence which it is his duty to prevent"
+    },
+    "120": {
+      "bns": "60",
+      "offence": "Concealing design to commit offence punishable with imprisonment"
+    },
+    "121": {
+      "bns": "147",
+      "offence": "Waging, or attempting to wage war, or abetting waging of war, against Government of India"
+    },
+    "122": {
+      "bns": "149",
+      "offence": "Collecting arms, etc., with intention of waging war against Government of India"
+    },
+    "123": {
+      "bns": "150",
+      "offence": "Concealing with intent to facilitate design to wage war"
+    },
+    "124": {
+      "bns": "151",
+      "offence": "Assaulting President, Governor, etc., with intent to compel or restrain exercise of any lawful power"
+    },
+    "125": {
+      "bns": "153",
+      "offence": "Waging war against Government of any foreign State at peace with Government of India"
+    },
+    "126": {
+      "bns": "154",
+      "offence": "Committing depredation on territories of foreign State at peace with Government of India"
+    },
+    "127": {
+      "bns": "155",
+      "offence": "Receiving property taken by war or depredation mentioned in sections 153 and 154"
+    },
+    "128": {
+      "bns": "156",
+      "offence": "Public servant voluntarily allowing prisoner of State or war to escape"
+    },
+    "129": {
+      "bns": "157",
+      "offence": "Public servant negligently suffering such prisoner to escape"
+    },
+    "130": {
+      "bns": "158",
+      "offence": "Aiding escape of, rescuing or harbouring such prisoner"
+    },
+    "131": {
+      "bns": "159",
+      "offence": "Abetting mutiny, or attempting to seduce a soldier, sailor or airman from his duty"
+    },
+    "132": {
+      "bns": "160",
+      "offence": "Abetment of mutiny, if mutiny is committed in consequence thereof"
+    },
+    "133": {
+      "bns": "161",
+      "offence": "Abetment of assault by soldier, sailor or airman on his superior officer, when in execution of his office"
+    },
+    "134": {
+      "bns": "162",
+      "offence": "Abetment of such assault, if assault committed"
+    },
+    "135": {
+      "bns": "163",
+      "offence": "Abetment of desertion of soldier, sailor or airman"
+    },
+    "136": {
+      "bns": "164",
+      "offence": "Harbouring deserter"
+    },
+    "137": {
+      "bns": "165",
+      "offence": "Deserter concealed on board merchant vessel through negligence of master"
+    },
+    "138": {
+      "bns": "166",
+      "offence": "Abetment of act of insubordination by soldier, sailor or airman"
+    },
+    "139": {
+      "bns": "167",
+      "offence": "Persons subject to certain Acts"
+    },
+    "140": {
+      "bns": "168",
+      "offence": "Wearing garb or carrying token used by soldier, sailor or airman"
+    },
+    "141": {
+      "bns": "189",
+      "offence": "Unlawful assembly"
+    },
+    "143": {
+      "bns": "189(2)",
+      "offence": "Unlawful assembly"
+    },
+    "144": {
+      "bns": "189(4)",
+      "offence": "Unlawful assembly"
+    },
+    "145": {
+      "bns": "189(3)",
+      "offence": "Unlawful assembly"
+    },
+    "146": {
+      "bns": "191",
+      "offence": "Rioting"
+    },
+    "147": {
+      "bns": "191(2)",
+      "offence": "Rioting"
+    },
+    "148": {
+      "bns": "191(3)",
+      "offence": "Rioting"
+    },
+    "149": {
+      "bns": "190",
+      "offence": "Every member of unlawful assembly guilty of offence committed in prosecution of common object"
+    },
+    "150": {
+      "bns": "189(6)",
+      "offence": "Unlawful assembly"
+    },
+    "151": {
+      "bns": "189(5)",
+      "offence": "Unlawful assembly"
+    },
+    "152": {
+      "bns": "195",
+      "offence": "Assaulting or obstructing public servant when suppressing riot, etc"
+    },
+    "153": {
+      "bns": "192",
+      "offence": "Wantonly giving provocation with intent to cause riot- if rioting be committed; if not committed"
+    },
+    "154": {
+      "bns": "193",
+      "offence": "Liability of owner, occupier etc., of land on which an unlawful assembly or riot takes place"
+    },
+    "155": {
+      "bns": "193(2)",
+      "offence": "Liability of owner, occupier etc., of land on which an unlawful assembly or riot takes place"
+    },
+    "156": {
+      "bns": "193(3)",
+      "offence": "Liability of owner, occupier etc., of land on which an unlawful assembly or riot takes place"
+    },
+    "157": {
+      "bns": "189(7)",
+      "offence": "Unlawful assembly"
+    },
+    "158": {
+      "bns": "189(8)",
+      "offence": "Unlawful assembly"
+    },
+    "159": {
+      "bns": "194",
+      "offence": "Affray"
+    },
+    "160": {
+      "bns": "194(2)",
+      "offence": "Affray"
+    },
+    "166": {
+      "bns": "198",
+      "offence": "Public servant disobeying law, with intent to cause injury to any person"
+    },
+    "167": {
+      "bns": "201",
+      "offence": "Public servant framing an incorrect document with intent to cause injury"
+    },
+    "168": {
+      "bns": "202",
+      "offence": "Public servant unlawfully engaging in trade"
+    },
+    "169": {
+      "bns": "203",
+      "offence": "Public servant unlawfully buying or bidding for property"
+    },
+    "170": {
+      "bns": "204",
+      "offence": "Personating a public servant"
+    },
+    "171": {
+      "bns": "177",
+      "offence": "Failure to keep election accounts"
+    },
+    "172": {
+      "bns": "206",
+      "offence": "Absconding to avoid service of summons or other proceeding"
+    },
+    "173": {
+      "bns": "207",
+      "offence": "Preventing service of summons or other proceeding, or preventing publication thereof"
+    },
+    "174": {
+      "bns": "208",
+      "offence": "Non-attendance in obedience to an order from public servant"
+    },
+    "175": {
+      "bns": "210",
+      "offence": "Omission to produce document or electronic record to public servant by person legally bound to produce it"
+    },
+    "176": {
+      "bns": "211",
+      "offence": "Omission to give notice or information to public servant by person legally bound to give it"
+    },
+    "177": {
+      "bns": "212",
+      "offence": "Furnishing false information"
+    },
+    "178": {
+      "bns": "213",
+      "offence": "Refusing oath or affirmation when duly required by public servant to make it"
+    },
+    "179": {
+      "bns": "214",
+      "offence": "Refusing to answer public servant authorised to question"
+    },
+    "180": {
+      "bns": "215",
+      "offence": "Refusing to sign statement"
+    },
+    "181": {
+      "bns": "216",
+      "offence": "False statement on oath or affirmation to public servant or person authorised to administer an oath or affirmation"
+    },
+    "182": {
+      "bns": "217",
+      "offence": "False information, with intent to cause public servant to use his lawful power to injury of another person"
+    },
+    "183": {
+      "bns": "218",
+      "offence": "Resistance to taking of property by lawful authority of a public servant"
+    },
+    "184": {
+      "bns": "219",
+      "offence": "Obstructing sale of property offered for sale by authority of public servant"
+    },
+    "185": {
+      "bns": "220",
+      "offence": "Illegal purchase or bid for property offered for sale by authority of public servant"
+    },
+    "186": {
+      "bns": "221",
+      "offence": "Obstructing public servant in discharge of public functions"
+    },
+    "187": {
+      "bns": "222",
+      "offence": "Omission to assist public servant when bound by law to give assistance"
+    },
+    "188": {
+      "bns": "223",
+      "offence": "Disobedience to order duly promulgated by public servant"
+    },
+    "189": {
+      "bns": "224",
+      "offence": "Threat of injury to public servant"
+    },
+    "190": {
+      "bns": "225",
+      "offence": "Threat of injury to induce person to refrain from applying for protection to public servant"
+    },
+    "191": {
+      "bns": "227",
+      "offence": "Giving false evidence"
+    },
+    "192": {
+      "bns": "228",
+      "offence": "Fabricating false evidence"
+    },
+    "193": {
+      "bns": "229",
+      "offence": "Punishment for false evidence"
+    },
+    "194": {
+      "bns": "230",
+      "offence": "Giving or fabricating false evidence with intent to procure conviction of capital offence"
+    },
+    "195": {
+      "bns": "231",
+      "offence": "Giving or fabricating false evidence with intent to procure conviction of offence punishable with imprisonment for life or imprisonment"
+    },
+    "196": {
+      "bns": "233",
+      "offence": "Using evidence known to be false"
+    },
+    "197": {
+      "bns": "234",
+      "offence": "Issuing or signing false certificate"
+    },
+    "198": {
+      "bns": "235",
+      "offence": "Using as true a certificate known to be false"
+    },
+    "199": {
+      "bns": "236",
+      "offence": "False statement made in declaration which is by law receivable as evidence"
+    },
+    "200": {
+      "bns": "237",
+      "offence": "Using as true such declaration knowing it to be false"
+    },
+    "201": {
+      "bns": "238",
+      "offence": "Causing disappearance of evidence of offence, or giving false information to screen offender"
+    },
+    "202": {
+      "bns": "239",
+      "offence": "Intentional omission to give information of offence by person bound to inform"
+    },
+    "203": {
+      "bns": "240",
+      "offence": "Giving false information respecting an offence committed"
+    },
+    "204": {
+      "bns": "241",
+      "offence": "Destruction of document or electronic record to prevent its production as evidence"
+    },
+    "205": {
+      "bns": "242",
+      "offence": "False personation for purpose of act or proceeding in suit or prosecution"
+    },
+    "206": {
+      "bns": "243",
+      "offence": "Fraudulent removal or concealment of property to prevent its seizure as forfeited or in execution"
+    },
+    "207": {
+      "bns": "244",
+      "offence": "Fraudulent claim to property to prevent its seizure as forfeited or in execution"
+    },
+    "208": {
+      "bns": "245",
+      "offence": "Fraudulently suffering decree for sum not due"
+    },
+    "209": {
+      "bns": "246",
+      "offence": "Dishonestly making false claim in Court"
+    },
+    "210": {
+      "bns": "247",
+      "offence": "Fraudulently obtaining decree for sum not due"
+    },
+    "211": {
+      "bns": "248",
+      "offence": "False charge of offence made with intent to injure"
+    },
+    "212": {
+      "bns": "249",
+      "offence": "Harbouring offender"
+    },
+    "213": {
+      "bns": "250",
+      "offence": "Taking gift, etc., to screen an offender from punishment"
+    },
+    "214": {
+      "bns": "251",
+      "offence": "Offering gift or restoration of property in consideration of screening offender"
+    },
+    "215": {
+      "bns": "252",
+      "offence": "Taking gift to help to recover stolen property, etc"
+    },
+    "216": {
+      "bns": "253",
+      "offence": "Harbouring offender who has escaped from custody or whose apprehension has been ordered"
+    },
+    "217": {
+      "bns": "255",
+      "offence": "Public servant disobeying direction of law with intent to save person from punishment or property from forfeiture"
+    },
+    "218": {
+      "bns": "256",
+      "offence": "Public servant framing incorrect record or writing with intent to save person from punishment or property from forfeiture"
+    },
+    "219": {
+      "bns": "257",
+      "offence": "Public servant in judicial proceeding corruptly making report, etc., contrary to law"
+    },
+    "220": {
+      "bns": "258",
+      "offence": "Commitment for trial or confinement by person having authority who knows that he is acting contrary to law"
+    },
+    "221": {
+      "bns": "259",
+      "offence": "Intentional omission to apprehend on part of public servant bound to apprehend"
+    },
+    "222": {
+      "bns": "260",
+      "offence": "Intentional omission to apprehend on the part of public servant bound to apprehend person under sentence or lawfully committed"
+    },
+    "223": {
+      "bns": "261",
+      "offence": "Escape from confinement or custody negligently suffered by public servant"
+    },
+    "224": {
+      "bns": "262",
+      "offence": "Resistance or obstruction by a person to his lawful apprehension"
+    },
+    "225": {
+      "bns": "263",
+      "offence": "Resistance or obstruction to lawful apprehension of another person"
+    },
+    "227": {
+      "bns": "266",
+      "offence": "Violation of condition of remission of punishment"
+    },
+    "228": {
+      "bns": "267",
+      "offence": "Intentional insult or interruption to public servant sitting in judicial proceeding"
+    },
+    "229": {
+      "bns": "268",
+      "offence": "Personation of an assessor"
+    },
+    "230": {
+      "bns": "178(2)",
+      "offence": "Counterfeiting coin, Government stamps, currency-notes or bank-notes"
+    },
+    "231": {
+      "bns": "178",
+      "offence": "Counterfeiting coin, Government stamps, currency-notes or bank-notes"
+    },
+    "233": {
+      "bns": "181",
+      "offence": "Making or possessing instruments or materials for forging or counterfeiting coin, Government stamp, currency-notes or bank-notes"
+    },
+    "236": {
+      "bns": null,
+      "offence": "Abetting in India the counterfeiting out of India of coin",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "237": {
+      "bns": "179",
+      "offence": "Using as genuine, forged or counterfeit coin, Government stamp, currency-notes or bank-notes"
+    },
+    "242": {
+      "bns": "180",
+      "offence": "Possession of forged or counterfeit coin, Government stamp, currency-notes or bank-notes"
+    },
+    "244": {
+      "bns": "187",
+      "offence": "Person employed in mint causing coin to be of different weight or composition from that fixed by law"
+    },
+    "245": {
+      "bns": "188",
+      "offence": "Unlawfully taking coining instrument from mint"
+    },
+    "246": {
+      "bns": "178(5)",
+      "offence": "Counterfeiting coin, Government stamps, currency-notes or bank-notes"
+    },
+    "261": {
+      "bns": "183",
+      "offence": "Effacing writing from substance bearing Government stamp, or removing from document a stamp used for it, with intent to cause loss to Government"
+    },
+    "262": {
+      "bns": "184",
+      "offence": "Using Government stamp known to have been before used"
+    },
+    "263": {
+      "bns": "185",
+      "offence": "Erasure of mark denoting that stamp has been used"
+    },
+    "264": {
+      "bns": null,
+      "offence": "Fraudulent use of false instrument for weighing",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "265": {
+      "bns": null,
+      "offence": "Fraudulent use of false weight or measure",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "266": {
+      "bns": null,
+      "offence": "Being in possession of false weight or measure",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "267": {
+      "bns": null,
+      "offence": "Making or selling false weight or measure",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "268": {
+      "bns": "270",
+      "offence": "Public nuisance"
+    },
+    "269": {
+      "bns": "271",
+      "offence": "Negligent act likely to spread infection of disease dangerous to life"
+    },
+    "270": {
+      "bns": "272",
+      "offence": "Malignant act likely to spread infection of disease dangerous to life"
+    },
+    "271": {
+      "bns": "273",
+      "offence": "Disobedience to quarantine rule"
+    },
+    "272": {
+      "bns": "274",
+      "offence": "Adulteration of food or drink intended for sale"
+    },
+    "273": {
+      "bns": "275",
+      "offence": "Sale of noxious food or drink"
+    },
+    "274": {
+      "bns": "276",
+      "offence": "Adulteration of drugs"
+    },
+    "275": {
+      "bns": "277",
+      "offence": "Sale of adulterated drugs"
+    },
+    "276": {
+      "bns": "278",
+      "offence": "Sale of drug as a different drug or preparation"
+    },
+    "277": {
+      "bns": "279",
+      "offence": "Fouling water of public spring or reservoir"
+    },
+    "278": {
+      "bns": "280",
+      "offence": "Making atmosphere noxious to health"
+    },
+    "279": {
+      "bns": "281",
+      "offence": "Rash driving or riding on a public way"
+    },
+    "280": {
+      "bns": "282",
+      "offence": "Rash navigation of vessel"
+    },
+    "281": {
+      "bns": "283",
+      "offence": "Exhibition of false light, mark or buoy"
+    },
+    "282": {
+      "bns": "284",
+      "offence": "Conveying person by water for hire in unsafe or overloaded vessel"
+    },
+    "283": {
+      "bns": "285",
+      "offence": "Danger or obstruction in public way or line of navigation"
+    },
+    "284": {
+      "bns": "286",
+      "offence": "Negligent conduct with respect to poisonous substance"
+    },
+    "285": {
+      "bns": "287",
+      "offence": "Negligent conduct with respect to fire or combustible matter"
+    },
+    "286": {
+      "bns": "288",
+      "offence": "Negligent conduct with respect to explosive substance"
+    },
+    "287": {
+      "bns": "289",
+      "offence": "Negligent conduct with respect to machinery"
+    },
+    "288": {
+      "bns": "290",
+      "offence": "Negligent conduct with respect to pulling down, repairing or constructing buildings etc"
+    },
+    "289": {
+      "bns": "291",
+      "offence": "Negligent conduct with respect to animal"
+    },
+    "290": {
+      "bns": "292",
+      "offence": "Punishment for public nuisance in cases not otherwise provided for"
+    },
+    "291": {
+      "bns": "293",
+      "offence": "Continuance of nuisance after injunction to discontinue"
+    },
+    "292": {
+      "bns": "294",
+      "offence": "Sale, etc., of obscene books, etc"
+    },
+    "293": {
+      "bns": "295",
+      "offence": "Sale, etc., of obscene objects to child"
+    },
+    "294": {
+      "bns": "296",
+      "offence": "Obscene acts and songs"
+    },
+    "295": {
+      "bns": "298",
+      "offence": "Injuring or defiling place of worship with intent to insult religion of any class"
+    },
+    "296": {
+      "bns": "300",
+      "offence": "Disturbing religious assembly"
+    },
+    "297": {
+      "bns": "301",
+      "offence": "Trespassing on burial places, etc"
+    },
+    "298": {
+      "bns": "302",
+      "offence": "Uttering words, etc., with deliberate intent to wound religious feelings of any person"
+    },
+    "299": {
+      "bns": "100",
+      "offence": "Culpable homicide"
+    },
+    "29A": {
+      "bns": null,
+      "offence": "“Electronic record”",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "300": {
+      "bns": "101",
+      "offence": "Murder"
+    },
+    "301": {
+      "bns": "102",
+      "offence": "Culpable homicide by causing death of person other than person whose death was intended"
+    },
+    "302": {
+      "bns": "103",
+      "offence": "Punishment for murder"
+    },
+    "303": {
+      "bns": "104",
+      "offence": "Punishment for murder by life-convict"
+    },
+    "304": {
+      "bns": "105",
+      "offence": "Punishment for culpable homicide not amounting to murder"
+    },
+    "305": {
+      "bns": "107",
+      "offence": "Abetment of suicide of child or person of unsound mind"
+    },
+    "306": {
+      "bns": "108",
+      "offence": "Abetment of suicide"
+    },
+    "307": {
+      "bns": "109",
+      "offence": "Attempt to murder"
+    },
+    "308": {
+      "bns": "110",
+      "offence": "Attempt to commit culpable homicide"
+    },
+    "309": {
+      "bns": null,
+      "offence": "",
+      "note": "Attempt to suicide is not retained as a general offence (see the Mental Healthcare Act, 2017). BNS s.226 covers attempt to suicide to compel or restrain a public servant."
+    },
+    "312": {
+      "bns": "88",
+      "offence": "Causing miscarriage"
+    },
+    "313": {
+      "bns": "89",
+      "offence": "Causing miscarriage without woman’s consent"
+    },
+    "314": {
+      "bns": "90",
+      "offence": "Death caused by act done with intent to cause miscarriage"
+    },
+    "315": {
+      "bns": "91",
+      "offence": "Act done with intent to prevent child being born alive or to cause to die after birth"
+    },
+    "316": {
+      "bns": "92",
+      "offence": "Causing death of quick unborn child by act amounting to culpable homicide"
+    },
+    "317": {
+      "bns": "93",
+      "offence": "Exposure and abandonment of child under twelve years, by parent or person having care of it"
+    },
+    "318": {
+      "bns": "94",
+      "offence": "Concealment of birth by secret disposal of dead body"
+    },
+    "319": {
+      "bns": "114",
+      "offence": "Hurt"
+    },
+    "320": {
+      "bns": "116",
+      "offence": "Grievous hurt"
+    },
+    "321": {
+      "bns": "115",
+      "offence": "Voluntarily causing hurt"
+    },
+    "322": {
+      "bns": "117",
+      "offence": "Voluntarily causing grievous hurt"
+    },
+    "323": {
+      "bns": "115(2)",
+      "offence": "Voluntarily causing hurt"
+    },
+    "324": {
+      "bns": "118",
+      "offence": "Voluntarily causing hurt or grievous hurt by dangerous weapons or means"
+    },
+    "325": {
+      "bns": "117(2)",
+      "offence": "Voluntarily causing grievous hurt"
+    },
+    "326": {
+      "bns": "118(2)",
+      "offence": "Voluntarily causing hurt or grievous hurt by dangerous weapons or means"
+    },
+    "327": {
+      "bns": "119",
+      "offence": "Voluntarily causing hurt or grievous hurt to extort property, or to constrain to an illegal act"
+    },
+    "328": {
+      "bns": "123",
+      "offence": "Causing hurt by means of poison, etc., with intent to commit an offence"
+    },
+    "329": {
+      "bns": "119(2)",
+      "offence": "Voluntarily causing hurt or grievous hurt to extort property, or to constrain to an illegal act"
+    },
+    "330": {
+      "bns": "120",
+      "offence": "Voluntarily causing hurt or grievous hurt to extort confession, or to compel restoration of property"
+    },
+    "331": {
+      "bns": "120(2)",
+      "offence": "Voluntarily causing hurt or grievous hurt to extort confession, or to compel restoration of property"
+    },
+    "332": {
+      "bns": "121",
+      "offence": "Voluntarily causing hurt or grievous hurt to deter public servant from his duty"
+    },
+    "333": {
+      "bns": "121(2)",
+      "offence": "Voluntarily causing hurt or grievous hurt to deter public servant from his duty"
+    },
+    "334": {
+      "bns": "122",
+      "offence": "Voluntarily causing hurt or grievous hurt on provocation"
+    },
+    "335": {
+      "bns": "122(2)",
+      "offence": "Voluntarily causing hurt or grievous hurt on provocation"
+    },
+    "336": {
+      "bns": "125",
+      "offence": "Act endangering life or personal safety of others"
+    },
+    "337": {
+      "bns": "125",
+      "offence": "Act endangering life or personal safety of others"
+    },
+    "338": {
+      "bns": "125",
+      "offence": "Act endangering life or personal safety of others"
+    },
+    "339": {
+      "bns": "126",
+      "offence": "Wrongful restraint"
+    },
+    "340": {
+      "bns": "127",
+      "offence": "Wrongful confinement"
+    },
+    "341": {
+      "bns": "126(2)",
+      "offence": "Wrongful restraint"
+    },
+    "342": {
+      "bns": "127(2)",
+      "offence": "Wrongful confinement"
+    },
+    "343": {
+      "bns": "127(3)",
+      "offence": "Wrongful confinement"
+    },
+    "344": {
+      "bns": "127(4)",
+      "offence": "Wrongful confinement"
+    },
+    "345": {
+      "bns": "127(5)",
+      "offence": "Wrongful confinement"
+    },
+    "346": {
+      "bns": "127(6)",
+      "offence": "Wrongful confinement"
+    },
+    "347": {
+      "bns": "127(7)",
+      "offence": "Wrongful confinement"
+    },
+    "348": {
+      "bns": "127(8)",
+      "offence": "Wrongful confinement"
+    },
+    "349": {
+      "bns": "128",
+      "offence": "Force"
+    },
+    "350": {
+      "bns": "129",
+      "offence": "Criminal force"
+    },
+    "351": {
+      "bns": "130",
+      "offence": "Assault"
+    },
+    "352": {
+      "bns": "131",
+      "offence": "Punishment for assault or criminal force otherwise than on grave provocation"
+    },
+    "353": {
+      "bns": "132",
+      "offence": "Assault or criminal force to deter public servant from discharge of his duty"
+    },
+    "354": {
+      "bns": "74",
+      "offence": "Assault or use of criminal force to woman with intent to outrage her modesty"
+    },
+    "355": {
+      "bns": "133",
+      "offence": "Assault or criminal force with intent to dishonour person, otherwise than on grave provocation"
+    },
+    "356": {
+      "bns": "134",
+      "offence": "Assault or criminal force in attempt to commit theft of property carried by a person"
+    },
+    "357": {
+      "bns": "135",
+      "offence": "Assault or criminal force in attempt to wrongfully to confine a person"
+    },
+    "358": {
+      "bns": "136",
+      "offence": "Assault or criminal force on grave provocation"
+    },
+    "359": {
+      "bns": "137",
+      "offence": "Kidnapping"
+    },
+    "360": {
+      "bns": "137(1)",
+      "offence": "Kidnapping"
+    },
+    "361": {
+      "bns": "137(1)",
+      "offence": "Kidnapping"
+    },
+    "362": {
+      "bns": "138",
+      "offence": "Abduction"
+    },
+    "363": {
+      "bns": "137(2)",
+      "offence": "Kidnapping"
+    },
+    "364": {
+      "bns": "140",
+      "offence": "Kidnapping or abducting in order to murder or for ransom etc"
+    },
+    "365": {
+      "bns": "140(3)",
+      "offence": "Kidnapping or abducting in order to murder or for ransom etc"
+    },
+    "366": {
+      "bns": "87",
+      "offence": "Kidnapping, abducting or inducing woman to compel her marriage, etc"
+    },
+    "367": {
+      "bns": "140(4)",
+      "offence": "Kidnapping or abducting in order to murder or for ransom etc"
+    },
+    "368": {
+      "bns": "142",
+      "offence": "Wrongfully concealing or keeping in confinement, kidnapped or abducted person"
+    },
+    "369": {
+      "bns": "97",
+      "offence": "Kidnapping or abducting child under ten years of age with intent to steal from its person"
+    },
+    "370": {
+      "bns": "143",
+      "offence": "Trafficking of person"
+    },
+    "371": {
+      "bns": "145",
+      "offence": "Habitual dealing in slaves"
+    },
+    "372": {
+      "bns": "98",
+      "offence": "Selling child for purposes of prostitution, etc"
+    },
+    "373": {
+      "bns": "99",
+      "offence": "Buying child for purposes of prostitution, etc"
+    },
+    "374": {
+      "bns": "146",
+      "offence": "Unlawful compulsory labour"
+    },
+    "375": {
+      "bns": "63",
+      "offence": "Rape"
+    },
+    "376": {
+      "bns": "64",
+      "offence": "Punishment for rape"
+    },
+    "377": {
+      "bns": null,
+      "offence": "Unnatural Offences",
+      "note": "No direct equivalent retained in the BNS."
+    },
+    "378": {
+      "bns": "303",
+      "offence": "Theft"
+    },
+    "379": {
+      "bns": "303(2)",
+      "offence": "Theft"
+    },
+    "380": {
+      "bns": "305",
+      "offence": "Theft in a dwelling house, or means of transportation or place of worship, etc"
+    },
+    "381": {
+      "bns": "306",
+      "offence": "Theft by clerk or servant of property in possession of master"
+    },
+    "382": {
+      "bns": "307",
+      "offence": "Theft after preparation made for causing death, hurt or restraint in order to committing of theft"
+    },
+    "383": {
+      "bns": "308",
+      "offence": "Extortion"
+    },
+    "384": {
+      "bns": "308(2)",
+      "offence": "Extortion"
+    },
+    "385": {
+      "bns": "308(3)",
+      "offence": "Extortion"
+    },
+    "386": {
+      "bns": "308(5)",
+      "offence": "Extortion"
+    },
+    "387": {
+      "bns": "308(4)",
+      "offence": "Extortion"
+    },
+    "388": {
+      "bns": "308(7)",
+      "offence": "Extortion"
+    },
+    "389": {
+      "bns": "308(6)",
+      "offence": "Extortion"
+    },
+    "390": {
+      "bns": "309",
+      "offence": "Robbery. 309 (1)(2)(3)"
+    },
+    "391": {
+      "bns": "310",
+      "offence": "Dacoity"
+    },
+    "392": {
+      "bns": "309(4)",
+      "offence": "Robbery. 309 (1)(2)(3)"
+    },
+    "393": {
+      "bns": "309(5)",
+      "offence": "Robbery. 309 (1)(2)(3)"
+    },
+    "394": {
+      "bns": "309(6)",
+      "offence": "Robbery. 309 (1)(2)(3)"
+    },
+    "395": {
+      "bns": "310(2)",
+      "offence": "Dacoity"
+    },
+    "396": {
+      "bns": "310(3)",
+      "offence": "Dacoity"
+    },
+    "397": {
+      "bns": "311",
+      "offence": "Robbery, or dacoity, with attempt to cause death or grievous hurt"
+    },
+    "398": {
+      "bns": "312",
+      "offence": "Attempt to commit robbery or dacoity when armed with deadly weapon"
+    },
+    "399": {
+      "bns": "310(4)",
+      "offence": "Dacoity"
+    },
+    "400": {
+      "bns": "310(6)",
+      "offence": "Dacoity"
+    },
+    "401": {
+      "bns": "313",
+      "offence": "Punishment for belonging to gang of robbers, dacoits, etc"
+    },
+    "402": {
+      "bns": "310(5)",
+      "offence": "Dacoity"
+    },
+    "403": {
+      "bns": "314",
+      "offence": "Dishonest misappropriation of property"
+    },
+    "404": {
+      "bns": "315",
+      "offence": "Dishonest misappropriation of property possessed by deceased person at the time of his death"
+    },
+    "405": {
+      "bns": "316",
+      "offence": "Criminal breach of trust"
+    },
+    "406": {
+      "bns": "316(2)",
+      "offence": "Criminal breach of trust"
+    },
+    "407": {
+      "bns": "316(3)",
+      "offence": "Criminal breach of trust"
+    },
+    "408": {
+      "bns": "316(4)",
+      "offence": "Criminal breach of trust"
+    },
+    "409": {
+      "bns": "316(5)",
+      "offence": "Criminal breach of trust"
+    },
+    "410": {
+      "bns": "317",
+      "offence": "Stolen property"
+    },
+    "411": {
+      "bns": "317(2)",
+      "offence": "Stolen property"
+    },
+    "412": {
+      "bns": "317(3)",
+      "offence": "Stolen property"
+    },
+    "413": {
+      "bns": "317(4)",
+      "offence": "Stolen property"
+    },
+    "414": {
+      "bns": "317(5)",
+      "offence": "Stolen property"
+    },
+    "415": {
+      "bns": "318",
+      "offence": "Cheating"
+    },
+    "416": {
+      "bns": "318",
+      "offence": "Cheating"
+    },
+    "417": {
+      "bns": "318(2)",
+      "offence": "Cheating"
+    },
+    "418": {
+      "bns": "318(3)",
+      "offence": "Cheating"
+    },
+    "419": {
+      "bns": "319(2)",
+      "offence": "Cheating"
+    },
+    "420": {
+      "bns": "318(4)",
+      "offence": "Cheating"
+    },
+    "421": {
+      "bns": "320",
+      "offence": "Dishonest or fraudulent removal or concealment of property to prevent distribution among creditors"
+    },
+    "422": {
+      "bns": "321",
+      "offence": "Dishonestly or fraudulently preventing debt being available for creditors"
+    },
+    "423": {
+      "bns": "322",
+      "offence": "Dishonest or fraudulent execution of deed of transfer containing false statement of consideration"
+    },
+    "424": {
+      "bns": "323",
+      "offence": "Dishonest or fraudulent removal or concealment of property"
+    },
+    "425": {
+      "bns": "324",
+      "offence": "Mischief"
+    },
+    "426": {
+      "bns": "324(2)",
+      "offence": "Mischief"
+    },
+    "427": {
+      "bns": "324(4)",
+      "offence": "Mischief"
+    },
+    "428": {
+      "bns": "325",
+      "offence": "Mischief by killing or maiming animal"
+    },
+    "430": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "431": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "432": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "433": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "434": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "435": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "436": {
+      "bns": "326",
+      "offence": "Mischief by injury, inundation, fire or explosive substance, etc"
+    },
+    "437": {
+      "bns": "327",
+      "offence": "Mischief with intent to destroy or make unsafe a rail, aircraft, decked vessel or one of twenty tons burden"
+    },
+    "438": {
+      "bns": "327(2)",
+      "offence": "Mischief with intent to destroy or make unsafe a rail, aircraft, decked vessel or one of twenty tons burden"
+    },
+    "439": {
+      "bns": "328",
+      "offence": "Punishment for intentionally running vessel aground or ashore with intent to commit theft, etc"
+    },
+    "440": {
+      "bns": "324(6)",
+      "offence": "Mischief"
+    },
+    "441": {
+      "bns": "329",
+      "offence": "Criminal trespass and house-trespass"
+    },
+    "442": {
+      "bns": "329(2)",
+      "offence": "Criminal trespass and house-trespass"
+    },
+    "443": {
+      "bns": "330",
+      "offence": "House-trespass and house-breaking"
+    },
+    "444": {
+      "bns": null,
+      "offence": "Lurking house-trespass by night",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "445": {
+      "bns": "330(2)",
+      "offence": "House-trespass and house-breaking"
+    },
+    "446": {
+      "bns": null,
+      "offence": "House-breaking by night",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "447": {
+      "bns": "329(3)",
+      "offence": "Criminal trespass and house-trespass"
+    },
+    "448": {
+      "bns": "329(4)",
+      "offence": "Criminal trespass and house-trespass"
+    },
+    "449": {
+      "bns": "332",
+      "offence": "House-trespass in order to commit offence"
+    },
+    "450": {
+      "bns": "332",
+      "offence": "House-trespass in order to commit offence"
+    },
+    "451": {
+      "bns": "332",
+      "offence": "House-trespass in order to commit offence"
+    },
+    "452": {
+      "bns": "333",
+      "offence": "House-trespass after preparation for hurt, assault or wrongful restraint"
+    },
+    "453": {
+      "bns": "331",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "454": {
+      "bns": "331(3)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "455": {
+      "bns": "331(5)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "456": {
+      "bns": "331(2)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "457": {
+      "bns": "331(4)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "458": {
+      "bns": "331(6)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "459": {
+      "bns": "331(7)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "460": {
+      "bns": "331(8)",
+      "offence": "Punishment for house-trespass or house-breaking"
+    },
+    "461": {
+      "bns": "334",
+      "offence": "Dishonestly breaking open receptacle containing property"
+    },
+    "462": {
+      "bns": "334(2)",
+      "offence": "Dishonestly breaking open receptacle containing property"
+    },
+    "463": {
+      "bns": "336",
+      "offence": "Forgery"
+    },
+    "464": {
+      "bns": "335",
+      "offence": "Making a false document"
+    },
+    "465": {
+      "bns": "336(2)",
+      "offence": "Forgery"
+    },
+    "466": {
+      "bns": "337",
+      "offence": "Forgery of record of Court or of public register, etc"
+    },
+    "467": {
+      "bns": "338",
+      "offence": "Forgery of valuable security, will, etc"
+    },
+    "468": {
+      "bns": "336(3)",
+      "offence": "Forgery"
+    },
+    "469": {
+      "bns": "336(4)",
+      "offence": "Forgery"
+    },
+    "470": {
+      "bns": "340",
+      "offence": "Forged document or electronic record and using it as genuine"
+    },
+    "471": {
+      "bns": "340(2)",
+      "offence": "Forged document or electronic record and using it as genuine"
+    },
+    "472": {
+      "bns": "341",
+      "offence": "Making or possessing counterfeit seal, etc., with intent to commit forgery punishable under section 338"
+    },
+    "473": {
+      "bns": "341(2)",
+      "offence": "Making or possessing counterfeit seal, etc., with intent to commit forgery punishable under section 338"
+    },
+    "474": {
+      "bns": "339",
+      "offence": "Having possession of document described in section 337 or section 338, knowing it to be forged and intending to use it as genuine"
+    },
+    "475": {
+      "bns": "342",
+      "offence": "Counterfeiting device or mark used for authenticating documents described in section 338, or possessing counterfeit marked material"
+    },
+    "476": {
+      "bns": "342(2)",
+      "offence": "Counterfeiting device or mark used for authenticating documents described in section 338, or possessing counterfeit marked material"
+    },
+    "477": {
+      "bns": "343",
+      "offence": "Fraudulent cancellation, destruction, etc., of will, authority to adopt, or valuable security"
+    },
+    "479": {
+      "bns": "345",
+      "offence": "Property mark"
+    },
+    "481": {
+      "bns": "345(2)",
+      "offence": "Property mark"
+    },
+    "482": {
+      "bns": "345(3)",
+      "offence": "Property mark"
+    },
+    "483": {
+      "bns": "347",
+      "offence": "Counterfeiting a property mark"
+    },
+    "484": {
+      "bns": "347(2)",
+      "offence": "Counterfeiting a property mark"
+    },
+    "485": {
+      "bns": "348",
+      "offence": "Making or possession of any instrument for counterfeiting a property mark"
+    },
+    "486": {
+      "bns": "349",
+      "offence": "Selling goods marked with a counterfeit property mark"
+    },
+    "487": {
+      "bns": "350",
+      "offence": "Making a false mark upon any receptacle containing goods"
+    },
+    "488": {
+      "bns": "350(2)",
+      "offence": "Making a false mark upon any receptacle containing goods"
+    },
+    "489": {
+      "bns": "346",
+      "offence": "Tampering with property mark with intent to cause injury"
+    },
+    "491": {
+      "bns": "357",
+      "offence": "Breach of contract to attend on and supply wants of helpless person"
+    },
+    "493": {
+      "bns": "81",
+      "offence": "Cohabitation caused by man deceitfully inducing belief of lawful marriage"
+    },
+    "494": {
+      "bns": "82",
+      "offence": "Marrying again during lifetime of husband or wife"
+    },
+    "495": {
+      "bns": "82(2)",
+      "offence": "Marrying again during lifetime of husband or wife"
+    },
+    "496": {
+      "bns": "83",
+      "offence": "Marriage ceremony fraudulently gone through without lawful marriage"
+    },
+    "497": {
+      "bns": null,
+      "offence": "Adultery",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "498": {
+      "bns": "84",
+      "offence": "Enticing or taking away or detaining with criminal intent a married woman"
+    },
+    "499": {
+      "bns": "356",
+      "offence": "Defamation"
+    },
+    "500": {
+      "bns": "356(2)",
+      "offence": "Defamation"
+    },
+    "501": {
+      "bns": "356(3)",
+      "offence": "Defamation"
+    },
+    "502": {
+      "bns": "356(4)",
+      "offence": "Defamation"
+    },
+    "503": {
+      "bns": "351",
+      "offence": "Criminal intimidation"
+    },
+    "504": {
+      "bns": "352",
+      "offence": "Intentional insult with intent to provoke breach of peace"
+    },
+    "505": {
+      "bns": "353",
+      "offence": "Statements conducing to public mischief"
+    },
+    "506": {
+      "bns": "351(2)",
+      "offence": "Criminal intimidation",
+      "note": "Aggravated forms of criminal intimidation fall under BNS s.351(3)."
+    },
+    "507": {
+      "bns": "351(4)",
+      "offence": "Criminal intimidation"
+    },
+    "508": {
+      "bns": "354",
+      "offence": "Act caused by inducing person to believe that he will be rendered an object of Divine displeasure"
+    },
+    "509": {
+      "bns": "79",
+      "offence": "Word, gesture or act intended to insult modesty of a woman"
+    },
+    "510": {
+      "bns": "355",
+      "offence": "Misconduct in public by a drunken person"
+    },
+    "511": {
+      "bns": "62",
+      "offence": "Punishment for attempting to commit offences punishable with imprisonment for life or other imprisonment"
+    },
+    "52A": {
+      "bns": "2(13)",
+      "offence": "Definitions"
+    },
+    "53A": {
+      "bns": null,
+      "offence": "Construction of reference to transportation",
+      "note": "No corresponding section in the BNS (repealed without a direct successor)."
+    },
+    "108A": {
+      "bns": "47",
+      "offence": "Abetment in India of offences outside India"
+    },
+    "120A": {
+      "bns": "61",
+      "offence": "Criminal conspiracy"
+    },
+    "120B": {
+      "bns": "61(2)",
+      "offence": "Criminal conspiracy"
+    },
+    "121A": {
+      "bns": "148",
+      "offence": "Conspiracy to commit offences punishable by section 147"
+    },
+    "124A": {
+      "bns": null,
+      "offence": "Sedition",
+      "note": "Sedition (IPC 124A) was repealed without a direct successor. BNS s.152 (acts endangering sovereignty, unity and integrity of India) is a NEW, differently-framed offence often discussed in its place — not a one-to-one re-enactment."
+    },
+    "153A": {
+      "bns": "196",
+      "offence": "Promoting enmity between different groups on ground of religion, race, place of birth, residence, language, etc., and doing acts prejudicial to maintenance of harmony"
+    },
+    "153B": {
+      "bns": "197",
+      "offence": "Imputations, assertions prejudicial to national integration"
+    },
+    "166A": {
+      "bns": "199",
+      "offence": "Public servant disobeying direction under law"
+    },
+    "166B": {
+      "bns": "200",
+      "offence": "Punishment for non-treatment of victim"
+    },
+    "171A": {
+      "bns": "169",
+      "offence": "Candidate, electoral right defined"
+    },
+    "171B": {
+      "bns": "170",
+      "offence": "Bribery"
+    },
+    "171C": {
+      "bns": "171",
+      "offence": "Undue influence at elections"
+    },
+    "171D": {
+      "bns": "172",
+      "offence": "Personation at elections"
+    },
+    "171E": {
+      "bns": "173",
+      "offence": "Punishment for bribery"
+    },
+    "171F": {
+      "bns": "174",
+      "offence": "Punishment for undue influence or personation at an election"
+    },
+    "171G": {
+      "bns": "175",
+      "offence": "False statement in connection with an election"
+    },
+    "171H": {
+      "bns": "176",
+      "offence": "Illegal payments in connection with an election"
+    },
+    "174A": {
+      "bns": "209",
+      "offence": "Non-appearance in response to a proclamation under section 84 of Bharatiya Nagarik Suraksha Sanhita , 2023"
+    },
+    "195A": {
+      "bns": "232",
+      "offence": "Threatening any person to give false evidence"
+    },
+    "216A": {
+      "bns": "254",
+      "offence": "Penalty for harbouring robbers or dacoits"
+    },
+    "225A": {
+      "bns": "264",
+      "offence": "Omission to apprehend, or sufferance of escape, on part of public servant, in cases not otherwise provided for"
+    },
+    "225B": {
+      "bns": "265",
+      "offence": "Resistance or obstruction to lawful apprehension or escape or rescue in cases not otherwise provided for"
+    },
+    "228A": {
+      "bns": "72",
+      "offence": "Disclosure of identity of victim of certain offences, etc"
+    },
+    "229A": {
+      "bns": "269",
+      "offence": "Failure by person released on bail bond or bond to appear in court"
+    },
+    "263A": {
+      "bns": "186",
+      "offence": "Prohibition of fictitious stamps"
+    },
+    "294A": {
+      "bns": "297",
+      "offence": "Keeping lottery office"
+    },
+    "295A": {
+      "bns": "299",
+      "offence": "Deliberate and malicious acts, intended to outrage religious feelings of any class by insulting its religion or religious beliefs"
+    },
+    "304A": {
+      "bns": "106",
+      "offence": "Causing death by negligence"
+    },
+    "304B": {
+      "bns": "80",
+      "offence": "Dowry death"
+    },
+    "326A": {
+      "bns": "124",
+      "offence": "Voluntarily causing grievous hurt by use of acid, etc"
+    },
+    "326B": {
+      "bns": "124(2)",
+      "offence": "Voluntarily causing grievous hurt by use of acid, etc"
+    },
+    "354A": {
+      "bns": "75",
+      "offence": "Sexual harassment"
+    },
+    "354B": {
+      "bns": "76",
+      "offence": "Assault or use of criminal force to woman with intent to disrobe"
+    },
+    "354C": {
+      "bns": "77",
+      "offence": "Voyeurism"
+    },
+    "354D": {
+      "bns": "78",
+      "offence": "Stalking"
+    },
+    "363A": {
+      "bns": "139",
+      "offence": "Kidnapping or maiming a child for purposes of begging"
+    },
+    "364A": {
+      "bns": "140(2)",
+      "offence": "Kidnapping or abducting in order to murder or for ransom etc"
+    },
+    "366A": {
+      "bns": "96",
+      "offence": "Procuration of child"
+    },
+    "366B": {
+      "bns": "141",
+      "offence": "Importation of girl or boy from foreign country"
+    },
+    "370A": {
+      "bns": "144",
+      "offence": "Exploitation of a trafficked person"
+    },
+    "376A": {
+      "bns": "65(2)",
+      "offence": "Punishment for rape in certain cases"
+    },
+    "376B": {
+      "bns": "67",
+      "offence": "Sexual intercourse by husband upon his wife during separation"
+    },
+    "376C": {
+      "bns": "68",
+      "offence": "Sexual intercourse by a person in authority"
+    },
+    "376D": {
+      "bns": "70",
+      "offence": "Gang rape"
+    },
+    "376E": {
+      "bns": "71",
+      "offence": "Punishment for repeat offenders"
+    },
+    "477A": {
+      "bns": "344",
+      "offence": "Falsification of accounts"
+    },
+    "489E": {
+      "bns": "182",
+      "offence": "Making or using documents resembling currency-notes or bank-notes"
+    },
+    "498A": {
+      "bns": "85",
+      "offence": "Husband or relative of husband of a woman subjecting her to cruelty",
+      "note": "BNS s.86 defines 'cruelty' for the purposes of this offence."
+    }
   }
 }

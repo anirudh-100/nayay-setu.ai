@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "note": "Human-authored clarifying notes merged on top of the official NCRB mappings by scripts/ingest_ncrb_mappings.py. This file is NEVER overwritten by the ingest, so re-running is idempotent. It carries nuance the bare correspondence table can't (e.g. that BNS 152 is a NEW offence, not a sedition successor). law_map.py ignores this file (no from_code/to_code).",
+    "not_a_mapping": true
+  },
+  "ipc_bns": {
+    "124A": {"note": "Sedition (IPC 124A) was repealed without a direct successor. BNS s.152 (acts endangering sovereignty, unity and integrity of India) is a NEW, differently-framed offence often discussed in its place — not a one-to-one re-enactment."},
+    "309": {"note": "Attempt to suicide is not retained as a general offence (see the Mental Healthcare Act, 2017). BNS s.226 covers attempt to suicide to compel or restrain a public servant."},
+    "377": {"note": "No direct equivalent retained in the BNS."},
+    "498A": {"note": "BNS s.86 defines 'cruelty' for the purposes of this offence."},
+    "506": {"note": "Aggravated forms of criminal intimidation fall under BNS s.351(3)."}
+  },
+  "crpc_bnss": {
+    "156": {"note": "A Magistrate's power to order investigation (CrPC 156(3)) corresponds to BNSS s.175(3)."}
+  },
+  "iea_bsa": {
+    "25": {"note": "The related discovery rule (IEA s.27) folds into BSA s.23(2)."}
+  }
+}

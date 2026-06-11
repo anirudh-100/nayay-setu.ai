@@ -31,3 +31,6 @@ next-env.d.ts
 Thumbs.db
 .vscode/
 .idea/
+
+# fetched raw source HTML/PDF for ingestion (re-fetchable, bulky)
+nyaysetu-backend/data/_raw_sources/
