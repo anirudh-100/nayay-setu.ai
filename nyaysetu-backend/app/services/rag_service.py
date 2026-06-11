@@ -305,9 +305,11 @@ class RAGService:
                 if c.act in from_codes and c.code_status == "repealed" and c.section:
                     entry = law_map.successor(c.act, c.section)
                     if entry and entry.get("new"):
-                        to_code, new_sec = entry["to_code"], entry["new"]
-                        if (to_code, _base_num(new_sec)) not in present:
-                            wanted.setdefault(to_code, set()).add(new_sec)
+                        # Fetch by BASE section ("318"), since the bare-act index is keyed by
+                        # base section, not the mapping's subsection token ("318(4)").
+                        to_code, new_base = entry["to_code"], _base_num(entry["new"])
+                        if new_base and (to_code, new_base) not in present:
+                            wanted.setdefault(to_code, set()).add(new_base)
             if not wanted:
                 return results
 

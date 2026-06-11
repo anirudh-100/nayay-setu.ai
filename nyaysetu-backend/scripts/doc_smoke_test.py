@@ -131,7 +131,8 @@ def main() -> int:
         check("has key_points", len(a.key_points) > 0)
         check("captured deadline", len(a.deadlines) > 0, "; ".join(a.deadlines))
         check("has citations", len(a.citations) > 0, f"{len(a.citations)} citations")
-        check("current_law_note present", bool(a.current_law_note), (a.current_law_note or "")[:50])
+        # current-law note is retrieval-dependent (fake embedder); A2 verifies it deterministically.
+        print(f"       (current_law_note from real retrieval: {(a.current_law_note or 'none')[:50]})")
 
         # --- Scenario A2: grounded + verified (deterministic stub retrieving IPC 420 + BNS 318) ---
         print("\nScenario A2 - grounded, verified, current-law note (deterministic):")
