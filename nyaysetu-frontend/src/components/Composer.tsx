@@ -1,20 +1,25 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Paperclip } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/cn";
 
 interface ComposerProps {
   onSend: (text: string) => void;
+  onAttach: (file: File) => void;
   loading: boolean;
   showExamples: boolean;
 }
 
-export function Composer({ onSend, loading, showExamples }: ComposerProps) {
+// File types the backend's /analyze/file endpoint can extract text from.
+const ACCEPT = ".pdf,.txt,.md,.markdown,.text";
+
+export function Composer({ onSend, onAttach, loading, showExamples }: ComposerProps) {
   const { t, dict } = useI18n();
   const [value, setValue] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const submit = (text: string) => {
     const trimmed = text.trim();
@@ -52,6 +57,28 @@ export function Composer({ onSend, loading, showExamples }: ComposerProps) {
       )}
 
       <div className="flex items-end gap-2 rounded-2xl border border-border bg-surface p-2 shadow-sm focus-within:border-primary/50">
+        {/* Hidden file input — opened by the paperclip; analyses a document on select. */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept={ACCEPT}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onAttach(file);
+            e.target.value = ""; // allow re-selecting the same file
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={loading}
+          aria-label={t("attachDocument")}
+          title={t("attachDocument")}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted transition-colors hover:bg-primary-soft/30 hover:text-primary disabled:opacity-50"
+        >
+          <Paperclip size={18} aria-hidden />
+        </button>
         <textarea
           ref={taRef}
           value={value}

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { askQuestion, ApiError } from "@/lib/api";
+import { askQuestion, analyzeFile, ApiError } from "@/lib/api";
 import type { ChatMessage } from "@/lib/types";
 import { Header } from "./Header";
 import { MessageBubble } from "./MessageBubble";
@@ -43,6 +43,31 @@ export function ChatApp() {
     }
   };
 
+  const handleAnalyzeFile = async (file: File) => {
+    const userMsg: ChatMessage = { id: nextId(), role: "user", text: `📄 ${file.name}` };
+    const pendingId = nextId();
+    setMessages((prev) => [
+      ...prev,
+      userMsg,
+      { id: pendingId, role: "assistant", pending: true, analysisPending: true },
+    ]);
+    setLoading(true);
+
+    try {
+      const analysis = await analyzeFile(file, locale);
+      setMessages((prev) =>
+        prev.map((m) => (m.id === pendingId ? { ...m, pending: false, analysis } : m))
+      );
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "generic";
+      setMessages((prev) =>
+        prev.map((m) => (m.id === pendingId ? { ...m, pending: false, error: message } : m))
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const reset = () => {
     setMessages([]);
     setLoading(false);
@@ -68,7 +93,7 @@ export function ChatApp() {
 
         {/* Composer sticks to the bottom; examples show only on the empty screen. */}
         <div className="sticky bottom-0 bg-gradient-to-t from-bg via-bg to-transparent pb-4 pt-2">
-          <Composer onSend={handleSend} loading={loading} showExamples={empty} />
+          <Composer onSend={handleSend} onAttach={handleAnalyzeFile} loading={loading} showExamples={empty} />
           <p className="mt-2 text-center text-[11px] text-muted">{t("footerNote")}</p>
         </div>
       </main>

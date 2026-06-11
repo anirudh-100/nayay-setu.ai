@@ -4,9 +4,9 @@ import { AlertCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import type { ChatMessage } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
+import { DocumentCard } from "./DocumentCard";
 
-function Thinking() {
-  const { t } = useI18n();
+function Thinking({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-muted">
       <span className="flex gap-1">
@@ -14,7 +14,7 @@ function Thinking() {
         <span className="h-1.5 w-1.5 animate-blink rounded-full bg-primary [animation-delay:200ms]" />
         <span className="h-1.5 w-1.5 animate-blink rounded-full bg-primary [animation-delay:400ms]" />
       </span>
-      {t("thinking")}
+      {label}
     </div>
   );
 }
@@ -44,13 +44,16 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
     );
   }
 
+  const { t } = useI18n();
   return (
     <div className="flex justify-start">
       <div className="w-full max-w-full">
         {message.pending ? (
-          <Thinking />
+          <Thinking label={message.analysisPending ? t("analyzingDoc") : t("thinking")} />
         ) : message.error ? (
           <ErrorBubble message={message.error} />
+        ) : message.analysis ? (
+          <DocumentCard analysis={message.analysis} />
         ) : message.response ? (
           <AnswerCard response={message.response} />
         ) : null}
