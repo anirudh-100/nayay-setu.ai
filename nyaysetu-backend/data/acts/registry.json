@@ -68,6 +68,22 @@
       }
     },
     {
+      "code": "BSA",
+      "title": "Bharatiya Sakshya Adhiniyam, 2023",
+      "unit": "Section",
+      "code_status": "current",
+      "effective_date": "2024-07-01",
+      "path": "data/evidence/bsa_sections.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": true,
+      "provenance": {
+        "authority": "India Code (indiacode.nic.in) — Bharatiya Sakshya Adhiniyam, 2023, Act 47 of 2023",
+        "source_url": "https://www.indiacode.nic.in/bitstream/123456789/20063/1/aa202347.pdf",
+        "retrieved_at": "2026-06-11"
+      }
+    },
+    {
       "code": "MVA",
       "title": "Motor Vehicles Act, 1988",
       "unit": "Section",
