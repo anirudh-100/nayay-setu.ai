@@ -15,11 +15,13 @@
       "path": "data/bns/bns_sections.csv",
       "url_template": "https://devgan.in/bns/section/{base}/",
       "maps_to_act": "IPC",
-      "verified": false,
+      "verified": true,
       "provenance": {
-        "authority": "Curated starter (compiled from public BNS summaries)",
-        "source_url": "https://www.indiacode.nic.in/handle/123456789/20062",
-        "retrieved_at": null
+        "authority": "Courtbook.in (BNS bare act); all 358 section headings cross-checked against the official NCRB Corresponding Section Table",
+        "source_url": "https://courtbook.in/bare-acts/bns",
+        "authority_of_record": "https://www.indiacode.nic.in/handle/123456789/20062",
+        "retrieved_at": "2026-06-11",
+        "note": "Full provision text is from a secondary source (Courtbook), heading-verified against the official NCRB table; spot-checks (s.103, s.318) matched the official India Code PDF verbatim. Replace with India-Code-parsed text for fully first-party provenance."
       }
     },
     {
