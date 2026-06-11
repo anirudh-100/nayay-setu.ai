@@ -23,6 +23,7 @@
   "escalationLabel": "वास्तविक मदद पाएं",
   "verifyWarn": "इस संदर्भ का स्रोत से पूरी तरह मिलान नहीं हो सका — सावधानी से लें।",
   "codeStatus": { "current": "लागू", "repealed": "निरस्त", "unknown": "" },
+  "verification": { "official": "आधिकारिक", "curated": "संकलित", "unverified": "असत्यापित" },
   "sourceType": { "statute": "कानून", "judgment": "निर्णय", "qa": "केस प्रश्नोत्तर", "guide": "मार्गदर्शिका" },
   "openSource": "स्रोत खोलें",
   "disclaimerLabel": "कृपया ध्यान दें",

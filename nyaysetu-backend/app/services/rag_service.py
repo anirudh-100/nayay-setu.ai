@@ -288,48 +288,54 @@ class RAGService:
     # Phase 2 helpers
     # ------------------------------------------------------------------ #
     def _expand_current_law(self, results: list[RetrievedChunk]) -> list[RetrievedChunk]:
-        """Pull the current BNS chunk for any retrieved repealed IPC section that isn't
-        already represented, so the answer can lead with law in force. Best-effort: a
-        lookup failure (e.g. store unavailable) leaves results unchanged."""
+        """Pull the current successor chunk (BNS/BNSS/BSA) for any retrieved repealed
+        section (IPC/CrPC/IEA) that isn't already represented, so the answer can lead
+        with law in force. Best-effort: a lookup failure leaves results unchanged."""
         try:
             from app.rag.law_map import LawMap
             from app.rag.vector_store import VectorStore
 
             law_map = LawMap.instance()
+            from_codes = set(law_map.from_codes())
             present = {(rc.chunk.act, _base_num(rc.chunk.section or "")) for rc in results}
-            wanted: set[str] = set()
+            # Group wanted successor sections by their current code (BNS/BNSS/BSA).
+            wanted: dict[str, set[str]] = {}
             for rc in results:
                 c = rc.chunk
-                if c.act == "IPC" and c.code_status == "repealed" and c.section:
-                    entry = law_map.bns_for_ipc(c.section)
-                    if entry and entry.get("bns"):
-                        bns_sec = entry["bns"]
-                        if ("BNS", _base_num(bns_sec)) not in present:
-                            wanted.add(bns_sec)
+                if c.act in from_codes and c.code_status == "repealed" and c.section:
+                    entry = law_map.successor(c.act, c.section)
+                    if entry and entry.get("new"):
+                        to_code, new_sec = entry["to_code"], entry["new"]
+                        if (to_code, _base_num(new_sec)) not in present:
+                            wanted.setdefault(to_code, set()).add(new_sec)
             if not wanted:
                 return results
 
-            extra = VectorStore.instance().fetch_by_reference(act="BNS", sections=sorted(wanted))
-            for chunk in extra:
-                results.append(RetrievedChunk(chunk=chunk, score=0.0))
-            if extra:
-                logger.info("Cross-ref expansion added %d current BNS chunk(s)", len(extra))
+            added = 0
+            for to_code, sections in wanted.items():
+                extra = VectorStore.instance().fetch_by_reference(act=to_code, sections=sorted(sections))
+                for chunk in extra:
+                    results.append(RetrievedChunk(chunk=chunk, score=0.0))
+                added += len(extra)
+            if added:
+                logger.info("Cross-ref expansion added %d current-law chunk(s)", added)
         except Exception as e:  # never let expansion break a query
             logger.warning("Current-law expansion skipped: %s", e)
         return results
 
     def _current_law_note(self, results: list[RetrievedChunk]) -> str | None:
-        """Bridge the top repealed IPC section to its BNS successor, with a verify caveat."""
+        """Bridge the top repealed section (IPC/CrPC/IEA) to its current successor, with a caveat."""
         from app.rag.law_map import LawMap
 
         law_map = LawMap.instance()
+        from_codes = set(law_map.from_codes())
         for rc in results:
             c = rc.chunk
-            if c.act == "IPC" and c.section:
-                note = law_map.current_reference_note(c.section)
+            if c.act in from_codes and c.section:
+                note = law_map.current_reference_note(c.act, c.section)
                 if note:
-                    if not law_map.verified:
-                        note += " (Mapping is indicative — confirm against the official BNS.)"
+                    if not law_map.verified_for(c.act):
+                        note += " (Mapping is indicative — confirm against the official bare act.)"
                     return note
         return None
 

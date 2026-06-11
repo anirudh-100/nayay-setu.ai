@@ -3,6 +3,8 @@
 export type Confidence = "high" | "medium" | "low";
 export type SourceType = "statute" | "judgment" | "qa" | "guide";
 export type CodeStatus = "current" | "repealed" | "unknown";
+// How trustworthy the source text is — drives the per-citation trust badge.
+export type Verification = "official" | "curated" | "unverified";
 
 export interface Citation {
   label: string;
@@ -10,6 +12,8 @@ export interface Citation {
   snippet: string;
   url?: string | null;
   code_status: CodeStatus;
+  verification: Verification;
+  source_authority?: string | null;
 }
 
 export interface AskResponse {

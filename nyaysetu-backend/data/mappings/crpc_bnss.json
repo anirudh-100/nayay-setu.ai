@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "from_code": "CrPC",
+    "to_code": "BNSS",
+    "description": "Curated CrPC (1973) -> BNSS (Bharatiya Nagarik Suraksha Sanhita, 2023) correspondence for the procedural provisions citizens and practitioners most commonly cite (FIR, arrest, bail, maintenance, etc.).",
+    "transition_date": "2024-07-01",
+    "transition_rule": "Trials/procedure for matters on or after 2024-07-01 follow the BNSS. Proceedings already underway / matters before that date continue under the CrPC.",
+    "source": "Compiled from publicly published CrPC<->BNSS correspondence tables (MHA / legislative summaries).",
+    "verified": false,
+    "verification_note": "VERIFY every entry against the official Bharatiya Nagarik Suraksha Sanhita, 2023 bare act before relying on it."
+  },
+  "crpc_to_bnss": {
+    "41":    {"bnss": "35",     "offence": "When police may arrest without a warrant"},
+    "50":    {"bnss": "47",     "offence": "Person arrested to be informed of grounds of arrest and right to bail"},
+    "125":   {"bnss": "144",    "offence": "Order for maintenance of wife, children and parents"},
+    "144":   {"bnss": "163",    "offence": "Power to issue order in urgent cases of nuisance or apprehended danger"},
+    "154":   {"bnss": "173",    "offence": "Information in cognizable cases (registration of FIR)"},
+    "156":   {"bnss": "175",    "offence": "Police officer's power to investigate cognizable case", "note": "Magistrate's power to order investigation: CrPC 156(3) -> BNSS 175(3)."},
+    "161":   {"bnss": "180",    "offence": "Examination of witnesses by police"},
+    "164":   {"bnss": "183",    "offence": "Recording of confessions and statements by a Magistrate"},
+    "200":   {"bnss": "223",    "offence": "Examination of the complainant"},
+    "437":   {"bnss": "480",    "offence": "When bail may be taken in case of non-bailable offence"},
+    "438":   {"bnss": "482",    "offence": "Direction for grant of bail to person apprehending arrest (anticipatory bail)"},
+    "439":   {"bnss": "483",    "offence": "Special powers of High Court or Court of Session regarding bail"},
+    "482":   {"bnss": "528",    "offence": "Saving of inherent powers of the High Court"}
+  }
+}

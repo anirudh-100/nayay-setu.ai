@@ -1,8 +1,9 @@
 {
   "_meta": {
-    "note": "Single source of truth for every bare act the engine ingests. To ADD an act: (1) drop a CSV with a 'section'/'article' column plus any of offence/description/punishment, (2) add an entry below. No code changes. See data/acts/README.md.",
+    "note": "Single source of truth for every bare act the engine ingests. To ADD an act: (1) drop a CSV with a 'section'/'article' column plus any of offence/description/punishment, (2) add an entry below with a 'provenance' block. No code changes. See data/acts/README.md.",
     "verified": false,
-    "verification_note": "Acts flagged verified:false carry curated starter text — replace with the official bare act and verify before production."
+    "verification_note": "Acts flagged verified:false carry curated starter text and surface as 'Curated — confirm before relying' in the UI. Replace the CSV with the official bare act, set verified:true, fill provenance.retrieved_at, and re-run scripts/build_index.py to promote them to 'Official'.",
+    "provenance_note": "Every act carries a 'provenance' block (authority, source_url, retrieved_at) that is stamped onto each chunk and shown on each citation. retrieved_at is null until the text is taken from — and checked against — the cited authority."
   },
   "acts": [
     {
@@ -14,7 +15,12 @@
       "path": "data/bns/bns_sections.csv",
       "url_template": "https://devgan.in/bns/section/{base}/",
       "maps_to_act": "IPC",
-      "verified": false
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public BNS summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/20062",
+        "retrieved_at": null
+      }
     },
     {
       "code": "IPC",
@@ -24,7 +30,12 @@
       "path": "data/ipc/ipc_sections.csv",
       "url_template": "ik",
       "maps_to_act": null,
-      "verified": true
+      "verified": true,
+      "provenance": {
+        "authority": "India Code (indiacode.nic.in)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/2263",
+        "retrieved_at": "2024-09-01"
+      }
     },
     {
       "code": "MVA",
@@ -34,7 +45,12 @@
       "path": "data/acts/motor_vehicles_act.csv",
       "url_template": "ik",
       "maps_to_act": null,
-      "verified": false
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/1798",
+        "retrieved_at": null
+      }
     },
     {
       "code": "ITA",
@@ -44,7 +60,12 @@
       "path": "data/acts/it_act.csv",
       "url_template": "ik",
       "maps_to_act": null,
-      "verified": false
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/1999",
+        "retrieved_at": null
+      }
     },
     {
       "code": "PWDVA",
@@ -54,7 +75,12 @@
       "path": "data/acts/domestic_violence_act.csv",
       "url_template": "ik",
       "maps_to_act": null,
-      "verified": false
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/2031",
+        "retrieved_at": null
+      }
     },
     {
       "code": "Constitution",
@@ -64,7 +90,12 @@
       "path": "data/acts/constitution.csv",
       "url_template": "ik",
       "maps_to_act": null,
-      "verified": false
+      "verified": false,
+      "provenance": {
+        "authority": "Curated starter (compiled from public summaries)",
+        "source_url": "https://www.indiacode.nic.in/handle/123456789/15240",
+        "retrieved_at": null
+      }
     }
   ]
 }

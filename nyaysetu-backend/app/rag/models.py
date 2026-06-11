@@ -38,6 +38,18 @@ SourceType = Literal["statute", "judgment", "qa", "guide"]
 # incidents. ``unknown`` is the safe default for sources we haven't classified.
 CodeStatus = Literal["current", "repealed", "unknown"]
 
+# How trustworthy the *text itself* is — the heart of the product's promise. This is
+# distinct from ``code_status`` (which law applies) and is surfaced on every citation
+# so a user can see, at a glance, whether to rely on a source or confirm it first:
+#   - ``official``   — text taken from an authoritative source (e.g. India Code) and
+#                      verified against it. Safe to rely on.
+#   - ``curated``    — hand-compiled starter / plain-language guide. Useful, but flagged
+#                      "confirm before relying" until replaced with an official source.
+#   - ``unverified`` — bulk-ingested with no per-item check (e.g. a public QA dataset).
+# A wrong-but-confident citation is the exact failure this engine exists to prevent, so
+# we never silently present ``curated``/``unverified`` text as if it were ``official``.
+Verification = Literal["official", "curated", "unverified"]
+
 
 def make_chunk_id(source_type: str, ref: str, text: str) -> str:
     """Deterministic, content-addressed id.
@@ -76,6 +88,13 @@ class Chunk(BaseModel):
     language: str = "en"
     code_status: CodeStatus = "unknown"
     maps_to: Optional[str] = None        # cross-ref, e.g. IPC 420 -> "BNS 318"
+
+    # --- Provenance / trust (surfaced on every citation) ---
+    # Default to the safe, honest value: assume nothing is verified until a loader says so.
+    verification: Verification = "unverified"
+    source_authority: Optional[str] = None  # e.g. "India Code (indiacode.nic.in)"
+    official_url: Optional[str] = None       # authoritative source, distinct from the click-through
+    retrieved_at: Optional[str] = None       # ISO date the text was pulled from its source
 
     def source_url(self) -> Optional[str]:
         """A clickable link that actually resolves — computed canonically by source.
@@ -132,6 +151,10 @@ class Citation(BaseModel):
     url: Optional[str] = None
     code_status: CodeStatus = "unknown"
 
+    # --- Trust signal (drives the "Official / Curated / Unverified" badge in the UI) ---
+    verification: Verification = "unverified"
+    source_authority: Optional[str] = None
+
     @classmethod
     def from_chunk(cls, chunk: "Chunk", *, snippet_chars: int = 320) -> "Citation":
         snippet = chunk.text.strip()
@@ -143,6 +166,8 @@ class Citation(BaseModel):
             snippet=snippet,
             url=chunk.source_url(),
             code_status=chunk.code_status,
+            verification=chunk.verification,
+            source_authority=chunk.source_authority,
         )
 
 

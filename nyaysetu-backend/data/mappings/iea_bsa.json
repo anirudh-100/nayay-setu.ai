@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "from_code": "IEA",
+    "to_code": "BSA",
+    "description": "Curated Indian Evidence Act (1872) -> BSA (Bharatiya Sakshya Adhiniyam, 2023) correspondence for commonly cited evidence provisions.",
+    "transition_date": "2024-07-01",
+    "transition_rule": "Evidence in proceedings on or after 2024-07-01 is governed by the BSA. Matters/proceedings before that date continue under the Indian Evidence Act, 1872.",
+    "source": "Compiled from publicly published IEA<->BSA correspondence tables (MHA / legislative summaries).",
+    "verified": false,
+    "verification_note": "VERIFY every entry against the official Bharatiya Sakshya Adhiniyam, 2023 bare act before relying on it."
+  },
+  "iea_to_bsa": {
+    "3":   {"bsa": "2",   "offence": "Interpretation clause / definitions"},
+    "8":   {"bsa": "6",   "offence": "Motive, preparation and previous or subsequent conduct"},
+    "25":  {"bsa": "23",  "offence": "Confession to a police officer not provable", "note": "Related discovery rule (IEA 27) folds into BSA 23(2)."},
+    "32":  {"bsa": "26",  "offence": "Statements by a person who is dead or cannot be found (incl. dying declaration)"},
+    "45":  {"bsa": "39",  "offence": "Opinions of experts"},
+    "60":  {"bsa": "55",  "offence": "Oral evidence must be direct"},
+    "65B": {"bsa": "63",  "offence": "Admissibility of electronic records"},
+    "101": {"bsa": "104", "offence": "Burden of proof"},
+    "114": {"bsa": "119", "offence": "Court may presume existence of certain facts"}
+  }
+}

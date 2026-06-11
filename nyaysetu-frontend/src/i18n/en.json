@@ -23,6 +23,7 @@
   "escalationLabel": "Get real help",
   "verifyWarn": "This reference could not be fully matched to a source — treat it with caution.",
   "codeStatus": { "current": "In force", "repealed": "Repealed", "unknown": "" },
+  "verification": { "official": "Official", "curated": "Curated", "unverified": "Unverified" },
   "sourceType": { "statute": "Statute", "judgment": "Judgment", "qa": "Case Q&A", "guide": "Guide" },
   "openSource": "Open source",
   "disclaimerLabel": "Please note",
