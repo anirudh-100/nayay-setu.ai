@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routes.analyze import router as analyze_router
 from app.routes.ask import router as ask_router
+from app.routes.rti import router as rti_router
 from app.services.llm_service import OllamaClient
 from app.utils.logger import get_logger
 
@@ -98,3 +99,4 @@ def health() -> dict:
 
 app.include_router(ask_router)
 app.include_router(analyze_router)
+app.include_router(rti_router)
