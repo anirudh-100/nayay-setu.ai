@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { askQuestion, analyzeFile, draftRti, ApiError } from "@/lib/api";
-import type { ChatMessage, RTIDraftRequest } from "@/lib/types";
+import { askQuestion, analyzeFile, draftDocument, ApiError } from "@/lib/api";
+import type { ChatMessage } from "@/lib/types";
 import { Header } from "./Header";
 import { MessageBubble } from "./MessageBubble";
 import { Composer } from "./Composer";
-import { RtiForm } from "./RtiForm";
+import { DraftModal } from "./DraftModal";
 
 let counter = 0;
 const nextId = () => `m${++counter}`;
@@ -17,7 +17,7 @@ export function ChatApp() {
   const { locale } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [rtiOpen, setRtiOpen] = useState(false);
+  const [draftOpen, setDraftOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,21 +70,32 @@ export function ChatApp() {
     }
   };
 
-  const handleDraftRti = async (req: Omit<RTIDraftRequest, "language">) => {
-    setRtiOpen(false);
-    const userMsg: ChatMessage = { id: nextId(), role: "user", text: `📝 ${req.subject}` };
+  const handleDraft = async (
+    journeyId: string,
+    fields: Record<string, string | boolean>,
+    applicantName?: string,
+    applicantAddress?: string
+  ) => {
+    setDraftOpen(false);
+    const userMsg: ChatMessage = { id: nextId(), role: "user", text: `📝 ${t("draftLaunch")}` };
     const pendingId = nextId();
     setMessages((prev) => [
       ...prev,
       userMsg,
-      { id: pendingId, role: "assistant", pending: true, rtiPending: true },
+      { id: pendingId, role: "assistant", pending: true, draftPending: true },
     ]);
     setLoading(true);
 
     try {
-      const rti = await draftRti({ ...req, language: locale });
+      const draft = await draftDocument({
+        journey: journeyId,
+        fields,
+        applicant_name: applicantName,
+        applicant_address: applicantAddress,
+        language: locale,
+      });
       setMessages((prev) =>
-        prev.map((m) => (m.id === pendingId ? { ...m, pending: false, rti } : m))
+        prev.map((m) => (m.id === pendingId ? { ...m, pending: false, draft } : m))
       );
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "generic";
@@ -124,7 +135,7 @@ export function ChatApp() {
           <Composer
             onSend={handleSend}
             onAttach={handleAnalyzeFile}
-            onOpenRti={() => setRtiOpen(true)}
+            onOpenDraft={() => setDraftOpen(true)}
             loading={loading}
             showExamples={empty}
           />
@@ -132,7 +143,7 @@ export function ChatApp() {
         </div>
       </main>
 
-      {rtiOpen && <RtiForm onSubmit={handleDraftRti} onClose={() => setRtiOpen(false)} />}
+      {draftOpen && <DraftModal onSubmit={handleDraft} onClose={() => setDraftOpen(false)} />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { AskResponse, AnalyzeResponse, RTIDraftRequest, RTIDraftResponse } from "./types";
+import type { AskResponse, AnalyzeResponse, JourneyInfo, DraftRequest, DraftResponse } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
@@ -70,11 +70,23 @@ export async function analyzeFile(
   return (await res.json()) as AnalyzeResponse;
 }
 
-/** POST /draft/rti — draft a Right to Information application from a plain-language request. */
-export async function draftRti(req: RTIDraftRequest): Promise<RTIDraftResponse> {
+/** GET /draft/journeys — the catalogue of document types + their input fields. */
+export async function listJourneys(): Promise<JourneyInfo[]> {
   let res: Response;
   try {
-    res = await fetch(`${API_URL}/draft/rti`, {
+    res = await fetch(`${API_URL}/draft/journeys`);
+  } catch {
+    throw new ApiError("network");
+  }
+  if (!res.ok) throw new ApiError(`Request failed (${res.status})`, res.status);
+  return (await res.json()) as JourneyInfo[];
+}
+
+/** POST /draft — draft a document for a chosen journey. */
+export async function draftDocument(req: DraftRequest): Promise<DraftResponse> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/draft`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),
@@ -93,7 +105,7 @@ export async function draftRti(req: RTIDraftRequest): Promise<RTIDraftResponse> 
     throw new ApiError(detail || `Request failed (${res.status})`, res.status);
   }
 
-  return (await res.json()) as RTIDraftResponse;
+  return (await res.json()) as DraftResponse;
 }
 
 export const appConfig = {

@@ -48,35 +48,57 @@ export interface AnalyzeResponse {
   response_time_ms: number;
 }
 
-// RTI drafting (/draft/rti) — mirrors backend app/schemas/rti.py.
-export type GovLevel = "central" | "state";
+// Generic drafting engine (/draft) — mirrors backend app/schemas/draft.py.
+export type FieldKind = "text" | "textarea" | "select" | "checkbox";
+export type SectionTone = "default" | "info" | "warn";
 
-export interface RTIDraftRequest {
-  subject: string;
-  public_authority?: string;
-  level: GovLevel;
+export interface FieldOption {
+  value: string;
+  label: string;
+}
+
+export interface FieldSpec {
+  key: string;
+  label: string;
+  kind: FieldKind;
+  required: boolean;
+  placeholder?: string | null;
+  help?: string | null;
+  options: FieldOption[];
+  default?: string | null;
+}
+
+export interface JourneyInfo {
+  id: string;
+  title: string;
+  description: string;
+  doc_title: string;
+  icon?: string | null;
+  fields: FieldSpec[];
+  note?: string | null;
+}
+
+export interface DraftSection {
+  label: string;
+  items: string[];
+  tone: SectionTone;
+}
+
+export interface DraftRequest {
+  journey: string;
+  fields: Record<string, string | boolean>;
   applicant_name?: string;
   applicant_address?: string;
-  is_bpl: boolean;
   language: string;
 }
 
-export interface FilingInfo {
-  where_to_file: string;
-  fee: string;
-  is_bpl_exempt: boolean;
-  portal?: string | null;
-}
-
-export interface RTIDraftResponse {
-  application_text: string;
-  subject_line: string;
-  questions: string[];
-  public_authority: string;
-  filing: FilingInfo;
-  timeline: string[];
-  appeals: string[];
-  tips: string[];
+export interface DraftResponse {
+  journey: string;
+  doc_title: string;
+  document_text: string;
+  subject_line?: string | null;
+  key_points: string[];
+  sections: DraftSection[];
   confidence: Confidence;
   citations: Citation[];
   citation_verified: boolean;
@@ -95,10 +117,10 @@ export interface ChatMessage {
   analysis?: AnalyzeResponse;
   // true while a document upload is being analysed (shows a doc-specific loading label)
   analysisPending?: boolean;
-  // assistant messages for an RTI draft carry the drafted application
-  rti?: RTIDraftResponse;
-  // true while an RTI application is being drafted (shows an RTI-specific loading label)
-  rtiPending?: boolean;
+  // assistant messages for a drafted document carry the draft
+  draft?: DraftResponse;
+  // true while a document is being drafted (shows a drafting-specific loading label)
+  draftPending?: boolean;
   error?: string;
   pending?: boolean;
 }
