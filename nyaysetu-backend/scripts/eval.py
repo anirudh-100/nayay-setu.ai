@@ -65,6 +65,7 @@ def main() -> int:
         rag = RAGService()
 
     hits = 0
+    verified_hits = 0
     rr_sum = 0.0
     print(f"\nEvaluating {len(golden)} queries (top_k={args.top_k})\n" + "-" * 72)
 
@@ -75,21 +76,28 @@ def main() -> int:
 
         rank = None
         hit_label = ""
+        hit_verification = ""
         for i, rc in enumerate(results, start=1):
             sec = _base(rc.chunk.section or "")
             if sec and sec in expect:
                 rank = i
                 hit_label = rc.chunk.reference_label()
+                hit_verification = rc.chunk.verification
                 break
 
         if rank:
             hits += 1
             rr_sum += 1.0 / rank
-            status = f"PASS  @{rank}  ({hit_label})"
+            # A hit only strengthens the moat if it's backed by an official source.
+            verified = hit_verification == "official"
+            if verified:
+                verified_hits += 1
+            mark = "✓" if verified else f"~{hit_verification}"
+            status = f"PASS  @{rank}  {mark} ({hit_label})"
         else:
             top = results[0].chunk.reference_label() if results else "—"
             status = f"FAIL        (top was: {top})"
-        print(f"  [{status:<40}] {row['topic']:<22} | {query[:40]}")
+        print(f"  [{status:<44}] {row['topic']:<22} | {query[:40]}")
 
         if rag is not None:
             ans = rag.answer(query)
@@ -97,8 +105,11 @@ def main() -> int:
 
     n = len(golden) or 1
     print("-" * 72)
-    print(f"  Hit@{args.top_k}: {hits}/{len(golden)} = {hits / n:.1%}")
-    print(f"  MRR:     {rr_sum / n:.3f}")
+    print(f"  Hit@{args.top_k}:        {hits}/{len(golden)} = {hits / n:.1%}")
+    print(f"  MRR:           {rr_sum / n:.3f}")
+    # Of the queries we answered correctly, how many were backed by an OFFICIAL source
+    # (vs a curated starter)? This is the trust metric the corpus work moves.
+    print(f"  Verified-backed: {verified_hits}/{hits if hits else 0} of hits from official sources")
     print()
     return 0
 

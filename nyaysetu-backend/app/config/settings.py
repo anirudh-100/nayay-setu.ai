@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     ipc_dir: Path = Field(default=DATA_DIR / "ipc")
     bns_dir: Path = Field(default=DATA_DIR / "bns")
     qa_dir: Path = Field(default=DATA_DIR / "indiclegalqa")
+    judgments_dir: Path = Field(default=DATA_DIR / "judgments")
     index_dir: Path = Field(default=ROOT_DIR / "models" / "index")
 
     # --- Chunking ---

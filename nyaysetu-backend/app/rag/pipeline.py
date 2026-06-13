@@ -10,8 +10,10 @@ collapses to one vector automatically.
 """
 from __future__ import annotations
 
+import shutil
 from dataclasses import dataclass
 
+from app.config import settings
 from app.rag.embedder import Embedder
 from app.rag.lexical_store import LexicalStore
 from app.rag.loaders import load_all
@@ -57,6 +59,15 @@ def build_index() -> BuildStats:
 
     embedder = Embedder.instance()
     vectors = embedder.encode_passages([c.text for c in chunks])
+
+    # Clean slate: embedded Qdrant's recreate_collection can leave stale points behind
+    # in local mode (observed: a prior build's chunks survived a rebuild), which would
+    # let outdated/curated chunks compete with current official ones. For embedded mode
+    # we physically delete the on-disk collection before rebuilding. (Remote Qdrant
+    # relies on recreate_collection.)
+    if not getattr(settings, "qdrant_url", ""):
+        VectorStore.reset()
+        shutil.rmtree(settings.qdrant_path, ignore_errors=True)
 
     # Dense index (fresh collection each rebuild — deterministic, no stale points).
     store = VectorStore.instance()

@@ -1,0 +1,759 @@
+{
+  "_meta": {
+    "from_code": "IEA",
+    "to_code": "BSA",
+    "description": "Official IEA (Indian Evidence Act, 1872) -> BSA (Bharatiya Sakshya Adhiniyam, 2023) correspondence, parsed from the NCRB Corresponding Section Table.",
+    "transition_date": "2024-07-01",
+    "transition_rule": "Matters on or after 2024-07-01 fall under the BSA; earlier matters remain under the IEA.",
+    "source": "NCRB / MHA — Corresponding Section Tables (cytrain.ncrb.gov.in)",
+    "source_url": "https://cytrain.ncrb.gov.in/staticpage/web_pages/SectionTableBSA.html",
+    "authority_of_record": "https://www.indiacode.nic.in",
+    "retrieved_at": "2026-06-11",
+    "verified": true,
+    "verification_note": "Mapping data is from the official NCRB Corresponding Section Table; 1 human clarifying note(s) merged from _curated_overlay.json."
+  },
+  "iea_to_bsa": {
+    "1": {
+      "bsa": "1",
+      "offence": "Short title, application and commencement"
+    },
+    "2": {
+      "bsa": "1",
+      "offence": "Short title, application and commencement"
+    },
+    "3": {
+      "bsa": "2",
+      "offence": "Definitions"
+    },
+    "5": {
+      "bsa": "3",
+      "offence": "Evidence may be given of facts in issue and relevant facts"
+    },
+    "6": {
+      "bsa": "4",
+      "offence": "Relevancy of facts forming part of same transaction"
+    },
+    "7": {
+      "bsa": "5",
+      "offence": "Facts which are occasion, cause or effect of facts in issue or relevant facts"
+    },
+    "8": {
+      "bsa": "6",
+      "offence": "Motive, preparation and previous or subsequent conduct"
+    },
+    "9": {
+      "bsa": "7",
+      "offence": "Facts necessary to explain or introduce fact in issue or relevant facts"
+    },
+    "10": {
+      "bsa": "8",
+      "offence": "Things said or done by conspirator in reference to common design"
+    },
+    "11": {
+      "bsa": "9",
+      "offence": "When facts not otherwise relevant become relevant"
+    },
+    "12": {
+      "bsa": "10",
+      "offence": "Facts tending to enable Court to determine amount are relevant in suits for damages"
+    },
+    "13": {
+      "bsa": "11",
+      "offence": "Facts relevant when right or custom is in question"
+    },
+    "14": {
+      "bsa": "12",
+      "offence": "Facts showing existence of state of mind, or of body or bodily feeling"
+    },
+    "15": {
+      "bsa": "13",
+      "offence": "Facts bearing on question whether act was accidental or intentional"
+    },
+    "16": {
+      "bsa": "14",
+      "offence": "Existence of course of business when relevant"
+    },
+    "17": {
+      "bsa": "15",
+      "offence": "Admission defined"
+    },
+    "18": {
+      "bsa": "16",
+      "offence": "Admission by party to proceeding or his agent"
+    },
+    "19": {
+      "bsa": "17",
+      "offence": "Admissions by persons whose position must be proved as against party to suit"
+    },
+    "20": {
+      "bsa": "18",
+      "offence": "Admissions by persons expressly referred to by party to suit"
+    },
+    "21": {
+      "bsa": "19",
+      "offence": "Proof of admissions against persons making them, and by or on their behalf"
+    },
+    "22": {
+      "bsa": "20",
+      "offence": "When oral admissions as to contents of documents are relevant"
+    },
+    "23": {
+      "bsa": "21",
+      "offence": "Admissions in civil cases when relevant"
+    },
+    "24": {
+      "bsa": "22",
+      "offence": "Confession caused by inducement, threat, coercion or promise, when irrelevant in criminal proceeding"
+    },
+    "25": {
+      "bsa": "23",
+      "offence": "Confession to police officer",
+      "note": "The related discovery rule (IEA s.27) folds into BSA s.23(2)."
+    },
+    "26": {
+      "bsa": "23(2)",
+      "offence": "Confession to police officer"
+    },
+    "27": {
+      "bsa": "23",
+      "offence": "Proviso"
+    },
+    "28": {
+      "bsa": "22",
+      "offence": "Proviso 1"
+    },
+    "29": {
+      "bsa": "22",
+      "offence": "Proviso 2"
+    },
+    "30": {
+      "bsa": "24",
+      "offence": "Consideration of proved confession affecting person making it and others jointly under trial for same offence"
+    },
+    "31": {
+      "bsa": "25",
+      "offence": "Admissions not conclusive proof, but may estop"
+    },
+    "32": {
+      "bsa": "26",
+      "offence": "Cases in which statement of relevant fact by person who is dead or cannot be found, etc., is relevant"
+    },
+    "33": {
+      "bsa": "27",
+      "offence": "Relevancy of certain evidence for proving, in subsequent proceeding, truth of facts therein stated"
+    },
+    "34": {
+      "bsa": "28",
+      "offence": "Entries in books of account when relevant"
+    },
+    "35": {
+      "bsa": "29",
+      "offence": "Relevancy of entry in public record or an electronic record made in performance of duty"
+    },
+    "36": {
+      "bsa": "30",
+      "offence": "Relevancy of statements in maps, charts and plans"
+    },
+    "37": {
+      "bsa": "31",
+      "offence": "Relevancy of statement as to fact of public nature contained in certain Acts or notifications"
+    },
+    "38": {
+      "bsa": "32",
+      "offence": "Relevancy of statements as to any law contained in law books including electronic or digital form"
+    },
+    "39": {
+      "bsa": "33",
+      "offence": "What evidence to be given when statement forms part of a conversation, document, electronic record, book or series of letters or papers"
+    },
+    "40": {
+      "bsa": "34",
+      "offence": "Previous judgments relevant to bar a second suit or trial"
+    },
+    "41": {
+      "bsa": "35",
+      "offence": "Relevancy of certain judgments in probate, etc., jurisdiction"
+    },
+    "42": {
+      "bsa": "36",
+      "offence": "Relevancy and effect of judgments, orders or decrees, other than those mentioned in section 35"
+    },
+    "43": {
+      "bsa": "37",
+      "offence": "Judgments, etc., other than those mentioned in sections 34, 35 and 36 when relevant"
+    },
+    "44": {
+      "bsa": "38",
+      "offence": "Fraud or collusion in obtaining judgment, or incompetency of Court, may be proved"
+    },
+    "45": {
+      "bsa": "39",
+      "offence": "Opinions of experts"
+    },
+    "46": {
+      "bsa": "40",
+      "offence": "Facts bearing upon opinions of experts"
+    },
+    "47": {
+      "bsa": "41",
+      "offence": "Opinion as to handwriting and signature, when relevant"
+    },
+    "48": {
+      "bsa": "42",
+      "offence": "Opinion as to existence of general custom or right, when relevant"
+    },
+    "49": {
+      "bsa": "43",
+      "offence": "Opinion as to usages, tenets, etc., when relevant"
+    },
+    "50": {
+      "bsa": "44",
+      "offence": "Opinion on relationship, when relevant"
+    },
+    "51": {
+      "bsa": "45",
+      "offence": "Grounds of opinion, when relevant"
+    },
+    "52": {
+      "bsa": "46",
+      "offence": "In civil cases character to prove conduct imputed, irrelevant"
+    },
+    "53": {
+      "bsa": "47",
+      "offence": "In criminal cases previous good character relevant"
+    },
+    "54": {
+      "bsa": "49",
+      "offence": "Previous bad character not relevant, except in reply"
+    },
+    "55": {
+      "bsa": "50",
+      "offence": "Character as affecting damages"
+    },
+    "56": {
+      "bsa": "51",
+      "offence": "Fact judicially noticeable need not be proved"
+    },
+    "57": {
+      "bsa": "52",
+      "offence": "Facts of which Court shall take judicial notice"
+    },
+    "58": {
+      "bsa": "53",
+      "offence": "Facts admitted need not be proved"
+    },
+    "59": {
+      "bsa": "54",
+      "offence": "Proof of facts by oral evidence"
+    },
+    "60": {
+      "bsa": "55",
+      "offence": "Oral evidence to be direct"
+    },
+    "61": {
+      "bsa": "56",
+      "offence": "Proof of contents of documents"
+    },
+    "62": {
+      "bsa": "57",
+      "offence": "Primary evidence"
+    },
+    "63": {
+      "bsa": "58",
+      "offence": "Secondary evidence"
+    },
+    "64": {
+      "bsa": "59",
+      "offence": "Proof of documents by primary evidence"
+    },
+    "65": {
+      "bsa": "60",
+      "offence": "Cases in which secondary evidence relating to documents may be given"
+    },
+    "66": {
+      "bsa": "64",
+      "offence": "Rules as to notice to produce"
+    },
+    "67": {
+      "bsa": "65",
+      "offence": "Proof of signature and handwriting of person alleged to have signed or written document produced"
+    },
+    "68": {
+      "bsa": "67",
+      "offence": "Proof of execution of document required by law to be attested"
+    },
+    "69": {
+      "bsa": "68",
+      "offence": "Proof where no attesting witness found"
+    },
+    "70": {
+      "bsa": "69",
+      "offence": "Admission of execution by party to attested document"
+    },
+    "71": {
+      "bsa": "70",
+      "offence": "Proof when attesting witness denies execution"
+    },
+    "72": {
+      "bsa": "71",
+      "offence": "Proof of document not required by law to be attested"
+    },
+    "73": {
+      "bsa": "72",
+      "offence": "Comparison of signature, writing or seal with others admitted or proved"
+    },
+    "74": {
+      "bsa": "74",
+      "offence": "Public and private documents. 74(1)"
+    },
+    "75": {
+      "bsa": "74(2)",
+      "offence": "Public and private documents. 74(1)"
+    },
+    "76": {
+      "bsa": "75",
+      "offence": "Certified copies of public documents"
+    },
+    "77": {
+      "bsa": "76",
+      "offence": "Proof of documents by production of certified copies"
+    },
+    "78": {
+      "bsa": "77",
+      "offence": "Proof of other official documents"
+    },
+    "79": {
+      "bsa": "78",
+      "offence": "Presumption as to genuineness of certified copies"
+    },
+    "80": {
+      "bsa": "79",
+      "offence": "Presumption as to documents produced as record of evidence, etc"
+    },
+    "81": {
+      "bsa": "80",
+      "offence": "Presumption as to Gazettes, newspapers, and other documents. Explanation"
+    },
+    "82": {
+      "bsa": null,
+      "offence": "Presumption as to document admissible in England without proof of seal or signature",
+      "note": "No corresponding section in the BSA (repealed without a direct successor)."
+    },
+    "83": {
+      "bsa": "82",
+      "offence": "Presumption as to maps or plans made by authority of Government"
+    },
+    "84": {
+      "bsa": "83",
+      "offence": "Presumption as to collections of laws and reports of decisions"
+    },
+    "85": {
+      "bsa": "84",
+      "offence": "Presumption as to powers-of-attorney"
+    },
+    "86": {
+      "bsa": "88",
+      "offence": "Presumption as to certified copies of foreign judicial records"
+    },
+    "87": {
+      "bsa": "89",
+      "offence": "Presumption as to books, maps and charts"
+    },
+    "88": {
+      "bsa": null,
+      "offence": "Presumption as to telegraphic messages",
+      "note": "No corresponding section in the BSA (repealed without a direct successor)."
+    },
+    "89": {
+      "bsa": "91",
+      "offence": "Presumption as to due execution, etc., of documents not produced"
+    },
+    "90": {
+      "bsa": "92",
+      "offence": "Presumption as to documents thirty years old"
+    },
+    "91": {
+      "bsa": "94",
+      "offence": "Evidence of terms of contracts, grants and other dispositions of property reduced to form of document"
+    },
+    "92": {
+      "bsa": "95",
+      "offence": "Exclusion of evidence of oral agreement"
+    },
+    "93": {
+      "bsa": "96",
+      "offence": "Exclusion of evidence to explain or amend ambiguous document"
+    },
+    "94": {
+      "bsa": "97",
+      "offence": "Exclusion of evidence against application of document to existing facts"
+    },
+    "95": {
+      "bsa": "98",
+      "offence": "Evidence as to document unmeaning in reference to existing facts"
+    },
+    "96": {
+      "bsa": "99",
+      "offence": "Evidence as to application of language which can apply to one only of several persons"
+    },
+    "97": {
+      "bsa": "100",
+      "offence": "Evidence as to application of language to one of two sets of facts, to neither of which the whole correctly applies"
+    },
+    "98": {
+      "bsa": "101",
+      "offence": "Evidence as to meaning of illegible characters, etc"
+    },
+    "99": {
+      "bsa": "102",
+      "offence": "Who may give evidence of agreement varying terms of document"
+    },
+    "100": {
+      "bsa": "103",
+      "offence": "Saving of provisions of Indian Succession Act relating to wills"
+    },
+    "101": {
+      "bsa": "104",
+      "offence": "Burden of proof"
+    },
+    "102": {
+      "bsa": "105",
+      "offence": "On whom burden of proof lies"
+    },
+    "103": {
+      "bsa": "106",
+      "offence": "Burden of proof as to particular fact"
+    },
+    "104": {
+      "bsa": "107",
+      "offence": "Burden of proving fact to be proved to make evidence admissible"
+    },
+    "105": {
+      "bsa": "108",
+      "offence": "Burden of proving that case of accused comes within exceptions"
+    },
+    "106": {
+      "bsa": "109",
+      "offence": "Burden of proving fact especially within knowledge"
+    },
+    "107": {
+      "bsa": "110",
+      "offence": "Burden of proving death of person known to have been alive within thirty years"
+    },
+    "108": {
+      "bsa": "111",
+      "offence": "Burden of proving that person is alive who has not been heard of for seven years"
+    },
+    "109": {
+      "bsa": "112",
+      "offence": "Burden of proof as to relationship in the cases of partners, landlord and tenant, principal and agent"
+    },
+    "110": {
+      "bsa": "113",
+      "offence": "Burden of proof as to ownership"
+    },
+    "111": {
+      "bsa": "114",
+      "offence": "Proof of good faith in transactions where one party is in relation of active confidence"
+    },
+    "112": {
+      "bsa": "116",
+      "offence": "Birth during marriage, conclusive proof of legitimacy"
+    },
+    "113": {
+      "bsa": null,
+      "offence": "Proof of cession of territory",
+      "note": "No corresponding section in the BSA (repealed without a direct successor)."
+    },
+    "114": {
+      "bsa": "119",
+      "offence": "Court may presume existence of certain facts"
+    },
+    "115": {
+      "bsa": "121",
+      "offence": "Estoppel"
+    },
+    "116": {
+      "bsa": "122",
+      "offence": "Estoppel of tenants and of licensee of person in possession"
+    },
+    "117": {
+      "bsa": "123",
+      "offence": "Estoppel of acceptor of bill of exchange, bailee or licensee"
+    },
+    "118": {
+      "bsa": "124",
+      "offence": "Who may testify"
+    },
+    "119": {
+      "bsa": "125",
+      "offence": "Witness unable to communicate verbally"
+    },
+    "120": {
+      "bsa": "126",
+      "offence": "Competency of husband and wife as witnesses in certain cases"
+    },
+    "121": {
+      "bsa": "127",
+      "offence": "Judges and Magistrates"
+    },
+    "122": {
+      "bsa": "128",
+      "offence": "Communications during marriage"
+    },
+    "123": {
+      "bsa": "129",
+      "offence": "Evidence as to affairs of State"
+    },
+    "124": {
+      "bsa": "130",
+      "offence": "Official communications"
+    },
+    "125": {
+      "bsa": "131",
+      "offence": "Information as to commission of offences"
+    },
+    "126": {
+      "bsa": "132",
+      "offence": "Professional communications. 132(1) (2)"
+    },
+    "127": {
+      "bsa": "132(3)",
+      "offence": "Professional communications. 132(1) (2)"
+    },
+    "128": {
+      "bsa": "133",
+      "offence": "Privilege not waived by volunteering evidence"
+    },
+    "129": {
+      "bsa": "134",
+      "offence": "Confidential communication with legal advisers"
+    },
+    "130": {
+      "bsa": "135",
+      "offence": "Production of title-deeds of witness not a party"
+    },
+    "131": {
+      "bsa": "136",
+      "offence": "Production of documents or electronic records which another person, having possession, could refuse to produce"
+    },
+    "132": {
+      "bsa": "137",
+      "offence": "Witness not excused from answering on ground that answer will criminate"
+    },
+    "133": {
+      "bsa": "138",
+      "offence": "Accomplice"
+    },
+    "134": {
+      "bsa": "139",
+      "offence": "Number of witnesses"
+    },
+    "135": {
+      "bsa": "140",
+      "offence": "Order of production and examination of witnesses"
+    },
+    "136": {
+      "bsa": "141",
+      "offence": "Judge to decide as to admissibility of evidence"
+    },
+    "137": {
+      "bsa": "142",
+      "offence": "Examination of witnesses"
+    },
+    "138": {
+      "bsa": "143",
+      "offence": "Order of examinations"
+    },
+    "139": {
+      "bsa": "144",
+      "offence": "Cross-examination of person called to produce a document"
+    },
+    "140": {
+      "bsa": "145",
+      "offence": "Witnesses to character"
+    },
+    "141": {
+      "bsa": "146",
+      "offence": "Leading questions. 146(1)"
+    },
+    "142": {
+      "bsa": "146(2)",
+      "offence": "Leading questions. 146(1)"
+    },
+    "143": {
+      "bsa": "146(4)",
+      "offence": "Leading questions. 146(1)"
+    },
+    "144": {
+      "bsa": "147",
+      "offence": "Evidence as to matters in writing"
+    },
+    "145": {
+      "bsa": "148",
+      "offence": "Cross-examination as to previous statements in writing"
+    },
+    "146": {
+      "bsa": "149",
+      "offence": "Questions lawful in cross-examination"
+    },
+    "147": {
+      "bsa": "150",
+      "offence": "When witness to be compelled to answer"
+    },
+    "148": {
+      "bsa": "151",
+      "offence": "Court to decide when question shall be asked and when witness compelled to answer"
+    },
+    "149": {
+      "bsa": "152",
+      "offence": "Question not to be asked without reasonable grounds"
+    },
+    "150": {
+      "bsa": "153",
+      "offence": "Procedure of Court in case of question being asked without reasonable grounds"
+    },
+    "151": {
+      "bsa": "154",
+      "offence": "Indecent and scandalous questions"
+    },
+    "152": {
+      "bsa": "155",
+      "offence": "Questions intended to insult or annoy"
+    },
+    "153": {
+      "bsa": "156",
+      "offence": "Exclusion of evidence to contradict answers to questions testing veracity"
+    },
+    "154": {
+      "bsa": "157",
+      "offence": "Question by party to his own witness"
+    },
+    "155": {
+      "bsa": "158",
+      "offence": "Impeaching credit of witness"
+    },
+    "156": {
+      "bsa": "159",
+      "offence": "Questions tending to corroborate evidence of relevant fact, admissible"
+    },
+    "157": {
+      "bsa": "160",
+      "offence": "Former statements of witness may be proved to corroborate later testimony as to same fact"
+    },
+    "158": {
+      "bsa": "161",
+      "offence": "What matters may be proved in connection with proved statement relevant under section 26 or 27"
+    },
+    "159": {
+      "bsa": "162",
+      "offence": "Refreshing memory"
+    },
+    "160": {
+      "bsa": "163",
+      "offence": "Testimony to facts stated in document mentioned in section 162"
+    },
+    "161": {
+      "bsa": "164",
+      "offence": "Right of adverse party as to writing used to refresh memory"
+    },
+    "162": {
+      "bsa": "165",
+      "offence": "Production of documents"
+    },
+    "163": {
+      "bsa": "166",
+      "offence": "Giving, as evidence, of document called for and produced on notice"
+    },
+    "164": {
+      "bsa": "167",
+      "offence": "Using, as evidence, of document production of which was refused on notice"
+    },
+    "165": {
+      "bsa": "168",
+      "offence": "Judge's power to put questions or order production"
+    },
+    "166": {
+      "bsa": null,
+      "offence": "Power of jury or assessors to put questions",
+      "note": "No corresponding section in the BSA (repealed without a direct successor)."
+    },
+    "167": {
+      "bsa": "169",
+      "offence": "No new trial for improper admission or rejection of evidence"
+    },
+    "22A": {
+      "bsa": null,
+      "offence": "When oral admission as to contents of electronic records are relevant",
+      "note": "No corresponding section in the BSA (repealed without a direct successor)."
+    },
+    "45A": {
+      "bsa": "39(2)",
+      "offence": "Opinions of experts"
+    },
+    "47A": {
+      "bsa": "41(2)",
+      "offence": "Opinion as to handwriting and signature, when relevant"
+    },
+    "53A": {
+      "bsa": "48",
+      "offence": "Evidence of character or previous sexual experience not relevant in certain cases"
+    },
+    "65A": {
+      "bsa": "62",
+      "offence": "Special provisions as to evidence relating to electronic record"
+    },
+    "65B": {
+      "bsa": "63",
+      "offence": "Admissibility of electronic records"
+    },
+    "67A": {
+      "bsa": "66",
+      "offence": "Proof as to electronic signature"
+    },
+    "73A": {
+      "bsa": "73",
+      "offence": "Proof as to verification of digital signature"
+    },
+    "81A": {
+      "bsa": "81",
+      "offence": "Presumption as to Gazettes in electronic or digital record. Explanation"
+    },
+    "85A": {
+      "bsa": "85",
+      "offence": "Presumption as to electronic agreements"
+    },
+    "85B": {
+      "bsa": "86",
+      "offence": "Presumption as to electronic records and electronic signatures"
+    },
+    "85C": {
+      "bsa": "87",
+      "offence": "Presumption as to Electronic Signature Certificates"
+    },
+    "88A": {
+      "bsa": "90",
+      "offence": "Presumption as to electronic messages"
+    },
+    "90A": {
+      "bsa": "93",
+      "offence": "Presumption as to electronic records five years old"
+    },
+    "111A": {
+      "bsa": "115",
+      "offence": "Presumption as to certain offences"
+    },
+    "113A": {
+      "bsa": "117",
+      "offence": "Presumption as to abetment of suicide by a married woman"
+    },
+    "113B": {
+      "bsa": "118",
+      "offence": "Presumption as to dowry death"
+    },
+    "114A": {
+      "bsa": "120",
+      "offence": "Presumption as to absence of consent in certain prosecution for rape"
+    }
+  }
+}

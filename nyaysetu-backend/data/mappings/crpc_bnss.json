@@ -1,0 +1,2161 @@
+{
+  "_meta": {
+    "from_code": "CrPC",
+    "to_code": "BNSS",
+    "description": "Official CrPC (Code of Criminal Procedure, 1973) -> BNSS (Bharatiya Nagarik Suraksha Sanhita, 2023) correspondence, parsed from the NCRB Corresponding Section Table.",
+    "transition_date": "2024-07-01",
+    "transition_rule": "Matters on or after 2024-07-01 fall under the BNSS; earlier matters remain under the CrPC.",
+    "source": "NCRB / MHA — Corresponding Section Tables (cytrain.ncrb.gov.in)",
+    "source_url": "https://cytrain.ncrb.gov.in/staticpage/web_pages/SectionTableBNSS.html",
+    "authority_of_record": "https://www.indiacode.nic.in",
+    "retrieved_at": "2026-06-11",
+    "verified": true,
+    "verification_note": "Mapping data is from the official NCRB Corresponding Section Table; 1 human clarifying note(s) merged from _curated_overlay.json."
+  },
+  "crpc_to_bnss": {
+    "1": {
+      "bnss": "1",
+      "offence": "Short title, extent and commencement"
+    },
+    "2": {
+      "bnss": "2",
+      "offence": "Definitions.(Change)"
+    },
+    "3": {
+      "bnss": "3",
+      "offence": "Construction of references"
+    },
+    "4": {
+      "bnss": "4",
+      "offence": "Trial of offences under Bharatiya Nyaya Sanhita, 2023 and other laws"
+    },
+    "5": {
+      "bnss": "5",
+      "offence": "Saving"
+    },
+    "6": {
+      "bnss": "6",
+      "offence": "Classes of Criminal Courts"
+    },
+    "7": {
+      "bnss": "7",
+      "offence": "Territorial divisions"
+    },
+    "8": {
+      "bnss": null,
+      "offence": "Metropolitan areas",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "9": {
+      "bnss": "8",
+      "offence": "Court of Session(Change)"
+    },
+    "10": {
+      "bnss": null,
+      "offence": "Subordination of Assistant Sessions Judges",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "11": {
+      "bnss": "9",
+      "offence": "Courts of Judicial Magistrates"
+    },
+    "12": {
+      "bnss": "10",
+      "offence": "Chief Judicial Magistrate and Additional Chief Judicial Magistrate, etc"
+    },
+    "13": {
+      "bnss": "11",
+      "offence": "Special Judicial Magistrates (Change)"
+    },
+    "14": {
+      "bnss": "12",
+      "offence": "Local Jurisdiction of Judicial Magistrates.(Change)"
+    },
+    "15": {
+      "bnss": "13",
+      "offence": "Subordination of Judicial Magistrates"
+    },
+    "16": {
+      "bnss": null,
+      "offence": "Courts of Metropolitan Magistrates",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "17": {
+      "bnss": null,
+      "offence": "Chief Metropolitan Magistrate and Additional Chief Metropolitan Magistrate",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "18": {
+      "bnss": null,
+      "offence": "Special Metropolitan Magistrates",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "19": {
+      "bnss": null,
+      "offence": "Subordination of Metropolitan Magistrates",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "20": {
+      "bnss": "14",
+      "offence": "Executive Magistrates.(Change)"
+    },
+    "21": {
+      "bnss": "15",
+      "offence": "Special Executive Magistrates.(Change)"
+    },
+    "22": {
+      "bnss": "16",
+      "offence": "Local Jurisdiction of Executive Magistrates"
+    },
+    "23": {
+      "bnss": "17",
+      "offence": "Subordination of Executive Magistrates"
+    },
+    "24": {
+      "bnss": "18",
+      "offence": "Public Prosecutors.(Change)"
+    },
+    "25": {
+      "bnss": "19",
+      "offence": "Assistant Public Prosecutors(Change)"
+    },
+    "26": {
+      "bnss": "21",
+      "offence": "Courts by which offences are triable"
+    },
+    "27": {
+      "bnss": null,
+      "offence": "Jurisdiction in the case of juveniles",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "28": {
+      "bnss": "22",
+      "offence": "Sentences which High Courts and Sessions Judges may pass.(Change)"
+    },
+    "29": {
+      "bnss": "23",
+      "offence": "Sentences which Magistrates may pass (Change)"
+    },
+    "30": {
+      "bnss": "24",
+      "offence": "Sentence of imprisonment in default of fine"
+    },
+    "31": {
+      "bnss": "25",
+      "offence": "Sentence in cases of conviction of several offences at one trial.(Change)"
+    },
+    "32": {
+      "bnss": "26",
+      "offence": "Mode of conferring powers"
+    },
+    "33": {
+      "bnss": "27",
+      "offence": "Powers of officers appointed"
+    },
+    "34": {
+      "bnss": "28",
+      "offence": "Withdrawal of powers"
+    },
+    "35": {
+      "bnss": "29",
+      "offence": "Powers of Judges and Magistrates exercisable by their successors-in-office.(Change)"
+    },
+    "36": {
+      "bnss": "30",
+      "offence": "Powers of superior officers of police"
+    },
+    "37": {
+      "bnss": "31",
+      "offence": "Public when to assist Magistrates and police"
+    },
+    "38": {
+      "bnss": "32",
+      "offence": "Aid to person, other than police officer, executing warrant"
+    },
+    "39": {
+      "bnss": "33",
+      "offence": "Public to give information of certain offences"
+    },
+    "40": {
+      "bnss": "34",
+      "offence": "Duty of officers employed in connection with affairs of a village to make certain report"
+    },
+    "41": {
+      "bnss": "35",
+      "offence": "When police may arrest without warrant (Change)"
+    },
+    "42": {
+      "bnss": "39",
+      "offence": "Arrest on refusal to give name and residence.(Change)"
+    },
+    "43": {
+      "bnss": "40",
+      "offence": "Arrest by private person and procedure on such arrest.(Change)"
+    },
+    "44": {
+      "bnss": "41",
+      "offence": "Arrest by Magistrate"
+    },
+    "45": {
+      "bnss": "42",
+      "offence": "Protection of members of Armed Forces from arrest"
+    },
+    "46": {
+      "bnss": "43",
+      "offence": "Arrest how made. (Change)"
+    },
+    "47": {
+      "bnss": "44",
+      "offence": "Search of place entered by person sought to be arrested"
+    },
+    "48": {
+      "bnss": "45",
+      "offence": "Pursuit of offenders into other jurisdictions"
+    },
+    "49": {
+      "bnss": "46",
+      "offence": "No unnecessary restraint"
+    },
+    "50": {
+      "bnss": "47",
+      "offence": "Person arrested to be informed of grounds of arrest and of right to bail"
+    },
+    "51": {
+      "bnss": "49",
+      "offence": "Search of arrested person"
+    },
+    "52": {
+      "bnss": "50",
+      "offence": "Power to seize offensive weapons.(Change)"
+    },
+    "53": {
+      "bnss": "51",
+      "offence": "Examination of accused by medical practitioner at request of police officer. (Change)"
+    },
+    "54": {
+      "bnss": "53",
+      "offence": "Examination of arrested person by medical officer"
+    },
+    "55": {
+      "bnss": "55",
+      "offence": "Procedure when police officer deputes subordinate to arrest without warrant"
+    },
+    "56": {
+      "bnss": "57",
+      "offence": "Person arrested to be taken before Magistrate or officer in charge of police station"
+    },
+    "57": {
+      "bnss": "58",
+      "offence": "Person arrested not to be detained more than twenty-four hours.(Change)"
+    },
+    "58": {
+      "bnss": "59",
+      "offence": "Police to report apprehensions"
+    },
+    "59": {
+      "bnss": "60",
+      "offence": "Discharge of person apprehended.(Change)"
+    },
+    "60": {
+      "bnss": "61",
+      "offence": "Power, on escape, to pursue and retake"
+    },
+    "61": {
+      "bnss": "63",
+      "offence": "Form of summons.(Change)"
+    },
+    "62": {
+      "bnss": "64",
+      "offence": "Summons how served.(Change)"
+    },
+    "63": {
+      "bnss": "65",
+      "offence": "Service of summons on corporate bodies, firms, and societies.(Change) 65(1)(Change)"
+    },
+    "64": {
+      "bnss": "66",
+      "offence": "Service when persons summoned cannot be found"
+    },
+    "65": {
+      "bnss": "67",
+      "offence": "Procedure when service cannot be effected as before provided"
+    },
+    "66": {
+      "bnss": "68",
+      "offence": "Service on Government servant"
+    },
+    "67": {
+      "bnss": "69",
+      "offence": "Service of summons outside local limits"
+    },
+    "68": {
+      "bnss": "70",
+      "offence": "Proof of service in such cases and when serving officer not present. (Change)"
+    },
+    "69": {
+      "bnss": "71",
+      "offence": "Service of summons on witness.(Change)"
+    },
+    "70": {
+      "bnss": "72",
+      "offence": "Form of warrant of arrest and duration"
+    },
+    "71": {
+      "bnss": "73",
+      "offence": "Power to direct security to be taken.(Change)"
+    },
+    "72": {
+      "bnss": "74",
+      "offence": "Warrants to whom directed"
+    },
+    "73": {
+      "bnss": "75",
+      "offence": "Warrant may be directed to any person"
+    },
+    "74": {
+      "bnss": "76",
+      "offence": "Warrant directed to police officer"
+    },
+    "75": {
+      "bnss": "77",
+      "offence": "Notification of substance of warrant"
+    },
+    "76": {
+      "bnss": "78",
+      "offence": "Person arrested to be brought before Court without delay"
+    },
+    "77": {
+      "bnss": "79",
+      "offence": "Where warrant may be executed"
+    },
+    "78": {
+      "bnss": "80",
+      "offence": "Warrant forwarded for execution outside jurisdiction"
+    },
+    "79": {
+      "bnss": "81",
+      "offence": "Warrant directed to police officer for execution outside jurisdiction"
+    },
+    "80": {
+      "bnss": "82",
+      "offence": "Procedure on arrest of person against whom warrant issued. (Change)"
+    },
+    "81": {
+      "bnss": "83",
+      "offence": "Procedure by Magistrate before whom such person arrested is brought.(Change)"
+    },
+    "82": {
+      "bnss": "84",
+      "offence": "Proclamation for person absconding.(Change)"
+    },
+    "83": {
+      "bnss": "85",
+      "offence": "Attachment of property of person absconding"
+    },
+    "84": {
+      "bnss": "87",
+      "offence": "Claims and objections to attachment"
+    },
+    "85": {
+      "bnss": "88",
+      "offence": "Release, sale and restoration of attached property"
+    },
+    "86": {
+      "bnss": "89",
+      "offence": "Appeal from order rejecting application for restoration of attached property"
+    },
+    "87": {
+      "bnss": "90",
+      "offence": "Issue of warrant in lieu of, or in addition to, summons"
+    },
+    "88": {
+      "bnss": "91",
+      "offence": "Power to take bond or bail bond for appearance.(Change)"
+    },
+    "89": {
+      "bnss": "92",
+      "offence": "Arrest on breach of bond or bail bond for appearance.(Change)"
+    },
+    "90": {
+      "bnss": "93",
+      "offence": "Provisions of this Chapter generally applicable to summonses and warrants of arrest"
+    },
+    "91": {
+      "bnss": "94",
+      "offence": "Summons to produce document or other thing.(Change)"
+    },
+    "92": {
+      "bnss": "95",
+      "offence": "Procedure as to letters.(Change)"
+    },
+    "93": {
+      "bnss": "96",
+      "offence": "When search-warrant may be issued.(Change)"
+    },
+    "94": {
+      "bnss": "97",
+      "offence": "Search of place suspected to contain stolen property, forged documents, etc.(Change)"
+    },
+    "95": {
+      "bnss": "98",
+      "offence": "Power to declare certain publications forfeited and to issue search-warrants for same"
+    },
+    "96": {
+      "bnss": "99",
+      "offence": "Application to High Court to set aside declaration of forfeiture"
+    },
+    "97": {
+      "bnss": "100",
+      "offence": "Search for persons wrongfully confined"
+    },
+    "98": {
+      "bnss": "101",
+      "offence": "Power to compel restoration of abducted females.(Change)"
+    },
+    "99": {
+      "bnss": "102",
+      "offence": "Direction, etc., of search- warrants"
+    },
+    "100": {
+      "bnss": "103",
+      "offence": "Persons in charge of closed place to allow search"
+    },
+    "101": {
+      "bnss": "104",
+      "offence": "Disposal of things found in search beyond jurisdiction"
+    },
+    "102": {
+      "bnss": "106",
+      "offence": "Power of police officer to seize certain property"
+    },
+    "103": {
+      "bnss": "108",
+      "offence": "Magistrate may direct search in his presence"
+    },
+    "104": {
+      "bnss": "109",
+      "offence": "Power to impound document, etc., produced"
+    },
+    "105": {
+      "bnss": "110",
+      "offence": "Reciprocal arrangements regarding processes"
+    },
+    "106": {
+      "bnss": "125",
+      "offence": "Security for keeping peace on conviction.(Change)"
+    },
+    "107": {
+      "bnss": "126",
+      "offence": "Security for keeping peace in other cases.(Change)"
+    },
+    "108": {
+      "bnss": "127",
+      "offence": "Security for good behaviour from persons disseminating certain matters.(Change)"
+    },
+    "109": {
+      "bnss": "128",
+      "offence": "Security for good behaviour from suspected persons.(Change)"
+    },
+    "110": {
+      "bnss": "129",
+      "offence": "Security for good behaviour from habitual offenders.(Change)"
+    },
+    "111": {
+      "bnss": "130",
+      "offence": "Order to be made.(Change)"
+    },
+    "112": {
+      "bnss": "131",
+      "offence": "Procedure in respect of person present in Court"
+    },
+    "113": {
+      "bnss": "132",
+      "offence": "Summons or warrant in case of person not so present"
+    },
+    "114": {
+      "bnss": "133",
+      "offence": "Copy of order to accompany summons or warrant"
+    },
+    "115": {
+      "bnss": "134",
+      "offence": "Power to dispense with personal attendance.(Change)"
+    },
+    "116": {
+      "bnss": "135",
+      "offence": "Inquiry as to truth of information.(Change)"
+    },
+    "117": {
+      "bnss": "136",
+      "offence": "Order to give security.(Change)"
+    },
+    "118": {
+      "bnss": "137",
+      "offence": "Discharge of person informed against"
+    },
+    "119": {
+      "bnss": "138",
+      "offence": "Commencement of period for which security is required"
+    },
+    "120": {
+      "bnss": "139",
+      "offence": "Contents of bond.(Change)"
+    },
+    "121": {
+      "bnss": "140",
+      "offence": "Power to reject sureties.(Change)"
+    },
+    "122": {
+      "bnss": "141",
+      "offence": "Imprisonment in default of security.(Change)"
+    },
+    "123": {
+      "bnss": "142",
+      "offence": "Power to release persons imprisoned for failing to give security"
+    },
+    "124": {
+      "bnss": "143",
+      "offence": "Security for unexpired period of bond.(Change)"
+    },
+    "125": {
+      "bnss": "144",
+      "offence": "Order for maintenance of wives, children and parents"
+    },
+    "126": {
+      "bnss": "145",
+      "offence": "Procedure"
+    },
+    "127": {
+      "bnss": "146",
+      "offence": "Alteration in allowance"
+    },
+    "128": {
+      "bnss": "147",
+      "offence": "Enforcement of order of maintenance"
+    },
+    "129": {
+      "bnss": "148",
+      "offence": "Dispersal of assembly by use of civil force.(Change)"
+    },
+    "130": {
+      "bnss": "149",
+      "offence": "Use of armed forces to disperse assembly.(Change)"
+    },
+    "131": {
+      "bnss": "150",
+      "offence": "Power of certain armed force officers to disperse assembly"
+    },
+    "132": {
+      "bnss": "151",
+      "offence": "Protection against prosecution for acts done under sections 148, 149 and 150"
+    },
+    "133": {
+      "bnss": "152",
+      "offence": "Conditional order for removal of nuisance"
+    },
+    "134": {
+      "bnss": "153",
+      "offence": "Service or notification of order"
+    },
+    "135": {
+      "bnss": "154",
+      "offence": "Person to whom order is addressed to obey or show cause.(Change)"
+    },
+    "136": {
+      "bnss": "155",
+      "offence": "Penalty for failure to comply with section 154"
+    },
+    "137": {
+      "bnss": "156",
+      "offence": "Procedure where existence of public right is denied"
+    },
+    "138": {
+      "bnss": "157",
+      "offence": "Procedure where person against whom order is made under section 152 appears to show cause.(Change)"
+    },
+    "139": {
+      "bnss": "158",
+      "offence": "Power of Magistrate to direct local investigation and examination of an expert"
+    },
+    "140": {
+      "bnss": "159",
+      "offence": "Power of Magistrate to furnish written instructions, etc"
+    },
+    "141": {
+      "bnss": "160",
+      "offence": "Procedure on order being made absolute and consequences of disobedience"
+    },
+    "142": {
+      "bnss": "161",
+      "offence": "Injunction pending inquiry"
+    },
+    "143": {
+      "bnss": "162",
+      "offence": "Magistrate may prohibit repetition or continuance of public nuisance.(Change)"
+    },
+    "144": {
+      "bnss": "163",
+      "offence": "Power to issue order in urgent cases of nuisance or apprehended danger"
+    },
+    "145": {
+      "bnss": "164",
+      "offence": "Procedure where dispute concerning land or water is likely to cause breach of peace"
+    },
+    "146": {
+      "bnss": "165",
+      "offence": "Power to attach subject of dispute and to appoint receiver"
+    },
+    "147": {
+      "bnss": "166",
+      "offence": "Dispute concerning right of use of land or water"
+    },
+    "148": {
+      "bnss": "167",
+      "offence": "Local Inquiry"
+    },
+    "149": {
+      "bnss": "168",
+      "offence": "Police to prevent cognizable offences"
+    },
+    "150": {
+      "bnss": "169",
+      "offence": "Information of design to commit cognizable offences"
+    },
+    "151": {
+      "bnss": "170",
+      "offence": "Arrest to prevent commission of cognizable offences"
+    },
+    "152": {
+      "bnss": "171",
+      "offence": "Prevention of injury to public property"
+    },
+    "153": {
+      "bnss": null,
+      "offence": "Inspection of weights and measures",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "154": {
+      "bnss": "173",
+      "offence": "Information in cognizable cases.(Change) 173(1)(ii)"
+    },
+    "155": {
+      "bnss": "174",
+      "offence": "Information as to non-cognizable cases and investigation of such cases.(Change) 174(1)(ii)"
+    },
+    "156": {
+      "bnss": "175",
+      "offence": "Police officer’s power to investigate cognizable case. (Change)",
+      "note": "A Magistrate's power to order investigation (CrPC 156(3)) corresponds to BNSS s.175(3)."
+    },
+    "157": {
+      "bnss": "176",
+      "offence": "Procedure for investigation. (Change)"
+    },
+    "158": {
+      "bnss": "177",
+      "offence": "Report how submitted"
+    },
+    "159": {
+      "bnss": "178",
+      "offence": "Power to hold investigation or preliminary inquiry"
+    },
+    "160": {
+      "bnss": "179",
+      "offence": "Police officer’s power to require attendance of witnesses.(Change)"
+    },
+    "161": {
+      "bnss": "180",
+      "offence": "Examination of witnesses by police.(Change)"
+    },
+    "162": {
+      "bnss": "181",
+      "offence": "Statements to police and use thereof"
+    },
+    "163": {
+      "bnss": "182",
+      "offence": "No inducement to be offered"
+    },
+    "164": {
+      "bnss": "183",
+      "offence": "Recording of confessions and statements.(Change)"
+    },
+    "165": {
+      "bnss": "185",
+      "offence": "Search by police officer.(Change)"
+    },
+    "166": {
+      "bnss": "186",
+      "offence": "When officer in charge of police station may require another to issue search- warrant"
+    },
+    "167": {
+      "bnss": "187",
+      "offence": "Procedure when investigation cannot be completed in twenty-four hours.(Change)"
+    },
+    "168": {
+      "bnss": "188",
+      "offence": "Report of investigation by subordinate police officer"
+    },
+    "169": {
+      "bnss": "189",
+      "offence": "Release of accused when evidence deficient.(Change)"
+    },
+    "170": {
+      "bnss": "190",
+      "offence": "Cases to be sent to Magistrate, when evidence is sufficient.(Change)"
+    },
+    "171": {
+      "bnss": "191",
+      "offence": "Complainant and witnesses not to be required to accompany police officer and not to be subject to restraint"
+    },
+    "172": {
+      "bnss": "192",
+      "offence": "Diary of proceedings in investigation"
+    },
+    "173": {
+      "bnss": "193",
+      "offence": "Report of police officer on completion of investigation.(Change) 193(3)(ii)"
+    },
+    "174": {
+      "bnss": "194",
+      "offence": "Police to enquire and report on suicide, etc.(Change)"
+    },
+    "175": {
+      "bnss": "195",
+      "offence": "Power to summon persons.(Change)"
+    },
+    "176": {
+      "bnss": "196",
+      "offence": "Inquiry by Magistrate into cause of death.(Change)"
+    },
+    "177": {
+      "bnss": "197",
+      "offence": "Ordinary place of inquiry and trial"
+    },
+    "178": {
+      "bnss": "198",
+      "offence": "Place of inquiry or trial"
+    },
+    "179": {
+      "bnss": "199",
+      "offence": "Offence triable where act is done or consequence ensues"
+    },
+    "180": {
+      "bnss": "200",
+      "offence": "Place of trial where act is an offence by reason of relation to other offence"
+    },
+    "181": {
+      "bnss": "201",
+      "offence": "Place of trial in case of certain offences.(Change)"
+    },
+    "182": {
+      "bnss": "202",
+      "offence": "Offences committed by means of electronic communications, letters, etc.(Change)"
+    },
+    "183": {
+      "bnss": "203",
+      "offence": "Offence committed on journey or voyage"
+    },
+    "184": {
+      "bnss": "204",
+      "offence": "Place of trial for offences triable together"
+    },
+    "185": {
+      "bnss": "205",
+      "offence": "Power to order cases to be tried in different sessions divisions"
+    },
+    "186": {
+      "bnss": "206",
+      "offence": "High Court to decide, in case of doubt, district where inquiry or trial shall take place"
+    },
+    "187": {
+      "bnss": "207",
+      "offence": "Power to issue summons or warrant for offence committed beyond local jurisdiction. (Change)"
+    },
+    "188": {
+      "bnss": "208",
+      "offence": "Offence committed outside India. (Change)"
+    },
+    "189": {
+      "bnss": "209",
+      "offence": "Receipt of evidence relating to offences committed outside India.(Change)"
+    },
+    "190": {
+      "bnss": "210",
+      "offence": "Cognizance of offences by Magistrates. (Change)"
+    },
+    "191": {
+      "bnss": "211",
+      "offence": "Transfer on application of accused"
+    },
+    "192": {
+      "bnss": "212",
+      "offence": "Making over of cases to Magistrates"
+    },
+    "193": {
+      "bnss": "213",
+      "offence": "Cognizance of offences by Court of Session"
+    },
+    "194": {
+      "bnss": "214",
+      "offence": "Additional Sessions Judges to try cases made over to them. (Change)"
+    },
+    "195": {
+      "bnss": "215",
+      "offence": "Prosecution for contempt of lawful authority of public servants, for offences against public justice and for offences relating to documents given in evidence. (Change)"
+    },
+    "196": {
+      "bnss": "217",
+      "offence": "Prosecution for offences against State and for criminal conspiracy to commit such offence"
+    },
+    "197": {
+      "bnss": "218",
+      "offence": "Prosecution of Judges and public servants.(Change)"
+    },
+    "198": {
+      "bnss": "219",
+      "offence": "Prosecution for offences against marriage.(Change)"
+    },
+    "199": {
+      "bnss": "222",
+      "offence": "Prosecution for defamation (Change)"
+    },
+    "200": {
+      "bnss": "223",
+      "offence": "Examination of complainant. (Change)"
+    },
+    "201": {
+      "bnss": "224",
+      "offence": "Procedure by Magistrate not competent to take cognizance of case"
+    },
+    "202": {
+      "bnss": "225",
+      "offence": "Postponement of issue of process"
+    },
+    "203": {
+      "bnss": "226",
+      "offence": "Dismissal of complaint"
+    },
+    "204": {
+      "bnss": "227",
+      "offence": "Issue of process. (Change)"
+    },
+    "205": {
+      "bnss": "228",
+      "offence": "Magistrate may dispense with personal attendance of accused"
+    },
+    "206": {
+      "bnss": "229",
+      "offence": "Special summons in cases of petty offence.(Change)"
+    },
+    "207": {
+      "bnss": "230",
+      "offence": "Supply to accused of copy of police report and other documents.(Change)"
+    },
+    "208": {
+      "bnss": "231",
+      "offence": "Supply of copies of statements and documents to accused in other cases triable by Court of Session.(Change)"
+    },
+    "209": {
+      "bnss": "232",
+      "offence": "Commitment of case to Court of Session when offence is triable exclusively by it.(Change)"
+    },
+    "210": {
+      "bnss": "233",
+      "offence": "Procedure to be followed when there is a complaint case and police investigation in respect of same offence"
+    },
+    "211": {
+      "bnss": "234",
+      "offence": "Contents of charge"
+    },
+    "212": {
+      "bnss": "235",
+      "offence": "Particulars as to time, place and person"
+    },
+    "213": {
+      "bnss": "236",
+      "offence": "When manner of committing offence must be stated"
+    },
+    "214": {
+      "bnss": "237",
+      "offence": "Words in charge taken in sense of law under which offence is punishable"
+    },
+    "215": {
+      "bnss": "238",
+      "offence": "Effect of errors"
+    },
+    "216": {
+      "bnss": "239",
+      "offence": "Court may alter charge"
+    },
+    "217": {
+      "bnss": "240",
+      "offence": "Recall of witnesses when charge altered"
+    },
+    "218": {
+      "bnss": "241",
+      "offence": "Separate charges for distinct offences"
+    },
+    "219": {
+      "bnss": "242",
+      "offence": "Offences of same kind within year may be charged together.(Change)"
+    },
+    "220": {
+      "bnss": "243",
+      "offence": "Trial for more than one offence"
+    },
+    "221": {
+      "bnss": "244",
+      "offence": "Where it is doubtful what offence has been committed"
+    },
+    "222": {
+      "bnss": "245",
+      "offence": "When offence proved included in offence charged"
+    },
+    "223": {
+      "bnss": "246",
+      "offence": "What persons may be charged jointly"
+    },
+    "224": {
+      "bnss": "247",
+      "offence": "Withdrawal of remaining charges on conviction on one of several charges"
+    },
+    "225": {
+      "bnss": "248",
+      "offence": "Trial to be conducted by Public Prosecutor"
+    },
+    "226": {
+      "bnss": "249",
+      "offence": "Opening case for prosecution. (Change)"
+    },
+    "227": {
+      "bnss": "250(2)",
+      "offence": "Discharge. (Change)"
+    },
+    "228": {
+      "bnss": "251",
+      "offence": "Framing of charge. (Change)"
+    },
+    "229": {
+      "bnss": "252",
+      "offence": "Conviction on plea of guilty"
+    },
+    "230": {
+      "bnss": "253",
+      "offence": "Date for prosecution evidence"
+    },
+    "231": {
+      "bnss": "254",
+      "offence": "Evidence for prosecution.(Change)"
+    },
+    "232": {
+      "bnss": "255",
+      "offence": "Acquittal"
+    },
+    "233": {
+      "bnss": "256",
+      "offence": "Entering upon defence"
+    },
+    "234": {
+      "bnss": "257",
+      "offence": "Arguments"
+    },
+    "235": {
+      "bnss": "258",
+      "offence": "Judgment of acquittal or conviction (Change)"
+    },
+    "236": {
+      "bnss": "259",
+      "offence": "Previous conviction"
+    },
+    "237": {
+      "bnss": "260",
+      "offence": "Procedure in cases instituted under sub-section (2) of section 222"
+    },
+    "238": {
+      "bnss": "261",
+      "offence": "Compliance with section 230"
+    },
+    "239": {
+      "bnss": "262(2)",
+      "offence": "When accused shall be discharged.(Change)"
+    },
+    "240": {
+      "bnss": "263",
+      "offence": "Framing of charge. (Change)"
+    },
+    "241": {
+      "bnss": "264",
+      "offence": "Conviction on plea of guilty"
+    },
+    "242": {
+      "bnss": "265",
+      "offence": "Evidence for prosecution. (Change)"
+    },
+    "243": {
+      "bnss": "266",
+      "offence": "Evidence for defence.(Change)"
+    },
+    "244": {
+      "bnss": "267",
+      "offence": "Evidence for prosecution"
+    },
+    "245": {
+      "bnss": "268",
+      "offence": "When accused shall be discharged"
+    },
+    "246": {
+      "bnss": "269",
+      "offence": "Procedure where accused is not discharged. (Change)"
+    },
+    "247": {
+      "bnss": "270",
+      "offence": "Evidence for defence"
+    },
+    "248": {
+      "bnss": "271",
+      "offence": "Acquittal or conviction"
+    },
+    "249": {
+      "bnss": "272",
+      "offence": "Absence of complainant. (Change)"
+    },
+    "250": {
+      "bnss": "273",
+      "offence": "Compensation for accusation without reasonable cause.(Change)"
+    },
+    "251": {
+      "bnss": "274",
+      "offence": "Substance of accusation to be stated. (Change)"
+    },
+    "252": {
+      "bnss": "275",
+      "offence": "Conviction on plea of guilty"
+    },
+    "253": {
+      "bnss": "276",
+      "offence": "Conviction on plea of guilty in absence of accused in petty cases"
+    },
+    "254": {
+      "bnss": "277",
+      "offence": "Procedure when not convicted"
+    },
+    "255": {
+      "bnss": "278",
+      "offence": "Acquittal or conviction"
+    },
+    "256": {
+      "bnss": "279",
+      "offence": "Non-appearance or death of complainant. (Change)"
+    },
+    "257": {
+      "bnss": "280",
+      "offence": "Withdrawal of complaint"
+    },
+    "258": {
+      "bnss": "281",
+      "offence": "Power to stop proceedings in certain cases"
+    },
+    "259": {
+      "bnss": "282",
+      "offence": "Power of Court to convert summons-cases into warrant-cases"
+    },
+    "25A": {
+      "bnss": "20",
+      "offence": "Directorate of Prosecution.(Change)"
+    },
+    "260": {
+      "bnss": "283(2)",
+      "offence": "Power to try summarily. (Change)"
+    },
+    "261": {
+      "bnss": "284",
+      "offence": "Summary trial by Magistrate of second class"
+    },
+    "262": {
+      "bnss": "285",
+      "offence": "Procedure for summary trials"
+    },
+    "263": {
+      "bnss": "286",
+      "offence": "Record in summary trials"
+    },
+    "264": {
+      "bnss": "287",
+      "offence": "Judgment in cases tried summarily"
+    },
+    "265": {
+      "bnss": "288",
+      "offence": "Language of record and judgment"
+    },
+    "266": {
+      "bnss": "301",
+      "offence": "Definitions"
+    },
+    "267": {
+      "bnss": "302",
+      "offence": "Power to require attendance of prisoners"
+    },
+    "268": {
+      "bnss": "303",
+      "offence": "Power of State Government or Central Government to exclude certain persons from operation of section 302. (Change)"
+    },
+    "269": {
+      "bnss": "304",
+      "offence": "Officer in charge of prison to abstain from carrying out order in certain contingencies"
+    },
+    "270": {
+      "bnss": "305",
+      "offence": "Prisoner to be brought to Court in custody"
+    },
+    "271": {
+      "bnss": "306",
+      "offence": "Power to issue commission for examination of witness in prison"
+    },
+    "272": {
+      "bnss": "307",
+      "offence": "Language of Courts"
+    },
+    "273": {
+      "bnss": "308",
+      "offence": "Evidence to be taken in presence of accused. (Change)"
+    },
+    "274": {
+      "bnss": "309",
+      "offence": "Record in summons-cases and inquiries"
+    },
+    "275": {
+      "bnss": "310",
+      "offence": "Record in warrant-cases"
+    },
+    "276": {
+      "bnss": "311",
+      "offence": "Record in trial before Court of Session"
+    },
+    "277": {
+      "bnss": "312",
+      "offence": "Language of record of evidence"
+    },
+    "278": {
+      "bnss": "313",
+      "offence": "Procedure in regard to such evidence when completed. (Change)"
+    },
+    "279": {
+      "bnss": "314",
+      "offence": "Interpretation of evidence to accused or his advocate"
+    },
+    "280": {
+      "bnss": "315",
+      "offence": "Remarks respecting demeanour of witness"
+    },
+    "281": {
+      "bnss": "316",
+      "offence": "Record of examination of accused. (Change)"
+    },
+    "282": {
+      "bnss": "317",
+      "offence": "Interpreter to be bound to interpret truthfully"
+    },
+    "283": {
+      "bnss": "318",
+      "offence": "Record in High Court"
+    },
+    "284": {
+      "bnss": "319",
+      "offence": "When attendance of witness may be dispensed with and commission issued"
+    },
+    "285": {
+      "bnss": "320",
+      "offence": "Commission to whom to be issued. (Change)"
+    },
+    "286": {
+      "bnss": "321",
+      "offence": "Execution of commissions. (Change)"
+    },
+    "287": {
+      "bnss": "322",
+      "offence": "Parties may examine witnesses"
+    },
+    "288": {
+      "bnss": "323",
+      "offence": "Return of commission"
+    },
+    "289": {
+      "bnss": "324",
+      "offence": "Adjournment of proceeding"
+    },
+    "290": {
+      "bnss": "325",
+      "offence": "Execution of foreign commissions"
+    },
+    "291": {
+      "bnss": "326",
+      "offence": "Deposition of medical witness"
+    },
+    "292": {
+      "bnss": "328",
+      "offence": "Evidence of officers of the Mint"
+    },
+    "293": {
+      "bnss": "329",
+      "offence": "Reports of certain Government scientific experts"
+    },
+    "294": {
+      "bnss": "330",
+      "offence": "No formal proof of certain documents.(Change)"
+    },
+    "295": {
+      "bnss": "331",
+      "offence": "Affidavit in proof of conduct of public servants"
+    },
+    "296": {
+      "bnss": "332",
+      "offence": "Evidence of formal character on affidavit"
+    },
+    "297": {
+      "bnss": "333",
+      "offence": "Authorities before whom affidavits may be sworn"
+    },
+    "298": {
+      "bnss": "334",
+      "offence": "Previous conviction or acquittal how proved"
+    },
+    "299": {
+      "bnss": "335",
+      "offence": "Record of evidence in absence of accused"
+    },
+    "300": {
+      "bnss": "337",
+      "offence": "Person once convicted or acquitted not to be tried for same offence"
+    },
+    "301": {
+      "bnss": "338",
+      "offence": "Appearance by Public Prosecutors"
+    },
+    "302": {
+      "bnss": "339",
+      "offence": "Permission to conduct prosecution"
+    },
+    "303": {
+      "bnss": "340",
+      "offence": "Right of person against whom proceedings are instituted to be defended"
+    },
+    "304": {
+      "bnss": "341",
+      "offence": "Legal aid to accused at State expense in certain cases. (Change)"
+    },
+    "305": {
+      "bnss": "342",
+      "offence": "Procedure when corporation or registered society is an accused"
+    },
+    "306": {
+      "bnss": "343",
+      "offence": "Tender of pardon to accomplice. (Change)"
+    },
+    "307": {
+      "bnss": "344",
+      "offence": "Power to direct tender of pardon"
+    },
+    "308": {
+      "bnss": "345",
+      "offence": "Trial of person not complying with conditions of pardon"
+    },
+    "309": {
+      "bnss": "346",
+      "offence": "Power to postpone or adjourn proceedings. (Change)"
+    },
+    "310": {
+      "bnss": "347",
+      "offence": "Local inspection"
+    },
+    "311": {
+      "bnss": "348",
+      "offence": "Power to summon material witness, or examine person present"
+    },
+    "312": {
+      "bnss": "350",
+      "offence": "Expenses of complainants and witnesses"
+    },
+    "313": {
+      "bnss": "351",
+      "offence": "Power to examine accused"
+    },
+    "314": {
+      "bnss": "352",
+      "offence": "Oral arguments and memorandum of arguments"
+    },
+    "315": {
+      "bnss": "353",
+      "offence": "Accused person to be competent witness"
+    },
+    "316": {
+      "bnss": "354",
+      "offence": "No influence to be used to induce disclosure"
+    },
+    "317": {
+      "bnss": "355",
+      "offence": "Provision for inquiries and trial being held in the absence of accused in certain cases. (Change)"
+    },
+    "318": {
+      "bnss": "357",
+      "offence": "Procedure where accused does not understand proceedings"
+    },
+    "319": {
+      "bnss": "358",
+      "offence": "Power to proceed against other persons appearing to be guilty of offence"
+    },
+    "320": {
+      "bnss": "359",
+      "offence": "Compounding of offences. (Change)"
+    },
+    "321": {
+      "bnss": "360",
+      "offence": "Withdrawal from prosecution. (Change)"
+    },
+    "322": {
+      "bnss": "361",
+      "offence": "Procedure in cases which Magistrate cannot dispose of"
+    },
+    "323": {
+      "bnss": "362",
+      "offence": "Procedure when after commencement of inquiry or trial, Magistrate finds case should be committed"
+    },
+    "324": {
+      "bnss": "363",
+      "offence": "Trial of persons previously convicted of offences against coinage, stamp-law or property"
+    },
+    "325": {
+      "bnss": "364",
+      "offence": "Procedure when Magistrate cannot pass sentence sufficiently severe"
+    },
+    "326": {
+      "bnss": "365",
+      "offence": "Conviction or commitment on evidence partly recorded by one Magistrate and partly by another"
+    },
+    "327": {
+      "bnss": "366",
+      "offence": "Court to be open"
+    },
+    "328": {
+      "bnss": "367",
+      "offence": "Procedure in case of accused being person of unsound mind. (Change)"
+    },
+    "329": {
+      "bnss": "368",
+      "offence": "Procedure in case of person of unsound mind tried before Court"
+    },
+    "330": {
+      "bnss": "369",
+      "offence": "Release of person of unsound mind pending investigation or trial. (Change)"
+    },
+    "331": {
+      "bnss": "370",
+      "offence": "Resumption of inquiry or trial"
+    },
+    "332": {
+      "bnss": "371",
+      "offence": "Procedure on accused appearing before Magistrate or Court"
+    },
+    "333": {
+      "bnss": "372",
+      "offence": "When accused appears to have been of sound mind"
+    },
+    "334": {
+      "bnss": "373",
+      "offence": "Judgment of acquittal on ground of unsoundness of mind"
+    },
+    "335": {
+      "bnss": "374",
+      "offence": "Person acquitted on ground of unsoundness of mind to be detained in safe custody. (Change)"
+    },
+    "336": {
+      "bnss": "375",
+      "offence": "Power of State Government to empower officer in charge to discharge"
+    },
+    "337": {
+      "bnss": "376",
+      "offence": "Procedure where prisoner of unsound mind is reported capable of making his defence. (Change)"
+    },
+    "338": {
+      "bnss": "377",
+      "offence": "Procedure where person of unsound mind detained is declared fit to be released. (Change)"
+    },
+    "339": {
+      "bnss": "378",
+      "offence": "Delivery of person of unsound mind to care of relative or friend.(Change)"
+    },
+    "340": {
+      "bnss": "379",
+      "offence": "Procedure in cases mentioned in section 215"
+    },
+    "341": {
+      "bnss": "380",
+      "offence": "Appeal"
+    },
+    "342": {
+      "bnss": "381",
+      "offence": "Power to order costs"
+    },
+    "343": {
+      "bnss": "382",
+      "offence": "Procedure of Magistrate taking cognizance"
+    },
+    "344": {
+      "bnss": "383",
+      "offence": "Summary procedure for trial for giving false evidence. (Change)"
+    },
+    "345": {
+      "bnss": "384",
+      "offence": "Procedure in certain cases of contempt. (Change)"
+    },
+    "346": {
+      "bnss": "385",
+      "offence": "Procedure where Court considers that case should not be dealt with under section 384"
+    },
+    "347": {
+      "bnss": "386",
+      "offence": "When Registrar or Sub-Registrar to be deemed a Civil Court"
+    },
+    "348": {
+      "bnss": "387",
+      "offence": "Discharge of offender on submission of apology"
+    },
+    "349": {
+      "bnss": "388",
+      "offence": "Imprisonment or committal of person refusing to answer or produce document"
+    },
+    "350": {
+      "bnss": "389",
+      "offence": "Summary procedure for punishment for non-attendance by a witness in obedience to summons"
+    },
+    "351": {
+      "bnss": "390",
+      "offence": "Appeals from convictions under sections 383, 384, 388 and 389"
+    },
+    "352": {
+      "bnss": "391",
+      "offence": "Certain Judges and Magistrates not to try certain offences when committed before themselves"
+    },
+    "353": {
+      "bnss": "392",
+      "offence": "Judgment. (Change)"
+    },
+    "354": {
+      "bnss": "393",
+      "offence": "Language and contents of judgment"
+    },
+    "355": {
+      "bnss": null,
+      "offence": "Metropolitan Magistrate's judgment",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "356": {
+      "bnss": "394",
+      "offence": "Order for notifying address of previously convicted offender. (Change)"
+    },
+    "357": {
+      "bnss": "395",
+      "offence": "Order to pay compensation"
+    },
+    "358": {
+      "bnss": "399",
+      "offence": "Compensation to persons groundlessly arrested"
+    },
+    "359": {
+      "bnss": "400",
+      "offence": "Order to pay costs in non-cognizable cases"
+    },
+    "360": {
+      "bnss": "401",
+      "offence": "Order to release on probation of good conduct or after admonition. (Change)"
+    },
+    "361": {
+      "bnss": "402",
+      "offence": "Special reasons to be recorded in certain cases"
+    },
+    "362": {
+      "bnss": "403",
+      "offence": "Court not to alter judgment"
+    },
+    "363": {
+      "bnss": "404",
+      "offence": "Copy of judgment to be given to the accused and other persons. (Change)"
+    },
+    "364": {
+      "bnss": "405",
+      "offence": "Judgment when to be translated. (Change)"
+    },
+    "365": {
+      "bnss": "406",
+      "offence": "Court of Session to send copy of finding and sentence to District Magistrate"
+    },
+    "366": {
+      "bnss": "407",
+      "offence": "Sentence of death to be submitted by Court of Session for confirmation"
+    },
+    "367": {
+      "bnss": "408",
+      "offence": "Power to direct further inquiry to be made or additional evidence to be taken"
+    },
+    "368": {
+      "bnss": "409",
+      "offence": "Power of High Court to confirm sentence or annul conviction"
+    },
+    "369": {
+      "bnss": "410",
+      "offence": "Confirmation or new sentence to be signed by two Judges"
+    },
+    "370": {
+      "bnss": "411",
+      "offence": "Procedure in case of difference of opinion"
+    },
+    "371": {
+      "bnss": "412",
+      "offence": "Procedure in cases submitted to High Court for confirmation. (Change)"
+    },
+    "372": {
+      "bnss": "413",
+      "offence": "No appeal to lie unless otherwise provided"
+    },
+    "373": {
+      "bnss": "414",
+      "offence": "Appeal from orders requiring security or refusal to accept or rejecting surety for keeping peace or good behaviour"
+    },
+    "374": {
+      "bnss": "415",
+      "offence": "Appeals from convictions.(Change)"
+    },
+    "375": {
+      "bnss": "416",
+      "offence": "No appeal in certain cases when accused pleads guilty"
+    },
+    "376": {
+      "bnss": "417",
+      "offence": "No appeal in petty cases. (Change)"
+    },
+    "377": {
+      "bnss": "418",
+      "offence": "Appeal by State Government against sentence. (Change)"
+    },
+    "378": {
+      "bnss": "419",
+      "offence": "Appeal in case of acquittal.(Change)"
+    },
+    "379": {
+      "bnss": "420",
+      "offence": "Appeal against conviction by High Court in certain cases"
+    },
+    "380": {
+      "bnss": "421",
+      "offence": "Special right of appeal in certain cases"
+    },
+    "381": {
+      "bnss": "422",
+      "offence": "Appeal to Court of Session how heard. (Change)"
+    },
+    "382": {
+      "bnss": "423",
+      "offence": "Petition of appeal"
+    },
+    "383": {
+      "bnss": "424",
+      "offence": "Procedure when appellant in jail"
+    },
+    "384": {
+      "bnss": "425",
+      "offence": "Summary dismissal of appeal"
+    },
+    "385": {
+      "bnss": "426",
+      "offence": "Procedure for hearing appeals not dismissed summarily"
+    },
+    "386": {
+      "bnss": "427",
+      "offence": "Powers of Appellate Court"
+    },
+    "387": {
+      "bnss": "428",
+      "offence": "Judgments of subordinate Appellate Court"
+    },
+    "388": {
+      "bnss": "429",
+      "offence": "Order of High Court on appeal to be certified to lower Court"
+    },
+    "389": {
+      "bnss": "430",
+      "offence": "Suspension of sentence pending the appeal; release of appellant on bail. (Change)"
+    },
+    "390": {
+      "bnss": "431",
+      "offence": "Arrest of accused in appeal from acquittal"
+    },
+    "391": {
+      "bnss": "432",
+      "offence": "Appellate Court may take further evidence or direct it to be taken"
+    },
+    "392": {
+      "bnss": "433",
+      "offence": "Procedure where Judges of Court of Appeal are equally divided"
+    },
+    "393": {
+      "bnss": "434",
+      "offence": "Finality of judgments and orders on appeal"
+    },
+    "394": {
+      "bnss": "435",
+      "offence": "Abatement of appeals"
+    },
+    "395": {
+      "bnss": "436",
+      "offence": "Reference to High Court. (Change)"
+    },
+    "396": {
+      "bnss": "437",
+      "offence": "Disposal of case according to decision of High Court"
+    },
+    "397": {
+      "bnss": "438",
+      "offence": "Calling for records to exercise powers of revision.(Change)"
+    },
+    "398": {
+      "bnss": "439",
+      "offence": "Power to order inquiry"
+    },
+    "399": {
+      "bnss": "440",
+      "offence": "Sessions Judge’s powers of revision"
+    },
+    "400": {
+      "bnss": "441",
+      "offence": "Power of Additional Sessions Judge"
+    },
+    "401": {
+      "bnss": "442",
+      "offence": "High Court’s powers of revision"
+    },
+    "402": {
+      "bnss": "443",
+      "offence": "Power of High Court to withdraw or transfer revision cases"
+    },
+    "403": {
+      "bnss": "444",
+      "offence": "Option of Court to hear parties"
+    },
+    "404": {
+      "bnss": null,
+      "offence": "Statement by Metropolitan Magistrate of grounds of his decision to be considered by High Court",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "405": {
+      "bnss": "445",
+      "offence": "High Court’s order to be certified to lower Court"
+    },
+    "406": {
+      "bnss": "446",
+      "offence": "Power of Supreme Court to transfer cases and appeals"
+    },
+    "407": {
+      "bnss": "447",
+      "offence": "Power of High Court to transfer cases and appeals. (Change)"
+    },
+    "408": {
+      "bnss": "448",
+      "offence": "Power of Sessions Judge to transfer cases and appeals. (Change)"
+    },
+    "409": {
+      "bnss": "449",
+      "offence": "Withdrawal of cases and appeals by Sessions Judges"
+    },
+    "410": {
+      "bnss": "450",
+      "offence": "Withdrawal of cases by Judicial Magistrates"
+    },
+    "411": {
+      "bnss": "451",
+      "offence": "Making over or withdrawal of cases by Executive Magistrates"
+    },
+    "412": {
+      "bnss": "452",
+      "offence": "Reasons to be recorded"
+    },
+    "413": {
+      "bnss": "453",
+      "offence": "Execution of order passed under section 409"
+    },
+    "414": {
+      "bnss": "454",
+      "offence": "Execution of sentence of death passed by High Court"
+    },
+    "415": {
+      "bnss": "455",
+      "offence": "Postponement of execution of sentence of death in case of appeal to Supreme Court"
+    },
+    "416": {
+      "bnss": "456",
+      "offence": "Commutation of sentence of death on pregnant woman"
+    },
+    "417": {
+      "bnss": "457",
+      "offence": "Power to appoint place of imprisonment"
+    },
+    "418": {
+      "bnss": "458",
+      "offence": "Execution of sentence of imprisonment. (Change)"
+    },
+    "419": {
+      "bnss": "459",
+      "offence": "Direction of warrant for execution"
+    },
+    "41A": {
+      "bnss": "35(3)",
+      "offence": "When police may arrest without warrant (Change)"
+    },
+    "41B": {
+      "bnss": "36",
+      "offence": "Procedure of arrest and duties of officer making arrest"
+    },
+    "41C": {
+      "bnss": "37",
+      "offence": "Designated police officer.(Change)"
+    },
+    "41D": {
+      "bnss": "38",
+      "offence": "Right of arrested person to meet an advocate of his choice during interrogation"
+    },
+    "420": {
+      "bnss": "460",
+      "offence": "Warrant with whom to be lodged"
+    },
+    "421": {
+      "bnss": "461",
+      "offence": "Warrant for levy of fine. (Change)"
+    },
+    "422": {
+      "bnss": "462",
+      "offence": "Effect of such warrant"
+    },
+    "423": {
+      "bnss": "463",
+      "offence": "Warrant for levy of fine issued by a Court in any territory to which this Sanhita does not extend"
+    },
+    "424": {
+      "bnss": "464",
+      "offence": "Suspension of execution of sentence of imprisonment. (Change)"
+    },
+    "425": {
+      "bnss": "465",
+      "offence": "Who may issue warrant"
+    },
+    "426": {
+      "bnss": "466",
+      "offence": "Sentence on escaped convict when to take effect"
+    },
+    "427": {
+      "bnss": "467",
+      "offence": "Sentence on offender already sentenced for another offence"
+    },
+    "428": {
+      "bnss": "468",
+      "offence": "Period of detention undergone by accused to be set off against sentence of imprisonment"
+    },
+    "429": {
+      "bnss": "469",
+      "offence": "Saving"
+    },
+    "430": {
+      "bnss": "470",
+      "offence": "Return of warrant on execution of sentence"
+    },
+    "431": {
+      "bnss": "471",
+      "offence": "Money ordered to be paid recoverable as a fine"
+    },
+    "432": {
+      "bnss": "473",
+      "offence": "Power to suspend or remit sentences"
+    },
+    "433": {
+      "bnss": "474",
+      "offence": "Power to commute sentence. (Change) 474(c)"
+    },
+    "434": {
+      "bnss": "476",
+      "offence": "Concurrent power of Central Government in case of death sentences"
+    },
+    "435": {
+      "bnss": "477",
+      "offence": "State Government to act after concurrence with Central Government in certain cases. (Change)"
+    },
+    "436": {
+      "bnss": "478",
+      "offence": "In what cases bail to be taken"
+    },
+    "437": {
+      "bnss": "480",
+      "offence": "When bail may be taken in case of non-bailable offence. (Change)"
+    },
+    "438": {
+      "bnss": "482",
+      "offence": "Direction for grant of bail to person apprehending arrest"
+    },
+    "439": {
+      "bnss": "483",
+      "offence": "Special powers of High Court or Court of Session regarding bail"
+    },
+    "440": {
+      "bnss": "484",
+      "offence": "Amount of bond and reduction thereof"
+    },
+    "441": {
+      "bnss": "485",
+      "offence": "Bond of accused and sureties. (Change)"
+    },
+    "442": {
+      "bnss": "487",
+      "offence": "Discharge from custody. (Change)"
+    },
+    "443": {
+      "bnss": "488",
+      "offence": "Power to order sufficient bail when that first taken is insufficient"
+    },
+    "444": {
+      "bnss": "489",
+      "offence": "Discharge of sureties"
+    },
+    "445": {
+      "bnss": "490",
+      "offence": "Deposit instead of recognizance. (Change)"
+    },
+    "446": {
+      "bnss": "491",
+      "offence": "Procedure when bond has been forfeited"
+    },
+    "447": {
+      "bnss": "493",
+      "offence": "Procedure in case of insolvency or death of surety or when a bond is forfeited"
+    },
+    "448": {
+      "bnss": "494",
+      "offence": "Bond required from child. (Change)"
+    },
+    "449": {
+      "bnss": "495",
+      "offence": "Appeal from orders under section 491"
+    },
+    "450": {
+      "bnss": "496",
+      "offence": "Power to direct levy of amount due on certain recognizances"
+    },
+    "451": {
+      "bnss": "497",
+      "offence": "Order for custody and disposal of property pending trial in certain cases. (Change)"
+    },
+    "452": {
+      "bnss": "498",
+      "offence": "Order for disposal of property at conclusion of trial"
+    },
+    "453": {
+      "bnss": "499",
+      "offence": "Payment to innocent purchaser of money found on accused"
+    },
+    "454": {
+      "bnss": "500",
+      "offence": "Appeal against orders under section 498 or section 499"
+    },
+    "455": {
+      "bnss": "501",
+      "offence": "Destruction of libellous and other matter"
+    },
+    "456": {
+      "bnss": "502",
+      "offence": "Power to restore possession of immovable property"
+    },
+    "457": {
+      "bnss": "503",
+      "offence": "Procedure by police upon seizure of property"
+    },
+    "458": {
+      "bnss": "504",
+      "offence": "Procedure where no claimant appears within six months"
+    },
+    "459": {
+      "bnss": "505",
+      "offence": "Power to sell perishable property. (Change)"
+    },
+    "460": {
+      "bnss": "506",
+      "offence": "Irregularities which do not vitiate proceedings"
+    },
+    "461": {
+      "bnss": "507",
+      "offence": "Irregularities which vitiate proceedings. (Change)"
+    },
+    "462": {
+      "bnss": "508",
+      "offence": "Proceedings in wrong place"
+    },
+    "463": {
+      "bnss": "509",
+      "offence": "Non-compliance with provisions of section 183 or section 316"
+    },
+    "464": {
+      "bnss": "510",
+      "offence": "Effect of omission to frame, or absence of, or error in, charge"
+    },
+    "465": {
+      "bnss": "511",
+      "offence": "Finding or sentence when reversible by reason of error, omission or irregularity"
+    },
+    "466": {
+      "bnss": "512",
+      "offence": "Defect or error not to make attachment unlawful"
+    },
+    "467": {
+      "bnss": "513",
+      "offence": "Definitions"
+    },
+    "468": {
+      "bnss": "514",
+      "offence": "Bar to taking cognizance after lapse of period of limitation. (Change)"
+    },
+    "469": {
+      "bnss": "515",
+      "offence": "Commencement of period of limitation"
+    },
+    "470": {
+      "bnss": "516",
+      "offence": "Exclusion of time in certain cases"
+    },
+    "471": {
+      "bnss": "517",
+      "offence": "Exclusion of date on which Court is closed"
+    },
+    "472": {
+      "bnss": "518",
+      "offence": "Continuing offence"
+    },
+    "473": {
+      "bnss": "519",
+      "offence": "Extension of period of limitation in certain cases"
+    },
+    "474": {
+      "bnss": "520",
+      "offence": "Trials before High Courts"
+    },
+    "475": {
+      "bnss": "521",
+      "offence": "Delivery to commanding officers of persons liable to be tried by Court-martial"
+    },
+    "476": {
+      "bnss": "522",
+      "offence": "Forms"
+    },
+    "477": {
+      "bnss": "523",
+      "offence": "Power of High Court to make rules"
+    },
+    "478": {
+      "bnss": "524",
+      "offence": "Power to alter functions allocated to Executive Magistrate in certain cases"
+    },
+    "479": {
+      "bnss": "525",
+      "offence": "Cases in which Judge or Magistrate is personally interested"
+    },
+    "480": {
+      "bnss": "526",
+      "offence": "Practising advocate not to sit as Magistrate in certain Courts"
+    },
+    "481": {
+      "bnss": "527",
+      "offence": "Public servant concerned in sale not to purchase or bid for property"
+    },
+    "482": {
+      "bnss": "528",
+      "offence": "Saving of inherent powers of High Court"
+    },
+    "483": {
+      "bnss": "529",
+      "offence": "Duty of High Court to exercise continuous superintendence over Courts"
+    },
+    "484": {
+      "bnss": "531",
+      "offence": "Repeal and savings.(Change)"
+    },
+    "50A": {
+      "bnss": "48",
+      "offence": "Obligation of person making arrest to inform about arrest, etc., to relative or friend.(Change)"
+    },
+    "53A": {
+      "bnss": "52",
+      "offence": "Examination of person accused of rape by medical practitioner.(Change)"
+    },
+    "54A": {
+      "bnss": "54",
+      "offence": "Identification of person arrested.(Change)"
+    },
+    "55A": {
+      "bnss": "56",
+      "offence": "Health and safety of arrested person"
+    },
+    "60A": {
+      "bnss": "62",
+      "offence": "Arrest to be made strictly according to Sanhita"
+    },
+    "105A": {
+      "bnss": "111",
+      "offence": "Definitions"
+    },
+    "105B": {
+      "bnss": "114",
+      "offence": "Assistance in securing transfer of persons"
+    },
+    "105C": {
+      "bnss": "115",
+      "offence": "Assistance in relation to orders of attachment or forfeiture of property"
+    },
+    "105D": {
+      "bnss": "116",
+      "offence": "Identifying unlawfully acquired property"
+    },
+    "105E": {
+      "bnss": "117",
+      "offence": "Seizure or attachment of property"
+    },
+    "105F": {
+      "bnss": "118",
+      "offence": "Management of properties seized or forfeited under this Chapter"
+    },
+    "105G": {
+      "bnss": "119",
+      "offence": "Notice of forfeiture of property"
+    },
+    "105H": {
+      "bnss": "120",
+      "offence": "Forfeiture of property in certain cases"
+    },
+    "105J": {
+      "bnss": "122",
+      "offence": "Certain transfers to be null and void"
+    },
+    "105K": {
+      "bnss": "123",
+      "offence": "Procedure in respect of letter of request"
+    },
+    "105L": {
+      "bnss": "124",
+      "offence": "Application of this Chapter"
+    },
+    "144A": {
+      "bnss": null,
+      "offence": "Power to prohibit carrying arms in procession or mass drill or mass training with arms",
+      "note": "No corresponding section in the BNSS (repealed without a direct successor)."
+    },
+    "164A": {
+      "bnss": "184",
+      "offence": "Medical examination of victim of rape.(Change)"
+    },
+    "166A": {
+      "bnss": "112",
+      "offence": "Letter of request to competent authority for investigation in a country or place outside India"
+    },
+    "166B": {
+      "bnss": "113",
+      "offence": "Letter of request from a country or place outside India to a Court or an authority for investigation in India.(Change)"
+    },
+    "195A": {
+      "bnss": "216",
+      "offence": "Procedure for witnesses in case of threatening, etc"
+    },
+    "198A": {
+      "bnss": "220",
+      "offence": "Prosecution of offences under section 85 of Bharatiya Nyaya Sanhita, 2023"
+    },
+    "198B": {
+      "bnss": "221",
+      "offence": "Cognizance of offence"
+    },
+    "265A": {
+      "bnss": "289",
+      "offence": "Application of Chapter"
+    },
+    "265B": {
+      "bnss": "290",
+      "offence": "Application for plea bargaining. (Change)"
+    },
+    "265C": {
+      "bnss": "291",
+      "offence": "Guidelines for mutually satisfactory disposition"
+    },
+    "265D": {
+      "bnss": "292",
+      "offence": "Report of mutually satisfactory disposition to be submitted before Court"
+    },
+    "265E": {
+      "bnss": "293",
+      "offence": "Disposal of case. (Change)"
+    },
+    "265F": {
+      "bnss": "294",
+      "offence": "Judgment of Court"
+    },
+    "265G": {
+      "bnss": "295",
+      "offence": "Finality of judgment"
+    },
+    "265H": {
+      "bnss": "296",
+      "offence": "Power of Court in plea bargaining"
+    },
+    "265J": {
+      "bnss": "298",
+      "offence": "Savings"
+    },
+    "265K": {
+      "bnss": "299",
+      "offence": "Statements of accused not to be used"
+    },
+    "265L": {
+      "bnss": "300",
+      "offence": "Non-application of Chapter"
+    },
+    "291A": {
+      "bnss": "327",
+      "offence": "Identification report of Magistrate"
+    },
+    "311A": {
+      "bnss": "349",
+      "offence": "Power of Magistrate to order person to give specimen signatures or handwriting. (Change)"
+    },
+    "357A": {
+      "bnss": "396(1)",
+      "offence": "Victim compensation scheme"
+    },
+    "357B": {
+      "bnss": "396(7)",
+      "offence": "Victim compensation scheme"
+    },
+    "357C": {
+      "bnss": "397",
+      "offence": "Treatment of victims. (Change)"
+    },
+    "433A": {
+      "bnss": "475",
+      "offence": "Restriction on powers of remission or commutation in certain cases"
+    },
+    "436A": {
+      "bnss": "479",
+      "offence": "Maximum period for which undertrial prisoner can be detained. (Change) 479(2)"
+    },
+    "437A": {
+      "bnss": "481",
+      "offence": "Bail to require accused to appear before next appellate Court.(Change)"
+    },
+    "441A": {
+      "bnss": "486",
+      "offence": "Declaration by sureties"
+    },
+    "446A": {
+      "bnss": "492",
+      "offence": "Cancellation of bond and bail bond. (Change)"
+    }
+  }
+}

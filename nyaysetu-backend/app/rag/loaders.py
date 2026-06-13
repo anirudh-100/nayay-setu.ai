@@ -126,6 +126,14 @@ def load_act(path: Path, meta: dict) -> list[Chunk]:
     maps_to_act = meta.get("maps_to_act")
     is_article = unit.lower() == "article"
 
+    # Provenance / trust: a verified act becomes an "official" citation; everything
+    # else is an honest "curated" starter until its text is replaced + verified.
+    provenance = meta.get("provenance") or {}
+    verification = "official" if meta.get("verified") else "curated"
+    source_authority = provenance.get("authority")
+    official_url = provenance.get("source_url")
+    retrieved_at = provenance.get("retrieved_at")
+
     df = _read_table(path)
     num_col = _resolve_col(df, ["section", "article", "number", "section_number", "section_no", "ipc_section"])
     if not num_col:
@@ -174,6 +182,10 @@ def load_act(path: Path, meta: dict) -> list[Chunk]:
                 effective_date=effective_date,
                 maps_to=f"{maps_to_act} Section {maps_from}" if (maps_from and maps_to_act) else None,
                 url=_act_url(url_template, unit=unit, num=num, title=title),
+                verification=verification,
+                source_authority=source_authority,
+                official_url=official_url,
+                retrieved_at=retrieved_at,
             )
         )
     logger.info("Loaded %d %s provisions from %s", len(chunks), code, path.name)
@@ -216,7 +228,7 @@ def load_acts() -> list[Chunk]:
         except Exception:
             logger.exception("Failed to load act %s from %s", meta.get("code"), path)
 
-    _link_ipc_to_bns([c for c in chunks if c.act == "IPC"])
+    _link_repealed_to_current(chunks)
     return chunks
 
 
@@ -254,9 +266,73 @@ def load_indiclegalqa(path: Path) -> list[Chunk]:
                 court=court or None,
                 effective_date=date or None,
                 code_status="unknown",
+                # Bulk-ingested public dataset — no per-item check, so flagged unverified.
+                verification="unverified",
+                source_authority="IndicLegalQA dataset",
             )
         )
     logger.info("Loaded %d IndicLegalQA pairs from %s", len(chunks), path.name)
+    return chunks
+
+
+# --------------------------------------------------------------------------- #
+# Judgment loader (court opinions) — scaffold for case-law ingestion
+# --------------------------------------------------------------------------- #
+def load_judgments(path: Path, *, max_words: int, overlap: int) -> list[Chunk]:
+    """Court judgments -> ``judgment`` chunks carrying case metadata.
+
+    Columns are auto-detected so different sources (Indian Kanoon exports, eCourts
+    dumps, hand-curated sets) load through one path. A judgment is long, so the
+    holding/headnote (if present) becomes its own high-signal chunk and the full text
+    is windowed by words — each chunk keeps the case name / citation / court / date so
+    every retrieved passage is a verifiable pointer back to the judgment.
+
+    This is the scaffold for Phase-2 case law: drop a CSV/JSON into ``data/judgments/``
+    and it flows through with provenance. ``source_url()`` already routes judgments to an
+    Indian Kanoon search by citation/case name, so citations resolve out of the box.
+    """
+    df = _read_table(path)
+    case_col = _resolve_col(df, ["case_name", "case", "title", "name"])
+    court_col = _resolve_col(df, ["court", "bench"])
+    cite_col = _resolve_col(df, ["citation", "case_citation", "neutral_citation", "reporter"])
+    date_col = _resolve_col(df, ["judgment_date", "judgement_date", "date", "decision_date"])
+    body_col = _resolve_col(df, ["judgment", "text", "body", "full_text", "content", "opinion"])
+    head_col = _resolve_col(df, ["headnote", "holding", "summary", "gist", "ratio"])
+    if not body_col and not head_col:
+        raise KeyError(f"Judgments need a text/judgment or headnote column. Got: {list(df.columns)}")
+
+    chunks: list[Chunk] = []
+    for i, row in df.iterrows():
+        case_name = _clean(row[case_col]) if case_col else ""
+        court = _clean(row[court_col]) if court_col else ""
+        citation = _clean(row[cite_col]) if cite_col else ""
+        jdate = _clean(row[date_col]) if date_col else ""
+        headnote = _clean(row[head_col]) if head_col else ""
+        body = _clean(row[body_col]) if body_col else ""
+
+        ref_key = citation or case_name or f"judgment-{i}"
+        common = dict(
+            source_type="judgment",
+            title=case_name or None,
+            court=court or None,
+            case_citation=citation or None,
+            effective_date=jdate or None,
+            code_status="unknown",
+            # Auto-ingested from an external source — flagged unverified until checked.
+            verification="unverified",
+            source_authority="Court judgment",
+        )
+
+        # The holding/headnote is the single most useful retrievable unit — keep it whole.
+        if headnote:
+            chunks.append(
+                Chunk.create(text=f"{case_name}: {headnote}".strip(": ").strip(), ref=f"{ref_key}-head", **common)
+            )
+        # Window the full opinion so long judgments stay retrievable.
+        for j, piece in enumerate(_chunk_markdown(body, max_words=max_words, overlap=overlap)) if body else []:
+            chunks.append(Chunk.create(text=piece, ref=f"{ref_key}-{j}", **common))
+
+    logger.info("Loaded %d judgment chunk(s) from %s", len(chunks), path.name)
     return chunks
 
 
@@ -311,6 +387,9 @@ def load_corpus(corpus_dir: Path, *, max_words: int, overlap: int) -> list[Chunk
                     ref=f"{path.stem}-{j}",
                     title=title,
                     code_status="unknown",
+                    # Hand-authored plain-language explainer — useful, but not the bare act.
+                    verification="curated",
+                    source_authority="NyaySetu plain-language guide",
                 )
             )
     logger.info("Loaded %d guide chunks from %s", len(chunks), corpus_dir)
@@ -327,6 +406,7 @@ def load_all() -> list[Chunk]:
 
     data_dir = Path(settings.data_dir)
     qa_dir = Path(getattr(settings, "qa_dir", data_dir / "indiclegalqa"))
+    judgments_dir = Path(getattr(settings, "judgments_dir", data_dir / "judgments"))
     corpus_dir = Path(settings.corpus_dir)
     max_words = int(getattr(settings, "chunk_size", 700))
     overlap = int(getattr(settings, "chunk_overlap", 100))
@@ -340,23 +420,34 @@ def load_all() -> list[Chunk]:
     else:
         logger.warning("IndicLegalQA dataset not found under %s", qa_dir)
 
+    # Case law (scaffold): loads if a dataset is present, otherwise skipped with a note.
+    judgments_path = _find_dataset(judgments_dir) if judgments_dir.exists() else None
+    if judgments_path:
+        try:
+            chunks += load_judgments(judgments_path, max_words=max_words, overlap=overlap)
+        except Exception:
+            logger.exception("Failed to load judgments from %s", judgments_path)
+    else:
+        logger.info("No judgments dataset under %s (case-law ingestion not yet populated)", judgments_dir)
+
     chunks += load_corpus(corpus_dir, max_words=max_words, overlap=overlap)
 
     logger.info("Loaded %d total chunks across all sources", len(chunks))
     return chunks
 
 
-def _link_ipc_to_bns(ipc_chunks: list[Chunk]) -> None:
-    """Set ``maps_to`` on IPC chunks using the curated IPC<->BNS mapping."""
+def _link_repealed_to_current(chunks: list[Chunk]) -> None:
+    """Set ``maps_to`` on any repealed-code chunk (IPC/CrPC/IEA) using the curated
+    correspondence tables, so the answer can bridge old citations to current law."""
     from app.rag.law_map import LawMap
 
     law_map = LawMap.instance()
+    from_codes = set(law_map.from_codes())
+    candidates = [c for c in chunks if c.act in from_codes and c.section]
     linked = 0
-    for c in ipc_chunks:
-        if not c.section:
-            continue
-        entry = law_map.bns_for_ipc(c.section)
-        if entry and entry.get("bns"):
-            c.maps_to = f"BNS Section {entry['bns']}"
+    for c in candidates:
+        entry = law_map.successor(c.act, c.section)
+        if entry and entry.get("new"):
+            c.maps_to = f"{entry['to_code']} Section {entry['new']}"
             linked += 1
-    logger.info("Linked %d/%d IPC chunks to their BNS successor", linked, len(ipc_chunks))
+    logger.info("Linked %d/%d repealed-code chunks to their current successor", linked, len(candidates))
