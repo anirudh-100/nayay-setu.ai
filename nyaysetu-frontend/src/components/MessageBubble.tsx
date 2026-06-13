@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import type { ChatMessage } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
 import { DocumentCard } from "./DocumentCard";
+import { RtiCard } from "./RtiCard";
 
 function Thinking({ label }: { label: string }) {
   return (
@@ -49,11 +50,21 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
     <div className="flex justify-start">
       <div className="w-full max-w-full">
         {message.pending ? (
-          <Thinking label={message.analysisPending ? t("analyzingDoc") : t("thinking")} />
+          <Thinking
+            label={
+              message.analysisPending
+                ? t("analyzingDoc")
+                : message.rtiPending
+                ? t("rtiDrafting")
+                : t("thinking")
+            }
+          />
         ) : message.error ? (
           <ErrorBubble message={message.error} />
         ) : message.analysis ? (
           <DocumentCard analysis={message.analysis} />
+        ) : message.rti ? (
+          <RtiCard rti={message.rti} />
         ) : message.response ? (
           <AnswerCard response={message.response} />
         ) : null}

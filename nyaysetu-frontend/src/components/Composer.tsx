@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ArrowUp, Paperclip } from "lucide-react";
+import { ArrowUp, Paperclip, ScrollText } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/cn";
 
 interface ComposerProps {
   onSend: (text: string) => void;
   onAttach: (file: File) => void;
+  onOpenRti: () => void;
   loading: boolean;
   showExamples: boolean;
 }
@@ -15,7 +16,7 @@ interface ComposerProps {
 // File types the backend's /analyze/file endpoint can extract text from.
 const ACCEPT = ".pdf,.txt,.md,.markdown,.text";
 
-export function Composer({ onSend, onAttach, loading, showExamples }: ComposerProps) {
+export function Composer({ onSend, onAttach, onOpenRti, loading, showExamples }: ComposerProps) {
   const { t, dict } = useI18n();
   const [value, setValue] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -69,6 +70,16 @@ export function Composer({ onSend, onAttach, loading, showExamples }: ComposerPr
             e.target.value = ""; // allow re-selecting the same file
           }}
         />
+        <button
+          type="button"
+          onClick={onOpenRti}
+          disabled={loading}
+          aria-label={t("rtiLaunch")}
+          title={t("rtiLaunch")}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted transition-colors hover:bg-primary-soft/30 hover:text-primary disabled:opacity-50"
+        >
+          <ScrollText size={18} aria-hidden />
+        </button>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}

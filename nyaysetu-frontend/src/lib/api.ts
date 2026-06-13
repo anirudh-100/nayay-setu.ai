@@ -1,4 +1,4 @@
-import type { AskResponse, AnalyzeResponse } from "./types";
+import type { AskResponse, AnalyzeResponse, RTIDraftRequest, RTIDraftResponse } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
@@ -68,6 +68,32 @@ export async function analyzeFile(
   }
 
   return (await res.json()) as AnalyzeResponse;
+}
+
+/** POST /draft/rti — draft a Right to Information application from a plain-language request. */
+export async function draftRti(req: RTIDraftRequest): Promise<RTIDraftResponse> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/draft/rti`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  } catch {
+    throw new ApiError("network");
+  }
+
+  if (!res.ok) {
+    let detail = "";
+    try {
+      detail = (await res.json())?.detail ?? "";
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(detail || `Request failed (${res.status})`, res.status);
+  }
+
+  return (await res.json()) as RTIDraftResponse;
 }
 
 export const appConfig = {
