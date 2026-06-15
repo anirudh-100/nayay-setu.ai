@@ -65,8 +65,11 @@ class Settings(BaseSettings):
     top_k: int = 6             # chunks finally shown to the LLM
     rrf_k: int = 60            # RRF damping constant
     # Below this top rerank score, the engine abstains instead of risking a
-    # hallucinated section. Permissive default; raise it for stricter abstention.
-    min_rerank_score: float = -10.0
+    # hallucinated section. 0.0 = abstain when even the best-matched law scores as
+    # net-irrelevant (a negative cross-encoder logit). Calibrated on real queries
+    # (scripts/probe_abstain_scores.py): genuine legal questions scored +2.7..+9.4,
+    # off-topic ones -11.1..-1.6 — so 0.0 sits in the clean gap with margin both ways.
+    min_rerank_score: float = 0.0
 
     # --- Data + index locations ---
     data_dir: Path = Field(default=DATA_DIR)
