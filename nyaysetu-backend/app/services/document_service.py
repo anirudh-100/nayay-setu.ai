@@ -23,7 +23,7 @@ from app.rag.models import Citation, RetrievedChunk
 from app.rag.retriever import HybridRetriever
 from app.schemas.analyze import AnalyzeResponse
 from app.schemas.ask import DISCLAIMER, LEGAL_AID_ESCALATION, Confidence
-from app.services.llm_service import OllamaClient
+from app.services.llm_service import OllamaClient, get_llm
 from app.services.rag_service import (
     _format_context,
     _order_for_context,
@@ -60,8 +60,9 @@ RULES:
 - "key_points": array of the most important things to understand (short strings).
 - "deadlines": array of any dates or time-limits the person must act by — quote the date/period from the document. Use [] if there are none.
 - "action": the single most important next step.
-- "law_references": array of section labels FROM THE RELEVANT LAW above that apply (e.g. "BNS Section 318"). Use [] if none clearly apply. Do NOT invent section numbers that are not in the RELEVANT INDIAN LAW above.
+- "law_references": array of section labels FROM THE RELEVANT LAW above that apply, copying the code name VERBATIM from each label (e.g. "BNS Section 318", "BNSS Section 173", "BSA Section 23"). Use [] if none clearly apply. Do NOT invent section numbers that are not in the RELEVANT INDIAN LAW above.
 - Prefer CURRENT law (BNS / BNSS / BSA) over repealed law (IPC / CrPC / Evidence Act) when both appear.
+- BNS (penal), BNSS (procedure) and BSA (evidence) are THREE DIFFERENT codes — never shorten "BNSS" or "BSA" to "BNS", and never relabel one as another.
 - This is information to help them understand — do NOT give a definitive legal opinion.
 
 Return ONLY this JSON object (no prose before or after):
@@ -100,7 +101,7 @@ class DocumentService:
         llm: OllamaClient | None = None,
         retriever: HybridRetriever | None = None,
     ) -> None:
-        self._llm = llm or OllamaClient()
+        self._llm = llm or get_llm()
         self._retriever = retriever or HybridRetriever()
 
     def analyze(self, document_text: str, question: str | None = None, language: str = "en") -> AnalyzeResponse:

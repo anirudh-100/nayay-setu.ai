@@ -29,7 +29,7 @@ from app.schemas.ask import (
     AskResponse,
     Confidence,
 )
-from app.services.llm_service import OllamaClient
+from app.services.llm_service import OllamaClient, get_llm
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -80,7 +80,8 @@ In Mode A you MUST:
   - Prefer CURRENT law: if both a BNS section and the IPC section it replaced are present,
     lead with the BNS section and note the IPC applies to offences before 1 July 2024.
   - NOT paraphrase punishments. NOT generalize. NOT add your own knowledge.
-  - Set "law_reference" to the exact section/article from context (e.g. "BNS Section 318" or "IPC Section 420").
+  - Set "law_reference" to the exact section/article from context, copying the code name
+    VERBATIM from its [LABEL] (e.g. "BNS Section 318", "BNSS Section 173", "BSA Section 23", "IPC Section 420").
   - Begin "reasoning" with "Used <label> from context".
 
 MODE B — GENERAL GUIDANCE (use only when Mode A does not apply):
@@ -108,6 +109,15 @@ is ONE court's ruling on its own facts — persuasive, NOT the binding text of t
     rather than stating it as the law itself.
   - Do NOT put a case citation in "law_reference" when a statute is available.
 
+SPECIAL RULE — CODE NAMES (do not confuse the three reform codes):
+India's 2023 reforms created THREE SEPARATE codes that replaced three old ones:
+  - BNS  (Bharatiya Nyaya Sanhita)            — the PENAL code; replaced the IPC.
+  - BNSS (Bharatiya Nagarik Suraksha Sanhita) — the PROCEDURE code; replaced the CrPC.
+  - BSA  (Bharatiya Sakshya Adhiniyam)        — the EVIDENCE act; replaced the Evidence Act.
+They are DIFFERENT codes with their own section numbers. If the context [LABEL] says
+"BNSS Section 173", the answer is BNSS 173 — NOT "BNS 173". Copy the code name exactly as
+written in the [LABEL]; never shorten BNSS or BSA to "BNS", and never relabel one code as another.
+
 SAFETY:
 - Do NOT cite any section number that is not present in the CONTEXT above.
 - Do NOT invent punishments. If unsure, lower the confidence.
@@ -119,7 +129,7 @@ STYLE:
 Return ONLY this JSON object (no prose before or after):
 {{
   "answer": "...clear explanation...",
-  "law_reference": "...BNS/IPC/CrPC/Article or 'General Legal Guidance'...",
+  "law_reference": "...exact code+section from a [LABEL] e.g. BNS/BNSS/BSA/IPC/CrPC/Article, or 'General Legal Guidance'...",
   "action": "...what user should do next...",
   "confidence": "high|medium|low",
   "reasoning": "brief: 'Used BNS 318 from context' OR 'No strong context, used general principles'"
@@ -216,7 +226,7 @@ class RAGService:
         llm: OllamaClient | None = None,
         retriever: HybridRetriever | None = None,
     ) -> None:
-        self._llm = llm or OllamaClient()
+        self._llm = llm or get_llm()
         self._retriever = retriever or HybridRetriever()
         self._abstain_threshold = float(getattr(settings, "min_rerank_score", -10.0))
 
@@ -379,7 +389,9 @@ class RAGService:
             action="Contact free legal aid or a qualified lawyer for your specific situation.",
             confidence="low",
             reasoning="No strong context, used general principles.",
-            citations=self._dedupe_citations(results),
+            # Abstaining means nothing scored as reliably relevant — don't dangle the
+            # weak/below-threshold chunks as if they were sources for an answer.
+            citations=[],
             abstained=True,
             escalation=LEGAL_AID_ESCALATION,
             current_law_note=None,

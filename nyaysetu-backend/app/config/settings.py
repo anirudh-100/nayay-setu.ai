@@ -28,10 +28,20 @@ class Settings(BaseSettings):
     # Comma-separated origins allowed to call the API (the frontend dev server, etc.).
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
-    # --- LLM (Ollama, local) ---
+    # --- LLM (Ollama, local) — the free default engine ---
     ollama_host: str = "http://127.0.0.1:11434"
     ollama_model: str = "mistral"
     ollama_timeout_s: int = 300
+
+    # --- High-power mode (optional, OFF by default) ---
+    # Which engine answers: "ollama" (free, local) or "claude" (cloud, higher quality).
+    # Stays "ollama" unless explicitly switched, so the free/local default is untouched.
+    llm_provider: str = "ollama"
+    # Required only when llm_provider="claude". Empty => high-power mode unavailable.
+    anthropic_api_key: str = ""
+    # Opus 4.8 is the most capable tier — best for nuanced, current Indian law.
+    high_power_model: str = "claude-opus-4-8"
+    anthropic_timeout_s: int = 120
 
     # --- Embeddings (dense retrieval) ---
     # InLegalBERT understands Indian legal text far better than a generic encoder.
@@ -55,8 +65,11 @@ class Settings(BaseSettings):
     top_k: int = 6             # chunks finally shown to the LLM
     rrf_k: int = 60            # RRF damping constant
     # Below this top rerank score, the engine abstains instead of risking a
-    # hallucinated section. Permissive default; raise it for stricter abstention.
-    min_rerank_score: float = -10.0
+    # hallucinated section. 0.0 = abstain when even the best-matched law scores as
+    # net-irrelevant (a negative cross-encoder logit). Calibrated on real queries
+    # (scripts/probe_abstain_scores.py): genuine legal questions scored +2.7..+9.4,
+    # off-topic ones -11.1..-1.6 — so 0.0 sits in the clean gap with margin both ways.
+    min_rerank_score: float = 0.0
 
     # --- Data + index locations ---
     data_dir: Path = Field(default=DATA_DIR)
