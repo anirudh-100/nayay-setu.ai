@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.routes.analyze import router as analyze_router
@@ -20,8 +21,23 @@ from app.routes.draft import router as draft_router
 from app.routes.whatsapp import router as whatsapp_router
 from app.services.llm_service import get_llm
 from app.utils.logger import get_logger
+from app.utils.rate_limit import RateLimiter
 
 logger = get_logger(__name__)
+
+# Per-IP cost/abuse guard on the engine endpoints (no-op when rate_limit_per_min<=0).
+_rate_limiter = RateLimiter(settings.rate_limit_per_min)
+# Paths that cost money (LLM) or compute — worth throttling. The webhook is excluded:
+# it's signature-gated and must always 200 fast so the provider doesn't retry.
+_RATE_LIMITED_PREFIXES = ("/ask", "/analyze", "/draft")
+
+
+def _client_ip(request: Request) -> str:
+    """Best-effort client IP, honouring the proxy header set by Vercel/HF/most PaaS."""
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 
 def _warm_engine() -> None:
@@ -30,6 +46,10 @@ def _warm_engine() -> None:
     from app.rag.embedder import Embedder
     from app.rag.lexical_store import LexicalStore
     from app.rag.vector_store import VectorStore
+    from app.utils.index_bootstrap import ensure_index
+
+    # Production: pull the prebuilt index if it isn't on the box yet (no-op in dev).
+    ensure_index()
 
     Embedder.instance()  # load embedding model
 
@@ -77,6 +97,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    if _rate_limiter.per_minute > 0 and any(
+        request.url.path.startswith(p) for p in _RATE_LIMITED_PREFIXES
+    ):
+        if not _rate_limiter.allow(_client_ip(request)):
+            logger.warning("Rate limited %s on %s", _client_ip(request), request.url.path)
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests. Please wait a minute and try again."},
+            )
+    return await call_next(request)
 
 
 @app.middleware("http")

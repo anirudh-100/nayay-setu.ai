@@ -1,0 +1,23 @@
+# Keep the build context small and reproducible.
+.venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Secrets + local-only files never belong in an image.
+.env
+.env.*
+!.env.example
+build_index_log.txt
+*.output
+
+# Built artifacts: the index is fetched at boot via INDEX_URL, not baked in.
+# (Drop this line if you intend to bake a local index into the image instead.)
+models/
+
+# VCS / editor noise.
+.git/
+.gitignore
+.vscode/
+.idea/
