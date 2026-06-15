@@ -17,6 +17,7 @@ from app.config import settings
 from app.routes.analyze import router as analyze_router
 from app.routes.ask import router as ask_router
 from app.routes.draft import router as draft_router
+from app.routes.whatsapp import router as whatsapp_router
 from app.services.llm_service import get_llm
 from app.utils.logger import get_logger
 
@@ -100,3 +101,4 @@ def health() -> dict:
 app.include_router(ask_router)
 app.include_router(analyze_router)
 app.include_router(draft_router)
+app.include_router(whatsapp_router)
