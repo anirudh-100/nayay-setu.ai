@@ -43,6 +43,18 @@ class Settings(BaseSettings):
     high_power_model: str = "claude-opus-4-8"
     anthropic_timeout_s: int = 120
 
+    # --- Messaging channels (Pillar 4, OFF by default) ---
+    # How replies are delivered: "console" (local, logs only, nothing sent) or
+    # "whatsapp" (Meta Cloud API). Stays "console" so nothing leaves the machine.
+    messaging_provider: str = "console"
+    # WhatsApp Cloud API credentials — required only when messaging_provider="whatsapp".
+    whatsapp_verify_token: str = ""     # your chosen token for the webhook handshake
+    whatsapp_app_secret: str = ""       # Meta app secret; verifies inbound signatures
+    whatsapp_phone_number_id: str = ""  # the Cloud API phone number id (sender)
+    whatsapp_access_token: str = ""      # Graph API access token
+    whatsapp_graph_url: str = "https://graph.facebook.com/v21.0"
+    whatsapp_timeout_s: int = 30
+
     # --- Embeddings (dense retrieval) ---
     # InLegalBERT understands Indian legal text far better than a generic encoder.
     embedding_model: str = "law-ai/InLegalBERT"
