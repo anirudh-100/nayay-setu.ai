@@ -8,6 +8,7 @@ import { Header } from "./Header";
 import { MessageBubble } from "./MessageBubble";
 import { Composer } from "./Composer";
 import { DraftModal } from "./DraftModal";
+import { Home } from "./Home";
 
 let counter = 0;
 const nextId = () => `m${++counter}`;
@@ -19,6 +20,7 @@ export function ChatApp() {
   const [loading, setLoading] = useState(false);
   const [draftOpen, setDraftOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,7 +122,12 @@ export function ChatApp() {
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4">
         {empty ? (
-          <WelcomeView />
+          <Home
+            onPickExample={handleSend}
+            onAttach={handleAnalyzeFile}
+            onOpenDraft={() => setDraftOpen(true)}
+            onFocusAsk={() => composerRef.current?.focus()}
+          />
         ) : (
           <div className="flex-1 space-y-4 py-5">
             {messages.map((m) => (
@@ -136,26 +143,15 @@ export function ChatApp() {
             onSend={handleSend}
             onAttach={handleAnalyzeFile}
             onOpenDraft={() => setDraftOpen(true)}
+            inputRef={composerRef}
             loading={loading}
-            showExamples={empty}
+            showExamples={false}
           />
           <p className="mt-2 text-center text-[11px] text-muted">{t("footerNote")}</p>
         </div>
       </main>
 
       {draftOpen && <DraftModal onSubmit={handleDraft} onClose={() => setDraftOpen(false)} />}
-    </div>
-  );
-}
-
-function WelcomeView() {
-  const { t } = useI18n();
-  return (
-    <div className="flex flex-1 flex-col justify-center py-8">
-      <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-        {t("welcomeTitle")}
-      </h1>
-      <p className="mt-2 max-w-xl text-pretty leading-relaxed text-muted">{t("welcomeBody")}</p>
     </div>
   );
 }
