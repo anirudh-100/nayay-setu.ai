@@ -298,10 +298,17 @@ def load_judgments(path: Path, *, max_words: int, overlap: int) -> list[Chunk]:
     date_col = _resolve_col(df, ["judgment_date", "judgement_date", "date", "decision_date"])
     body_col = _resolve_col(df, ["judgment", "text", "body", "full_text", "content", "opinion"])
     head_col = _resolve_col(df, ["headnote", "holding", "summary", "gist", "ratio"])
+    # Optional provenance columns — let a source declare its own trust level / authority /
+    # links (e.g. official-source extractions) instead of the conservative defaults below.
+    verif_col = _resolve_col(df, ["verification"])
+    auth_col = _resolve_col(df, ["source_authority", "authority"])
+    ourl_col = _resolve_col(df, ["official_url"])
+    url_col = _resolve_col(df, ["url", "source_url"])
     if not body_col and not head_col:
         raise KeyError(f"Judgments need a text/judgment or headnote column. Got: {list(df.columns)}")
 
     chunks: list[Chunk] = []
+    skipped = 0
     for i, row in df.iterrows():
         case_name = _clean(row[case_col]) if case_col else ""
         court = _clean(row[court_col]) if court_col else ""
@@ -309,6 +316,15 @@ def load_judgments(path: Path, *, max_words: int, overlap: int) -> list[Chunk]:
         jdate = _clean(row[date_col]) if date_col else ""
         headnote = _clean(row[head_col]) if head_col else ""
         body = _clean(row[body_col]) if body_col else ""
+
+        raw_verif = (_clean(row[verif_col]) if verif_col else "")
+        verification = raw_verif or "unverified"
+        if verification not in ("official", "curated", "unverified"):
+            logger.warning("Judgment row %s: unrecognized verification %r -> 'unverified'", i, raw_verif)
+            verification = "unverified"
+        source_authority = (_clean(row[auth_col]) if auth_col else "") or "Court judgment"
+        official_url = (_clean(row[ourl_col]) if ourl_col else "") or None
+        url = (_clean(row[url_col]) if url_col else "") or None
 
         ref_key = citation or case_name or f"judgment-{i}"
         common = dict(
@@ -318,12 +334,16 @@ def load_judgments(path: Path, *, max_words: int, overlap: int) -> list[Chunk]:
             case_citation=citation or None,
             effective_date=jdate or None,
             code_status="unknown",
-            # Auto-ingested from an external source — flagged unverified until checked.
-            verification="unverified",
-            source_authority="Court judgment",
+            # Default conservative (unverified) for bulk auto-ingestion; a source may
+            # override via the optional provenance columns above.
+            verification=verification,
+            source_authority=source_authority,
+            official_url=official_url,
+            url=url,
         )
 
         # The holding/headnote is the single most useful retrievable unit — keep it whole.
+        before = len(chunks)
         if headnote:
             chunks.append(
                 Chunk.create(text=f"{case_name}: {headnote}".strip(": ").strip(), ref=f"{ref_key}-head", **common)
@@ -331,7 +351,11 @@ def load_judgments(path: Path, *, max_words: int, overlap: int) -> list[Chunk]:
         # Window the full opinion so long judgments stay retrievable.
         for j, piece in enumerate(_chunk_markdown(body, max_words=max_words, overlap=overlap)) if body else []:
             chunks.append(Chunk.create(text=piece, ref=f"{ref_key}-{j}", **common))
+        if len(chunks) == before:  # row had neither usable body nor headnote
+            skipped += 1
 
+    if skipped:
+        logger.warning("load_judgments: %d/%d rows produced no chunks (empty text + headnote).", skipped, len(df))
     logger.info("Loaded %d judgment chunk(s) from %s", len(chunks), path.name)
     return chunks
 

@@ -124,6 +124,24 @@ class VectorStore:
     def count(self) -> int:
         return self._client.count(collection_name=self._collection, exact=True).count
 
+    def delete_by_filter(self, filters: dict) -> int:
+        """Delete all points matching a payload filter (e.g. {"source_type": "judgment"}).
+
+        Used for clean incremental re-ingestion: remove a source's existing points before
+        re-upserting, so changed text (new content-hash ids) doesn't leave orphan chunks.
+        Returns the number of points removed.
+        """
+        flt = self._build_filter(filters)
+        if flt is None:
+            return 0
+        from qdrant_client.models import FilterSelector
+
+        before = self.count()
+        self._client.delete(collection_name=self._collection, points_selector=FilterSelector(filter=flt))
+        removed = before - self.count()
+        logger.info("Deleted %d points matching %s from %r", removed, filters, self._collection)
+        return removed
+
     def fetch_by_reference(self, *, act: str, sections: list[str], limit: int = 4) -> list[Chunk]:
         """Look up exact chunks by act + section(s) — used for cross-reference expansion
         (e.g. pull the current BNS chunk for a retrieved repealed IPC section). This is a
