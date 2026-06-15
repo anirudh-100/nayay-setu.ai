@@ -10,5 +10,6 @@ qdrant-client==1.11.3          # persisted dense vector store (embedded/local mo
 rank-bm25==0.2.2               # lexical (BM25) sparse retrieval
 numpy==1.26.4
 pandas==2.2.3                  # data loaders (IPC CSV, IndicLegalQA JSON)
+pyarrow==24.0.0                # read Supreme Court judgment metadata parquet (case-law ingest)
 python-multipart==0.0.12       # file uploads for the /analyze/file endpoint
 pypdf==5.1.0                   # extract text from uploaded PDF documents

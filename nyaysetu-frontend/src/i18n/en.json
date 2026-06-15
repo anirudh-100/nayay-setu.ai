@@ -31,6 +31,7 @@
   "verification": { "official": "Official", "curated": "Curated", "unverified": "Unverified" },
   "sourceType": { "statute": "Statute", "judgment": "Judgment", "qa": "Case Q&A", "guide": "Guide" },
   "openSource": "Open source",
+  "judgmentNotice": "Court judgment — persuasive, not the binding text of the law.",
   "disclaimerLabel": "Please note",
   "errorTitle": "Something went wrong",
   "errorNetwork": "Couldn't reach the legal assistant. Make sure the backend is running, then try again.",

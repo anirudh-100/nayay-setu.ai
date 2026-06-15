@@ -83,6 +83,9 @@ export function CitationCard({ citation }: { citation: Citation }) {
         </div>
       </div>
       <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-muted">{citation.snippet}</p>
+      {citation.source_type === "judgment" && (
+        <p className="mt-1 text-[11px] italic leading-snug text-muted">{t("judgmentNotice")}</p>
+      )}
       {clickable && (
         <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
           {t("openSource")}
