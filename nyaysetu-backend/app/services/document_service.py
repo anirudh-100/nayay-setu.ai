@@ -23,7 +23,7 @@ from app.rag.models import Citation, RetrievedChunk
 from app.rag.retriever import HybridRetriever
 from app.schemas.analyze import AnalyzeResponse
 from app.schemas.ask import DISCLAIMER, LEGAL_AID_ESCALATION, Confidence
-from app.services.llm_service import OllamaClient
+from app.services.llm_service import OllamaClient, get_llm
 from app.services.rag_service import (
     _format_context,
     _order_for_context,
@@ -100,7 +100,7 @@ class DocumentService:
         llm: OllamaClient | None = None,
         retriever: HybridRetriever | None = None,
     ) -> None:
-        self._llm = llm or OllamaClient()
+        self._llm = llm or get_llm()
         self._retriever = retriever or HybridRetriever()
 
     def analyze(self, document_text: str, question: str | None = None, language: str = "en") -> AnalyzeResponse:

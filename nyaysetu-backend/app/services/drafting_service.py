@@ -20,7 +20,7 @@ from typing import Optional
 from app.knowledge.drafting import all_journeys, get_journey
 from app.knowledge.drafting.base import Journey
 from app.schemas.draft import DRAFT_DISCLAIMER, DraftResponse, JourneyInfo
-from app.services.llm_service import LLMError, OllamaClient
+from app.services.llm_service import LLMError, OllamaClient, get_llm
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -54,7 +54,7 @@ def list_journeys() -> list[JourneyInfo]:
 
 class DraftingService:
     def __init__(self, llm: OllamaClient | None = None) -> None:
-        self._llm = llm or OllamaClient()
+        self._llm = llm or get_llm()
 
     def draft(
         self,

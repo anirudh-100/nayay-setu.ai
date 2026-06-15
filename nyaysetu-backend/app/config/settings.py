@@ -28,10 +28,20 @@ class Settings(BaseSettings):
     # Comma-separated origins allowed to call the API (the frontend dev server, etc.).
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
-    # --- LLM (Ollama, local) ---
+    # --- LLM (Ollama, local) — the free default engine ---
     ollama_host: str = "http://127.0.0.1:11434"
     ollama_model: str = "mistral"
     ollama_timeout_s: int = 300
+
+    # --- High-power mode (optional, OFF by default) ---
+    # Which engine answers: "ollama" (free, local) or "claude" (cloud, higher quality).
+    # Stays "ollama" unless explicitly switched, so the free/local default is untouched.
+    llm_provider: str = "ollama"
+    # Required only when llm_provider="claude". Empty => high-power mode unavailable.
+    anthropic_api_key: str = ""
+    # Opus 4.8 is the most capable tier — best for nuanced, current Indian law.
+    high_power_model: str = "claude-opus-4-8"
+    anthropic_timeout_s: int = 120
 
     # --- Embeddings (dense retrieval) ---
     # InLegalBERT understands Indian legal text far better than a generic encoder.

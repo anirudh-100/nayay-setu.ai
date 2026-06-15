@@ -29,7 +29,7 @@ from app.schemas.ask import (
     AskResponse,
     Confidence,
 )
-from app.services.llm_service import OllamaClient
+from app.services.llm_service import OllamaClient, get_llm
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -216,7 +216,7 @@ class RAGService:
         llm: OllamaClient | None = None,
         retriever: HybridRetriever | None = None,
     ) -> None:
-        self._llm = llm or OllamaClient()
+        self._llm = llm or get_llm()
         self._retriever = retriever or HybridRetriever()
         self._abstain_threshold = float(getattr(settings, "min_rerank_score", -10.0))
 

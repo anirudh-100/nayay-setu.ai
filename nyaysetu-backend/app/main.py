@@ -17,7 +17,7 @@ from app.config import settings
 from app.routes.analyze import router as analyze_router
 from app.routes.ask import router as ask_router
 from app.routes.draft import router as draft_router
-from app.services.llm_service import OllamaClient
+from app.services.llm_service import get_llm
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
     _warm_engine()
 
     logger.info("Warming up Ollama model...")
-    OllamaClient().warmup()
+    get_llm().warmup()
 
     yield
     logger.info("Shutting down %s", settings.app_name)
