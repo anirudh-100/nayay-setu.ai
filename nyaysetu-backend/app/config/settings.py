@@ -83,6 +83,15 @@ class Settings(BaseSettings):
     # off-topic ones -11.1..-1.6 — so 0.0 sits in the clean gap with margin both ways.
     min_rerank_score: float = 0.0
 
+    # --- Deployment (production) ---
+    # When the index is missing at startup and this is set, the backend downloads a
+    # prebuilt index zip from here (e.g. a GitHub Release) instead of rebuilding it on
+    # the box (~75 min). Empty in dev, where the locally built index is used.
+    index_url: str = ""
+    # Per-IP requests/minute cap on the answering endpoints (protects the paid Claude
+    # API from abuse / runaway cost). 0 disables it (the dev default).
+    rate_limit_per_min: int = 0
+
     # --- Data + index locations ---
     data_dir: Path = Field(default=DATA_DIR)
     corpus_dir: Path = Field(default=DATA_DIR / "corpus")
