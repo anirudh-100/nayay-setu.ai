@@ -49,6 +49,10 @@ _UNCERTAINTY_PHRASES: tuple[str, ...] = (
 
 _CONTEXT_CHUNKS = 6
 _MAX_CITATIONS = 5
+# Cap how many current-law successor chunks we inject, so expansion enriches context
+# without crowding out the directly-retrieved sources.
+_MAX_EXPANSION = 4
+_SECTION_WORD = r"(?:section|sec\.?|s\.?)"
 
 # Extracts the base section/article number from a reference string:
 # "IPC Section 420" -> "420", "BNS 318(4)" -> "318", "Article 21" -> "21".
@@ -77,8 +81,9 @@ Trigger when the CONTEXT contains either:
 In Mode A you MUST:
   - Use ONLY the context to answer.
   - Quote section numbers, punishments, and provisions EXACTLY as written in the context.
-  - Prefer CURRENT law: if both a BNS section and the IPC section it replaced are present,
-    lead with the BNS section and note the IPC applies to offences before 1 July 2024.
+  - Prefer CURRENT law: if a current-code section (BNS/BNSS/BSA) and the repealed section it
+    replaced (IPC/CrPC/IEA) are both present, LEAD with the current one and note the repealed
+    code applies only to matters before 1 July 2024.
   - NOT paraphrase punishments. NOT generalize. NOT add your own knowledge.
   - Set "law_reference" to the exact section/article from context, copying the code name
     VERBATIM from its [LABEL] (e.g. "BNS Section 318", "BNSS Section 173", "BSA Section 23", "IPC Section 420").
@@ -219,6 +224,51 @@ def _verify_citation(law_reference: str, results: list[RetrievedChunk]) -> bool:
     return bool(cited & available)
 
 
+def _scan_repealed_refs(text: str, from_codes: list[str]) -> list[tuple[str, str]]:
+    """Ordered, de-duped (code, section) repealed-law references found in free text.
+
+    Finds "(IPC|CrPC|IEA) Section N" style mentions in a query or a plain-language guide,
+    so the engine can pull the CURRENT successor into context even when the repealed
+    section isn't itself a retrieved, section-tagged statute chunk (e.g. an FIR guide
+    that only narrates "Section 154 CrPC")."""
+    if not text:
+        return []
+    hits: list[tuple[int, tuple[str, str]]] = []
+    for code in from_codes:
+        c = re.escape(code)
+        # CODE [section] N — "IPC 420", "CrPC Section 154", "IPC s. 124A"
+        for m in re.finditer(rf"\b{c}\b[\s.,]*{_SECTION_WORD}?\s*(\d+[A-Za-z]?)", text, re.IGNORECASE):
+            hits.append((m.start(), (code, m.group(1))))
+        # section N(..) CODE — "Section 154(3) CrPC"
+        for m in re.finditer(rf"{_SECTION_WORD}\s*(\d+[A-Za-z]?)\s*\(?\d*\)?\s*\b{c}\b", text, re.IGNORECASE):
+            hits.append((m.start(), (code, m.group(1))))
+        # section N of [the] CODE — "section 420 of the IPC"
+        for m in re.finditer(rf"{_SECTION_WORD}\s*(\d+[A-Za-z]?)[^.\n]*?\bof\s+(?:the\s+)?\b{c}\b", text, re.IGNORECASE):
+            hits.append((m.start(), (code, m.group(1))))
+    seen: set[tuple[str, str]] = set()
+    out: list[tuple[str, str]] = []
+    for _, ref in sorted(hits, key=lambda h: h[0]):
+        if ref not in seen:
+            seen.add(ref)
+            out.append(ref)
+    return out
+
+
+def _current_ref_in_note(note: str, to_codes: list[str]) -> tuple[str, str] | None:
+    """Pull a current-code section named in a mapping note, e.g. 'BNS s.152' -> ('BNS','152').
+
+    Used for repealed sections with no 1:1 successor (like sedition, IPC 124A) whose curated
+    note points at the new, differently-framed provision often discussed in its place."""
+    if not note:
+        return None
+    for code in sorted(to_codes, key=len, reverse=True):  # try BNSS before BNS
+        c = re.escape(code)
+        m = re.search(rf"\b{c}\b[\s.]*(?:section|s\.?)?\s*(\d+[A-Za-z]?)", note, re.IGNORECASE)
+        if m:
+            return (code, m.group(1))
+    return None
+
+
 # --------------------------------------------------------------------------- #
 class RAGService:
     def __init__(
@@ -247,8 +297,9 @@ class RAGService:
         if not results or (top_score is not None and top_score < self._abstain_threshold):
             return self._abstain(query, results, started)
 
-        # Phase 2: ensure current BNS law is in context for any repealed IPC hit.
-        results = self._expand_current_law(results)
+        # Phase 2: ensure current law (BNS/BNSS/BSA) is in context for any repealed
+        # reference in the question or the retrieved sources, so we can lead with it.
+        results = self._expand_current_law(results, query)
         ordered = _order_for_context(results)
 
         context = _format_context(ordered[:_CONTEXT_CHUNKS])
@@ -267,13 +318,20 @@ class RAGService:
         llm_confidence = _stringify(raw.get("confidence")).lower() or "?"
         confidence = _enforce_confidence(reasoning, answer)
 
+        # Deterministic current-law correction: the small model often headlines the
+        # repealed section it read (e.g. CrPC 154 from an FIR guide) instead of the
+        # successor in force. If the cited repealed section has a verified 1:1 successor
+        # present in context, rewrite the headline citation to that current section — the
+        # engine's promise (lead with law in force), enforced not left to the LLM.
+        law_reference = self._prefer_current_reference(law_reference, ordered)
+
         # Phase 2: hallucination gate — did the LLM cite a section we actually retrieved?
         citation_verified = _verify_citation(law_reference, ordered)
         if not citation_verified:
             logger.warning("Citation unverified: %r not in retrieved sources — downgrading.", law_reference)
             confidence = "low"
 
-        current_law_note = self._current_law_note(ordered)
+        current_law_note = self._current_law_note(ordered, query)
         citations = self._dedupe_citations(ordered)
         escalation = (
             LEGAL_AID_ESCALATION if (confidence == "low" or not citation_verified) else None
@@ -306,58 +364,119 @@ class RAGService:
     # ------------------------------------------------------------------ #
     # Phase 2 helpers
     # ------------------------------------------------------------------ #
-    def _expand_current_law(self, results: list[RetrievedChunk]) -> list[RetrievedChunk]:
-        """Pull the current successor chunk (BNS/BNSS/BSA) for any retrieved repealed
-        section (IPC/CrPC/IEA) that isn't already represented, so the answer can lead
-        with law in force. Best-effort: a lookup failure leaves results unchanged."""
+    @staticmethod
+    def _collect_repealed_refs(
+        results: list[RetrievedChunk], query: str, from_codes: list[str]
+    ) -> list[tuple[str, str]]:
+        """Ordered repealed (code, base-section) references to bridge to current law —
+        gathered from the QUESTION, from retrieved repealed statutes (by metadata), and
+        from the text of retrieved guides/QA (so a CrPC-only guide still routes to BNSS).
+        Query refs lead, then refs in retrieval order."""
+        fc = set(from_codes)
+        refs: list[tuple[str, str]] = []
+
+        def add(items: list[tuple[str, str]]) -> None:
+            for code, sec in items:
+                ref = (code, _base_num(sec))
+                if ref[1] and ref not in refs:
+                    refs.append(ref)
+
+        add(_scan_repealed_refs(query, from_codes))
+        for rc in results:
+            c = rc.chunk
+            if c.act in fc and c.section:           # retrieved repealed statute (trust its metadata)
+                add([(c.act, c.section)])
+            else:                                    # guide / QA / judgment — scan the prose
+                add(_scan_repealed_refs(f"{c.text} {c.title or ''}", from_codes))
+        return refs
+
+    def _expand_current_law(self, results: list[RetrievedChunk], query: str) -> list[RetrievedChunk]:
+        """Pull the current successor chunk (BNS/BNSS/BSA) for any repealed section
+        (IPC/CrPC/IEA) referenced by the question or the retrieved sources, so the answer
+        can LEAD with — and verifiably cite — law in force. For a repealed section with no
+        1:1 successor (e.g. sedition, IPC 124A) we fall back to the current provision named
+        in the mapping note (BNS 152). Best-effort: a failure leaves results unchanged."""
         try:
             from app.rag.law_map import LawMap
             from app.rag.vector_store import VectorStore
 
             law_map = LawMap.instance()
-            from_codes = set(law_map.from_codes())
-            present = {(rc.chunk.act, _base_num(rc.chunk.section or "")) for rc in results}
-            # Group wanted successor sections by their current code (BNS/BNSS/BSA).
-            wanted: dict[str, set[str]] = {}
-            for rc in results:
-                c = rc.chunk
-                if c.act in from_codes and c.code_status == "repealed" and c.section:
-                    entry = law_map.successor(c.act, c.section)
-                    if entry and entry.get("new"):
-                        # Fetch by BASE section ("318"), since the bare-act index is keyed by
-                        # base section, not the mapping's subsection token ("318(4)").
-                        to_code, new_base = entry["to_code"], _base_num(entry["new"])
-                        if new_base and (to_code, new_base) not in present:
-                            wanted.setdefault(to_code, set()).add(new_base)
-            if not wanted:
+            from_codes = list(law_map.from_codes())
+            to_codes = list(law_map.to_codes())
+            refs = self._collect_repealed_refs(results, query, from_codes)
+            if not refs:
                 return results
+
+            present = {(rc.chunk.act, _base_num(rc.chunk.section or "")) for rc in results}
+            wanted: dict[str, set[str]] = {}  # current code -> base sections to pull
+            for code, sec in refs:
+                entry = law_map.successor(code, sec)
+                if not entry:
+                    continue
+                if entry.get("new"):
+                    # Fetch by BASE section ("173"); the bare-act index is keyed by base,
+                    # not the mapping's subsection token ("173(1)(ii)").
+                    target = (entry["to_code"], _base_num(entry["new"]))
+                else:
+                    nb = _current_ref_in_note(entry.get("note", ""), to_codes)
+                    if not nb:
+                        continue
+                    target = (nb[0], _base_num(nb[1]))
+                if target[1] and target not in present:
+                    wanted.setdefault(target[0], set()).add(target[1])
 
             added = 0
             for to_code, sections in wanted.items():
+                if added >= _MAX_EXPANSION:
+                    break
                 extra = VectorStore.instance().fetch_by_reference(act=to_code, sections=sorted(sections))
                 for chunk in extra:
+                    if added >= _MAX_EXPANSION:
+                        break
                     results.append(RetrievedChunk(chunk=chunk, score=0.0))
-                added += len(extra)
+                    added += 1
             if added:
-                logger.info("Cross-ref expansion added %d current-law chunk(s)", added)
+                logger.info("Cross-ref expansion added %d current-law chunk(s) from %d ref(s)", added, len(refs))
         except Exception as e:  # never let expansion break a query
             logger.warning("Current-law expansion skipped: %s", e)
         return results
 
-    def _current_law_note(self, results: list[RetrievedChunk]) -> str | None:
-        """Bridge the top repealed section (IPC/CrPC/IEA) to its current successor, with a caveat."""
+    @staticmethod
+    def _prefer_current_reference(law_reference: str, ordered: list[RetrievedChunk]) -> str:
+        """Rewrite a repealed headline citation to its current successor when that
+        successor is present in context (so it's verifiable). Only acts on a genuine 1:1
+        successor — a repealed section with no direct equivalent (e.g. sedition, IPC 124A)
+        is left as-is for the gate to flag, since claiming a successor would mislead."""
         from app.rag.law_map import LawMap
 
         law_map = LawMap.instance()
-        from_codes = set(law_map.from_codes())
-        for rc in results:
-            c = rc.chunk
-            if c.act in from_codes and c.section:
-                note = law_map.current_reference_note(c.act, c.section)
-                if note:
-                    if not law_map.verified_for(c.act):
-                        note += " (Mapping is indicative — confirm against the official bare act.)"
-                    return note
+        refs = _scan_repealed_refs(law_reference, list(law_map.from_codes()))
+        if not refs:
+            return law_reference
+        code, sec = refs[0]
+        entry = law_map.successor(code, sec)
+        if not (entry and entry.get("new")):
+            return law_reference
+        to_code, new_base = entry["to_code"], _base_num(entry["new"])
+        present = {(rc.chunk.act, _base_num(rc.chunk.section or "")) for rc in ordered}
+        if new_base and (to_code, new_base) in present:
+            new_label = f"{to_code} Section {new_base}"
+            logger.info("Current-law correction: headline %r -> %r", law_reference, new_label)
+            return new_label
+        return law_reference
+
+    def _current_law_note(self, results: list[RetrievedChunk], query: str) -> str | None:
+        """Bridge the first repealed section referenced (by the question or the retrieved
+        sources) to its current successor, with a caveat when the map is unverified."""
+        from app.rag.law_map import LawMap
+
+        law_map = LawMap.instance()
+        for code, sec in self._collect_repealed_refs(results, query, list(law_map.from_codes())):
+            note = law_map.current_reference_note(code, sec)
+            if note:
+                if not law_map.verified_for(code):
+                    note += " (Mapping is indicative — confirm against the official bare act.)"
+                return note
         return None
 
     @staticmethod

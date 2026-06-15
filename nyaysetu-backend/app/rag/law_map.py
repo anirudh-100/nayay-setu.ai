@@ -151,6 +151,10 @@ class LawMap:
         """Repealed codes that have a successor map, e.g. ['IPC', 'CrPC', 'IEA']."""
         return [m.from_code for m in self._maps.values()]
 
+    def to_codes(self) -> list[str]:
+        """Current codes a map points to, e.g. ['BNS', 'BNSS', 'BSA']."""
+        return list({m.to_code for m in self._maps.values()})
+
     def successor(self, from_code: str, section: str) -> Optional[dict]:
         """Return {new, to_code, offence, note} for an old section, or None.
 
