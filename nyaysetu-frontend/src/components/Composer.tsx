@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 interface ComposerProps {
   onSend: (text: string) => void;
   onAttach: (file: File) => void;
-  onOpenRti: () => void;
+  onOpenDraft: () => void;
   loading: boolean;
   showExamples: boolean;
 }
@@ -16,7 +16,7 @@ interface ComposerProps {
 // File types the backend's /analyze/file endpoint can extract text from.
 const ACCEPT = ".pdf,.txt,.md,.markdown,.text";
 
-export function Composer({ onSend, onAttach, onOpenRti, loading, showExamples }: ComposerProps) {
+export function Composer({ onSend, onAttach, onOpenDraft, loading, showExamples }: ComposerProps) {
   const { t, dict } = useI18n();
   const [value, setValue] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -72,10 +72,10 @@ export function Composer({ onSend, onAttach, onOpenRti, loading, showExamples }:
         />
         <button
           type="button"
-          onClick={onOpenRti}
+          onClick={onOpenDraft}
           disabled={loading}
-          aria-label={t("rtiLaunch")}
-          title={t("rtiLaunch")}
+          aria-label={t("draftLaunch")}
+          title={t("draftLaunch")}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted transition-colors hover:bg-primary-soft/30 hover:text-primary disabled:opacity-50"
         >
           <ScrollText size={18} aria-hidden />

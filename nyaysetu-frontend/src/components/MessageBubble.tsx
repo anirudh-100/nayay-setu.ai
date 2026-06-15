@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import type { ChatMessage } from "@/lib/types";
 import { AnswerCard } from "./AnswerCard";
 import { DocumentCard } from "./DocumentCard";
-import { RtiCard } from "./RtiCard";
+import { DraftCard } from "./DraftCard";
 
 function Thinking({ label }: { label: string }) {
   return (
@@ -54,8 +54,8 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
             label={
               message.analysisPending
                 ? t("analyzingDoc")
-                : message.rtiPending
-                ? t("rtiDrafting")
+                : message.draftPending
+                ? t("draftDrafting")
                 : t("thinking")
             }
           />
@@ -63,8 +63,8 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
           <ErrorBubble message={message.error} />
         ) : message.analysis ? (
           <DocumentCard analysis={message.analysis} />
-        ) : message.rti ? (
-          <RtiCard rti={message.rti} />
+        ) : message.draft ? (
+          <DraftCard draft={message.draft} />
         ) : message.response ? (
           <AnswerCard response={message.response} />
         ) : null}
