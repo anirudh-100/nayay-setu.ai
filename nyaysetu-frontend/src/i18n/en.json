@@ -5,11 +5,25 @@
   "welcomeBody": "Get clear answers with the exact sections they come from. This is legal information to help you understand your situation — not a substitute for a lawyer.",
   "examples": [
     "What is the punishment for cheating under IPC 420?",
-    "My husband's family is harassing me for dowry — what law applies?",
-    "Someone is threatening to hurt me. What can I do?",
-    "What is the punishment for theft?"
+    "How do I file an FIR, and what if the police refuse?",
+    "My in-laws are harassing me for dowry — what law applies?",
+    "Can I be denied a government job for a small mistake in my form?"
   ],
   "examplesLabel": "Try asking",
+  "home": {
+    "ask": {
+      "title": "Ask a legal question",
+      "body": "Get a clear answer cited to current law (BNS / BNSS / BSA) and Supreme Court judgments."
+    },
+    "understand": {
+      "title": "Understand a document",
+      "body": "Upload an FIR, notice, or agreement — get it explained in plain words, with any deadlines."
+    },
+    "draft": {
+      "title": "Draft a letter or complaint",
+      "body": "RTI, consumer complaint, or police complaint — drafted and ready to file."
+    }
+  },
   "placeholder": "Ask your legal question…",
   "send": "Ask",
   "attachDocument": "Analyze a document (PDF or text)",

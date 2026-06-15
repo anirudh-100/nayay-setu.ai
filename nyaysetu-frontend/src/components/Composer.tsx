@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type RefObject } from "react";
 import { ArrowUp, Paperclip, ScrollText } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/cn";
@@ -9,6 +9,8 @@ interface ComposerProps {
   onSend: (text: string) => void;
   onAttach: (file: File) => void;
   onOpenDraft: () => void;
+  // Lifted from ChatApp so the home screen's "Ask" card can focus the input.
+  inputRef: RefObject<HTMLTextAreaElement>;
   loading: boolean;
   showExamples: boolean;
 }
@@ -16,10 +18,10 @@ interface ComposerProps {
 // File types the backend's /analyze/file endpoint can extract text from.
 const ACCEPT = ".pdf,.txt,.md,.markdown,.text";
 
-export function Composer({ onSend, onAttach, onOpenDraft, loading, showExamples }: ComposerProps) {
+export function Composer({ onSend, onAttach, onOpenDraft, inputRef, loading, showExamples }: ComposerProps) {
   const { t, dict } = useI18n();
   const [value, setValue] = useState("");
-  const taRef = useRef<HTMLTextAreaElement>(null);
+  const taRef = inputRef;
   const fileRef = useRef<HTMLInputElement>(null);
 
   const submit = (text: string) => {
