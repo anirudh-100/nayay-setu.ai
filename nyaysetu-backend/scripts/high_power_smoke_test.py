@@ -97,12 +97,18 @@ def main() -> int:
     check("used configured model", c._client.messages.last_kwargs.get("model") == "claude-opus-4-8")
 
     # --- Missing key fails loudly ---
+    # Hermetic: clear any ambient key from .env so the empty-key path is actually exercised
+    # (ClaudeClient(api_key="") otherwise falls back to settings.anthropic_api_key).
     print("\nMissing API key:")
+    _saved_key = settings.anthropic_api_key
+    settings.anthropic_api_key = ""
     try:
         ClaudeClient(api_key="").generate_json("x")
         check("raises LLMError without key", False)
     except LLMError as e:
         check("raises LLMError without key", "ANTHROPIC_API_KEY" in str(e))
+    finally:
+        settings.anthropic_api_key = _saved_key
 
     # --- Non-JSON response is caught ---
     print("\nMalformed response:")
