@@ -209,7 +209,11 @@ def _verify_citation(law_reference: str, results: list[RetrievedChunk]) -> bool:
     if not ref or any(g in ref for g in _GENERIC_REFS) or "article" in ref:
         return True
 
-    cited = {_base_num(t) for t in _NUM_RE.findall(ref)}
+    # Normalize section tokens to a single case: a cited "124A" must match a retrieved
+    # "124A" even though ``ref`` was lower-cased above. Extract from the original
+    # reference and upper-case both sides so letter-suffix sections (124A, 304B, 326A,
+    # 376D, …) aren't falsely flagged unverified.
+    cited = {_base_num(t).upper() for t in _NUM_RE.findall(law_reference)}
     cited.discard("")
     if not cited:
         return True
@@ -217,9 +221,9 @@ def _verify_citation(law_reference: str, results: list[RetrievedChunk]) -> bool:
     available: set[str] = set()
     for rc in results:
         if rc.chunk.section:
-            available.add(_base_num(rc.chunk.section))
+            available.add(_base_num(rc.chunk.section).upper())
         if rc.chunk.article:
-            available.add(_base_num(rc.chunk.article))
+            available.add(_base_num(rc.chunk.article).upper())
 
     return bool(cited & available)
 
