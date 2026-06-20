@@ -100,6 +100,10 @@ class ClaudeClient:
         self._api_key = api_key or settings.anthropic_api_key
         self._model = model or settings.high_power_model
         self._timeout = timeout_s or settings.anthropic_timeout_s
+        # Adaptive thinking lifts answer quality but is Opus-family-only; smaller tiers
+        # (Haiku, some Sonnet) reject it. Start from config, then auto-disable on the
+        # first model that refuses it so any tier "just works".
+        self._use_thinking = (settings.anthropic_thinking or "adaptive").strip().lower() == "adaptive"
         self._client = None  # lazy
 
     def _ensure_client(self):
@@ -120,17 +124,31 @@ class ClaudeClient:
         if not self._api_key:
             logger.warning("llm_provider=claude but ANTHROPIC_API_KEY is empty — /ask will fail until it's set.")
 
+    def _create(self, client, prompt: str):
+        """Call the Messages API, retrying once without thinking if the model rejects it."""
+        kwargs = dict(
+            model=self._model,
+            max_tokens=8000,
+            system="You are a precise legal-information assistant for India. Return ONLY the JSON "
+                   "object the user's instructions ask for — no markdown fences, no prose around it.",
+            messages=[{"role": "user", "content": prompt}],
+        )
+        if self._use_thinking:
+            kwargs["thinking"] = {"type": "adaptive"}
+        try:
+            return client.messages.create(**kwargs)
+        except Exception as e:
+            if self._use_thinking and "thinking" in str(e).lower():
+                logger.info("Model %s rejects adaptive thinking — disabling it for this engine.", self._model)
+                self._use_thinking = False
+                kwargs.pop("thinking", None)
+                return client.messages.create(**kwargs)  # one clean retry; let errors propagate
+            raise
+
     def generate_json(self, prompt: str) -> dict:
         client = self._ensure_client()
         try:
-            resp = client.messages.create(
-                model=self._model,
-                max_tokens=8000,
-                system="You are a precise legal-information assistant for India. Return ONLY the JSON "
-                       "object the user's instructions ask for — no markdown fences, no prose around it.",
-                thinking={"type": "adaptive"},
-                messages=[{"role": "user", "content": prompt}],
-            )
+            resp = self._create(client, prompt)
         except LLMError:
             raise
         except Exception as e:  # anthropic.APIError etc. — keep the route's friendly 502 path

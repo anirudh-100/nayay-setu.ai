@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     # Opus 4.8 is the most capable tier — best for nuanced, current Indian law.
     high_power_model: str = "claude-opus-4-8"
     anthropic_timeout_s: int = 120
+    # Adaptive thinking (Opus-family only) improves answer quality. Leave "adaptive";
+    # the client auto-disables it for tiers that reject it (e.g. Haiku). Set to "off"
+    # to never send it.
+    anthropic_thinking: str = "adaptive"
 
     # --- Messaging channels (Pillar 4, OFF by default) ---
     # How replies are delivered: "console" (local, logs only, nothing sent) or
