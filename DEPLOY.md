@@ -72,10 +72,16 @@ That URL is your `INDEX_URL`.
    |---|---|---|
    | `ANTHROPIC_API_KEY` | secret | `sk-ant-...` |
    | `LLM_PROVIDER` | variable | `claude` |
+   | `HIGH_POWER_MODEL` | variable | `claude-haiku-4-5` |
    | `INDEX_URL` | variable | the Release URL from Step 0 |
    | `RATE_LIMIT_PER_MIN` | variable | `20` |
    | `APP_ENV` | variable | `production` |
    | `CORS_ORIGINS` | variable | *(fill in after Step 2 with the Vercel URL)* |
+
+   **Engine choice:** `claude-haiku-4-5` is the recommended default — it hit the same
+   13/13 trust-clean bar as Opus in testing at ~5–10× lower cost, the right trade-off
+   for a free, at-scale tool. For maximum citation polish on hard queries, set
+   `HIGH_POWER_MODEL=claude-opus-4-8` instead (same code; no other change).
 4. The Space builds (first build pulls torch + caches the models; a few minutes), then
    boots and downloads the index. Verify:
    `https://<you>-nyaysetu-api.hf.space/health` → `{"status":"ok"}`, then try `/ask`.
