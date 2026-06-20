@@ -1,0 +1,20 @@
+# Root build context (Railway/PaaS building the root Dockerfile = the backend).
+# Keep the context small: the backend image needs only nyaysetu-backend/ (minus its
+# venv + the index, which is fetched at boot via INDEX_URL).
+.git/
+nyaysetu-frontend/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.venv/
+nyaysetu-backend/.venv/
+nyaysetu-backend/models/
+**/.env
+.env
+.env.*
+!**/.env.example
+*.output
+MORNING_REPORT.md
+.vscode/
+.idea/
