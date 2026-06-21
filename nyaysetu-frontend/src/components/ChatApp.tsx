@@ -131,8 +131,12 @@ export function ChatApp() {
           />
         ) : (
           <div className="flex-1 space-y-4 py-5">
-            {messages.map((m) => (
-              <MessageBubble key={m.id} message={m} />
+            {messages.map((m, i) => (
+              <MessageBubble
+                key={m.id}
+                message={m}
+                question={messages[i - 1]?.role === "user" ? messages[i - 1].text : undefined}
+              />
             ))}
             <div ref={bottomRef} />
           </div>

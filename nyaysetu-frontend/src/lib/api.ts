@@ -38,6 +38,24 @@ export async function askQuestion(query: string, language: string): Promise<AskR
   return (await res.json()) as AskResponse;
 }
 
+/** POST /feedback — record a thumbs up/down on an answer. Best-effort: never blocks the UI. */
+export async function sendFeedback(payload: {
+  verdict: "up" | "down";
+  query?: string;
+  law_reference?: string;
+  language?: string;
+}): Promise<void> {
+  try {
+    await fetch(`${API_URL}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    /* feedback is non-critical — swallow errors */
+  }
+}
+
 /** POST /analyze/file — upload a document (PDF/.txt/.md), get a structured analysis. */
 export async function analyzeFile(
   file: File,
