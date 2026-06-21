@@ -30,6 +30,11 @@ DRAFT_DISCLAIMER = (
     "confirm the details (fee, exact office/forum, and any local rules) before using it. "
     "It is informational, not legal advice."
 )
+DRAFT_DISCLAIMER_HI = (
+    "यह आपकी अपनी मदद के लिए एक मसौदा है — उपयोग से पहले इसे ध्यान से पढ़ें, रिक्त स्थान भरें, "
+    "और विवरण (शुल्क, सही कार्यालय/मंच, और स्थानीय नियम) की पुष्टि कर लें। यह केवल जानकारी है, "
+    "कानूनी सलाह नहीं।"
+)
 
 
 class FieldOption(BaseModel):
