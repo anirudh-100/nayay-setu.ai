@@ -28,6 +28,25 @@ def _present() -> bool:
     return settings.qdrant_path.exists() and settings.bm25_file.exists()
 
 
+def _extract_normalized(zf: zipfile.ZipFile, dest: Path) -> None:
+    """Extract a zip, normalizing path separators.
+
+    PowerShell's Compress-Archive writes entry names with BACKSLASHES
+    (``qdrant\\meta.json``); ``extractall`` on Linux would then create flat files with
+    literal backslashes instead of a directory tree, so Qdrant finds no collection. We
+    rewrite '\\'->'/' and stream each file into the right place. Stray ``.lock`` files
+    are skipped (Qdrant makes its own)."""
+    for info in zf.infolist():
+        rel = info.filename.replace("\\", "/").lstrip("/")
+        if not rel or rel.endswith("/"):
+            continue  # directory entry
+        if rel.rsplit("/", 1)[-1] == ".lock":
+            continue  # don't carry over a stale lock file
+        target = dest / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(zf.read(info))
+
+
 def ensure_index() -> bool:
     """Make sure a usable index exists locally. Returns True if one is present
     (already, or after a successful download); False if it couldn't be provisioned."""
@@ -56,7 +75,7 @@ def ensure_index() -> bool:
                 buf.write(chunk)
         buf.seek(0)
         with zipfile.ZipFile(buf) as zf:
-            zf.extractall(index_dir)
+            _extract_normalized(zf, index_dir)
     except Exception:
         logger.exception("Failed to download/extract the index from %s", url)
         return False

@@ -99,10 +99,49 @@ def test_index_bootstrap() -> None:
         shutil.rmtree(work, ignore_errors=True)
 
 
+def test_index_bootstrap_backslash() -> None:
+    """Regression: a zip whose entries use Windows backslash separators (what PowerShell's
+    Compress-Archive produces) must still unpack into a real directory tree on Linux —
+    not flat files named 'qdrant\\meta.json' (which leaves Qdrant with no collection)."""
+    print("\nIndex bootstrap (Windows-backslash zip -> proper tree):")
+    work = Path(tempfile.mkdtemp(prefix="nyay-deploy-bs-"))
+    try:
+        zpath = work / "nyaysetu-index.zip"
+        with zipfile.ZipFile(zpath, "w") as z:
+            # Backslash arcnames, exactly as Compress-Archive writes them.
+            z.writestr("qdrant\\meta.json", b"{}")
+            z.writestr("qdrant\\collection\\nyaysetu_chunks\\storage.sqlite", b"data")
+            z.writestr("qdrant\\.lock", b"")  # stray lock should be dropped
+            z.writestr("bm25.pkl", b"bm25")
+
+        handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(work))
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        port = srv.server_address[1]
+
+        target = work / "index"
+        orig_dir, orig_url = settings.index_dir, settings.index_url
+        settings.index_dir = target
+        settings.index_url = f"http://127.0.0.1:{port}/nyaysetu-index.zip"
+        try:
+            check("ensure_index() returned True", ensure_index())
+            check("qdrant/ is a real dir", settings.qdrant_path.is_dir())
+            check("nested collection file reconstructed",
+                  (target / "qdrant" / "collection" / "nyaysetu_chunks" / "storage.sqlite").exists())
+            check("bm25.pkl reconstructed", settings.bm25_file.exists())
+            check("stray .lock dropped", not (target / "qdrant" / ".lock").exists())
+        finally:
+            settings.index_dir, settings.index_url = orig_dir, orig_url
+            srv.shutdown()
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
 def main() -> int:
     print("Deployment smoke test (offline)\n" + "=" * 64)
     test_rate_limiter()
     test_index_bootstrap()
+    test_index_bootstrap_backslash()
     print("=" * 64)
     print("ALL CHECKS PASSED" if _failures == 0 else f"{_failures} CHECK(S) FAILED")
     return 1 if _failures else 0
