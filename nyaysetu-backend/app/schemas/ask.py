@@ -58,6 +58,9 @@ class CaseAnalysis(BaseModel):
     """
     # Set in code (never from the LLM) so the "not a prediction" frame can't be dropped.
     outcome_framing: str = ""
+    # Grounded offence classification (cognizable/bailable/court) from the BNSS First
+    # Schedule, set in code for a single clearly-classified offence; "" otherwise.
+    classification: str = ""
     situation: list[str] = Field(default_factory=list)          # what the facts legally are
     applicable_law: list[str] = Field(default_factory=list)     # cited sections (current-first)
     what_happens_next: list[str] = Field(default_factory=list)  # BNSS process steps (grounded)

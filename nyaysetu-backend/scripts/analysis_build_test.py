@@ -136,5 +136,20 @@ check("non-BNSS section does not ground a process step",
       build({"what_happens_next": ["Step under Section 318."], "do_now": ["Keep records."]})
       .what_happens_next == [])
 
+# 14. Offence classification (BNSS First Schedule) — grounded, set in code, not the LLM.
+cls103 = svc._offence_classification("BNS Section 103", False)  # murder
+check("classification: murder (103) = cognizable/non-bailable/Sessions",
+      "cognizable" in cls103.lower() and "non-bailable" in cls103.lower() and "session" in cls103.lower())
+check("classification: theft (303) is conditional -> empty (suppressed)",
+      svc._offence_classification("BNS Section 303", False) == "")
+check("classification: non-BNS ref (Article 21) -> empty",
+      svc._offence_classification("Article 21", False) == "")
+check("classification: differing offences (103 + 318) -> empty (don't over-simplify)",
+      svc._offence_classification("BNS Section 103 and BNS Section 318", False) == "")
+check("classification: Hindi murder contains संज्ञेय",
+      "संज्ञेय" in svc._offence_classification("BNS Section 103", True))
+# 15. Classification flows into the built analysis for a single clear offence (318 cheating).
+check("analysis.classification set for single clear offence (318)", bool(a and a.classification))
+
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

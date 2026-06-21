@@ -20,6 +20,7 @@ export interface Citation {
 // strong, verified answer; each list may be empty (an empty list renders as hidden).
 export interface CaseAnalysis {
   outcome_framing: string;
+  classification: string;
   situation: string[];
   applicable_law: string[];
   what_happens_next: string[];

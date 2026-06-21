@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Info, AlertTriangle, ArrowRight, LifeBuoy, BookMarked, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Info, AlertTriangle, ArrowRight, LifeBuoy, BookMarked, Scale, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { sendFeedback } from "@/lib/api";
 import type { AskResponse } from "@/lib/types";
@@ -114,6 +114,18 @@ export function AnswerCard({ response, question }: { response: AskResponse; ques
           <AnalysisList label={t("situationLabel")} items={response.analysis.situation} />
           <AnalysisList label={t("doNowLabel")} items={response.analysis.do_now} tone="info" />
           <AnalysisList label={t("applicableLawLabel")} items={response.analysis.applicable_law} />
+          {/* Grounded offence classification (BNSS First Schedule) — only when unambiguous */}
+          {response.analysis.classification && (
+            <div className="flex gap-2 rounded-xl border border-border bg-bg p-3 text-sm text-ink">
+              <Scale size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  {t("classificationLabel")}
+                </p>
+                <p className="mt-0.5 leading-relaxed">{response.analysis.classification}</p>
+              </div>
+            </div>
+          )}
           <AnalysisList
             label={t("whatHappensNextLabel")}
             items={response.analysis.what_happens_next}

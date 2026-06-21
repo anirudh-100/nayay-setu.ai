@@ -590,6 +590,30 @@ class RAGService:
             return []
 
     # ------------------------------------------------------------------ #
+    @staticmethod
+    def _offence_classification(law_reference: str, hindi: bool) -> str:
+        """A grounded one-line offence classification (BNSS First Schedule) for the
+        headline — only when EVERY cited BNS section resolves to the SAME unambiguous
+        classification. "" otherwise (no BNS section, no entry, or differing classes
+        across multiple cited offences — never over-simplify)."""
+        try:
+            secs = re.findall(
+                r"\bBNS\b\s*(?:Section|Sec\.?|S\.?)?\s*(\d+[A-Za-z]?)", law_reference or "", re.IGNORECASE
+            )
+            if not secs:
+                return ""
+            from app.rag.offence_classification import OffenceClassification
+
+            oc = OffenceClassification.instance()
+            descs = [oc.describe(s, hindi) for s in secs]
+            if descs and all(d and d == descs[0] for d in descs):
+                return descs[0]
+            return ""
+        except Exception as e:
+            logger.warning("Offence classification skipped: %s", e)
+            return ""
+
+    # ------------------------------------------------------------------ #
     def _build_analysis(
         self,
         raw_analysis: object,
@@ -675,8 +699,11 @@ class RAGService:
             if not any([situation, applicable_law, what_happens_next, do_now, also_possible, for_your_advocate]):
                 return None  # nothing survived scrubbing → fall back to the plain card
 
+            classification = self._offence_classification(law_reference, hindi)
+
             return CaseAnalysis(
                 outcome_framing=_OUTCOME_FRAMING_HI if hindi else _OUTCOME_FRAMING,
+                classification=classification,
                 situation=situation,
                 applicable_law=applicable_law,
                 what_happens_next=what_happens_next,
