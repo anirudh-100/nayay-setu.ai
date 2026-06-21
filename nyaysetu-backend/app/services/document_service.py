@@ -22,10 +22,17 @@ from typing import Optional
 from app.rag.models import Citation, RetrievedChunk
 from app.rag.retriever import HybridRetriever
 from app.schemas.analyze import AnalyzeResponse
-from app.schemas.ask import DISCLAIMER, LEGAL_AID_ESCALATION, Confidence
+from app.schemas.ask import (
+    DISCLAIMER,
+    DISCLAIMER_HI,
+    LEGAL_AID_ESCALATION,
+    LEGAL_AID_ESCALATION_HI,
+    Confidence,
+)
 from app.services.llm_service import OllamaClient, get_llm
 from app.services.rag_service import (
     _format_context,
+    _is_hindi,
     _order_for_context,
     _stringify,
     _verify_citation,
@@ -40,6 +47,15 @@ _MAX_CITATIONS = 5
 # embedder truncates internally, but we cap the prompt to keep latency/cost bounded.
 _PROMPT_DOC_CHARS = 6000
 _QUERY_DOC_CHARS = 2000
+
+# Appended to the prompt when the user is working in Hindi — same trust rules, Hindi prose.
+_HINDI_DOC_INSTRUCTION = """
+---
+LANGUAGE — RESPOND IN HINDI:
+Write "document_type", "summary", each "key_points" item, and "action" in simple, clear Hindi (Devanagari).
+Keep "law_references" precise and in standard English form (e.g. "BNS Section 318"). Quote any dates/numbers
+from the document exactly as they appear (they may stay as-is in "deadlines").
+"""
 
 
 PROMPT_TEMPLATE = """You are an AI legal assistant for India. A person has shared a legal document they received and wants to understand it in plain language.
@@ -107,6 +123,9 @@ class DocumentService:
     def analyze(self, document_text: str, question: str | None = None, language: str = "en") -> AnalyzeResponse:
         started = time.perf_counter()
         document_text = document_text.strip()
+        # The user's chosen language (or a Devanagari question) drives the explanation
+        # language — the document itself is often English even when the reader is not.
+        hindi = _is_hindi(language, question or "")
 
         # 1. Retrieve the law most relevant to the document (and the user's question).
         query = f"{question or ''} {document_text[:_QUERY_DOC_CHARS]}".strip()
@@ -121,15 +140,19 @@ class DocumentService:
             question_block=question_block,
             context=context,
         )
+        if hindi:
+            prompt += _HINDI_DOC_INSTRUCTION
         raw = self._llm.generate_json(prompt)
 
-        document_type = _stringify(raw.get("document_type")) or "Legal document"
+        document_type = _stringify(raw.get("document_type")) or ("कानूनी दस्तावेज़" if hindi else "Legal document")
         summary = _stringify(raw.get("summary")) or (
+            "यह एक कानूनी दस्तावेज़ प्रतीत होता है। दिए गए पाठ से मैं इसे पूरी तरह वर्गीकृत नहीं कर सका।" if hindi else
             "This appears to be a legal document. I couldn't fully classify it from the text provided."
         )
         key_points = _stringify_list(raw.get("key_points"))
         deadlines = _stringify_list(raw.get("deadlines"))
         action = _stringify(raw.get("action")) or (
+            "अपने विकल्पों और किसी भी समय-सीमा को समझने के लिए किसी वकील या मुफ़्त कानूनी सहायता से सलाह लें।" if hindi else
             "Consider consulting a lawyer or free legal aid to understand your options and any time limits."
         )
         law_references = _stringify_list(raw.get("law_references"))
@@ -149,9 +172,11 @@ class DocumentService:
         else:
             confidence = "medium"
 
-        current_law_note = self._current_law_note(ordered)
+        current_law_note = self._current_law_note(ordered, hindi)
         citations = self._dedupe_citations(ordered)
-        escalation = LEGAL_AID_ESCALATION if (confidence == "low" or not citation_verified) else None
+        escalation = None
+        if confidence == "low" or not citation_verified:
+            escalation = LEGAL_AID_ESCALATION_HI if hindi else LEGAL_AID_ESCALATION
 
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         logger.info(
@@ -175,12 +200,12 @@ class DocumentService:
             citation_verified=citation_verified,
             abstained=False,
             escalation=escalation,
-            disclaimer=DISCLAIMER,
+            disclaimer=DISCLAIMER_HI if hindi else DISCLAIMER,
             response_time_ms=elapsed_ms,
         )
 
     # ------------------------------------------------------------------ #
-    def _current_law_note(self, results: list[RetrievedChunk]) -> Optional[str]:
+    def _current_law_note(self, results: list[RetrievedChunk], hindi: bool = False) -> Optional[str]:
         """Bridge the top repealed section (IPC/CrPC/IEA) to its current successor."""
         from app.rag.law_map import LawMap
 
@@ -189,10 +214,13 @@ class DocumentService:
         for rc in results:
             c = rc.chunk
             if c.act in from_codes and c.section:
-                note = law_map.current_reference_note(c.act, c.section)
+                note = law_map.current_reference_note(c.act, c.section, hindi=hindi)
                 if note:
                     if not law_map.verified_for(c.act):
-                        note += " (Mapping is indicative — confirm against the official bare act.)"
+                        note += (
+                            " (यह मानचित्रण सांकेतिक है — आधिकारिक मूल अधिनियम से पुष्टि करें।)" if hindi
+                            else " (Mapping is indicative — confirm against the official bare act.)"
+                        )
                     return note
         return None
 
