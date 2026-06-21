@@ -1,13 +1,22 @@
 "use client";
 
-import { Info, AlertTriangle, ArrowRight, LifeBuoy, BookMarked } from "lucide-react";
+import { useState } from "react";
+import { Info, AlertTriangle, ArrowRight, LifeBuoy, BookMarked, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { sendFeedback } from "@/lib/api";
 import type { AskResponse } from "@/lib/types";
 import { ConfidenceBadge } from "./ConfidenceBadge";
 import { CitationCard } from "./CitationCard";
 
-export function AnswerCard({ response }: { response: AskResponse }) {
-  const { t } = useI18n();
+export function AnswerCard({ response, question }: { response: AskResponse; question?: string }) {
+  const { t, locale } = useI18n();
+  const [voted, setVoted] = useState<null | "up" | "down">(null);
+
+  const vote = (verdict: "up" | "down") => {
+    if (voted) return;
+    setVoted(verdict);
+    sendFeedback({ verdict, query: question, law_reference: response.law_reference, language: locale });
+  };
 
   return (
     <div className="animate-fade-up rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-5">
@@ -83,8 +92,33 @@ export function AnswerCard({ response }: { response: AskResponse }) {
         </div>
       )}
 
+      {/* Feedback */}
+      <div className="mt-4 flex items-center gap-2 border-t border-border pt-3">
+        {voted ? (
+          <span className="text-xs text-muted">{t("feedbackThanks")}</span>
+        ) : (
+          <>
+            <span className="text-xs text-muted">{t("feedbackPrompt")}</span>
+            <button
+              onClick={() => vote("up")}
+              aria-label={t("feedbackUp")}
+              className="rounded-full border border-border p-1.5 text-muted transition-colors hover:text-primary"
+            >
+              <ThumbsUp size={14} aria-hidden />
+            </button>
+            <button
+              onClick={() => vote("down")}
+              aria-label={t("feedbackDown")}
+              className="rounded-full border border-border p-1.5 text-muted transition-colors hover:text-danger"
+            >
+              <ThumbsDown size={14} aria-hidden />
+            </button>
+          </>
+        )}
+      </div>
+
       {/* Disclaimer */}
-      <p className="mt-4 border-t border-border pt-3 text-xs leading-relaxed text-muted">
+      <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted">
         <span className="font-medium">{t("disclaimerLabel")}:</span> {response.disclaimer}
       </p>
     </div>
