@@ -46,6 +46,26 @@ class ConversationTurn(BaseModel):
     content: str = Field(default="", max_length=4000)
 
 
+class CaseAnalysis(BaseModel):
+    """A structured, citizen-ordered breakdown of a described situation.
+
+    Built ONLY on a strong, citation-verified (Mode A / high-confidence) answer, and only
+    after deterministic server-side scrubbing keeps every claim inside the trust contract:
+    no outcome/verdict prediction, no ungrounded offence classification
+    (cognizable/bailable/…), and no invented case-law citations. Any weakness collapses
+    the whole block back to None — the citizen then sees today's honest single paragraph,
+    never an invented six-section skeleton. Empty lists render as hidden sections.
+    """
+    # Set in code (never from the LLM) so the "not a prediction" frame can't be dropped.
+    outcome_framing: str = ""
+    situation: list[str] = Field(default_factory=list)          # what the facts legally are
+    applicable_law: list[str] = Field(default_factory=list)     # cited sections (current-first)
+    what_happens_next: list[str] = Field(default_factory=list)  # BNSS process steps (grounded)
+    do_now: list[str] = Field(default_factory=list)             # calm, concrete next steps
+    also_possible: list[str] = Field(default_factory=list)      # impersonal possibilities
+    for_your_advocate: list[str] = Field(default_factory=list)  # research pointers (no precedents)
+
+
 class AskRequest(BaseModel):
     query: str = Field(..., min_length=3, max_length=2000)
     language: str = Field(default="en", max_length=8)
@@ -71,6 +91,9 @@ class AskResponse(BaseModel):
     # False when the answer cited a section that wasn't found in the retrieved sources
     # (a hallucination signal) — confidence is downgraded when this happens.
     citation_verified: bool = True
+    # Optional structured case-analysis (situation → law → process → options → advocate
+    # notes). Present only on a strong, verified answer; None means "show the plain card".
+    analysis: Optional[CaseAnalysis] = None
 
     disclaimer: str = DISCLAIMER
     response_time_ms: int

@@ -29,6 +29,7 @@ from app.schemas.ask import (
     LEGAL_AID_ESCALATION,
     LEGAL_AID_ESCALATION_HI,
     AskResponse,
+    CaseAnalysis,
     Confidence,
 )
 from app.services.llm_service import OllamaClient, get_llm
@@ -67,6 +68,9 @@ Write "answer" and "action" in simple, clear Hindi (Devanagari) an ordinary pers
 Keep every law reference precise and recognizable: code names in standard form (BNS, BNSS, BSA, IPC, CrPC, Article)
 and section numbers as digits (you may use "धारा" for "Section"). Set "law_reference" to the standard English form
 (e.g. "BNS Section 103"). Keep "reasoning" in English (begin "Used ..." or "No strong context ...").
+Also write the analysis arrays (situation, what_happens_next, do_now, also_possible, for_your_advocate) in simple Hindi.
+In applicable_law keep code names (BNS/BNSS/BSA/IPC/CrPC) and section numbers in standard English/digits.
+For also_possible, begin each item with "कानून अनुमति देता है…", "अदालत विचार कर सकती है…", या "यह अदालत तय करेगी कि…".
 """
 
 _ABSTAIN_ANSWER_HI = (
@@ -92,6 +96,92 @@ _SECTION_WORD = r"(?:section|sec\.?|s\.?)"
 _NUM_RE = re.compile(r"(\d+[A-Za-z]?)")
 # Generic law_reference values that name no specific section to verify.
 _GENERIC_REFS = ("general legal guidance", "general indian law", "general")
+
+# --------------------------------------------------------------------------- #
+# Case-analysis (situation → structured guidance) safety machinery.
+# The rich "analysis" block is built ONLY on a strong, citation-verified Mode-A answer
+# (see RAGService._build_analysis). Everything below is defence-in-depth *behind* the
+# prompt: deterministic scrubbers that keep every bullet inside the trust contract, so a
+# prompt slip can never surface an outcome prediction, an ungrounded offence label, or an
+# invented precedent to a citizen or their lawyer.
+# --------------------------------------------------------------------------- #
+_ANALYSIS_KEYS = (
+    "situation", "applicable_law", "what_happens_next", "do_now", "also_possible", "for_your_advocate",
+)
+_ANALYSIS_MAX_ITEMS = 8
+_ANALYSIS_MAX_LEN = 400
+
+# The mandatory frame rendered atop any analysis block — set in code, never from the LLM.
+_OUTCOME_FRAMING = (
+    "This explains what the law provides and what a court examines — not a prediction of your case."
+)
+_OUTCOME_FRAMING_HI = (
+    "यह बताता है कि कानून क्या प्रावधान देता है और अदालत किन बातों को देखती है — "
+    "यह आपके मामले के परिणाम की भविष्यवाणी नहीं है।"
+)
+
+# Offence-classification labels are NOT in our sources (the BNSS First Schedule isn't
+# ingested), so any such label in synthesised prose is ungrounded — strip the bullet.
+# Includes Hindi forms so a Devanagari bullet isn't silently exempt.
+_CLASSIFICATION_RE = re.compile(
+    r"\b(?:non[-\s]?)?cognizable\b|\b(?:non[-\s]?)?bailable\b|\b(?:non[-\s]?)?compoundable\b|\btriable\b"
+    r"|संज्ञेय|असंज्ञेय|ज़मानती|जमानती|गैर[-\s]?ज़मानती|गैर[-\s]?जमानती|शमनीय|असंज्ञेय",
+    re.IGNORECASE,
+)
+
+# Second-person / likelihood verdict phrasing — a de-facto outcome prediction. Dropped
+# wherever it appears (English and Hindi). Backstops the safe-stem allowlist below.
+_OUTCOME_PREDICTION_RE = re.compile(
+    r"\byou(?:'ll| will| are going to| can expect| should (?:get|win|receive)| have a good chance| are likely)\b"
+    r"|\byour (?:sentence|case is (?:strong|weak)|chances?)\b"
+    r"|\bgood chance\b|\bguaranteed\b|\blikely to (?:get|be|win|lose|receive)\b"
+    r"|\b(?:the )?accused will (?:be|get)\b"
+    r"|आपको\s+\S+\s*(?:मिलेगी|मिलेगा|मिल\s*जाएगी|मिल\s*जाएगा|होगी|होगा)"
+    r"|आप\s+\S*\s*(?:जाएंगे|जाएगा|बरी)"
+    r"|आपकी\s*सज़ा|आपका\s*मामला\s*(?:मजबूत|मज़बूत|कमज़ोर)|संभावना\s*है\s*कि\s*आप",
+    re.IGNORECASE,
+)
+
+# Case-citation shaped tokens. We have NO offence→precedent map, so no case may EVER be
+# named in advocate notes; a bullet that looks like it cites one is dropped.
+_PRECEDENT_RE = re.compile(
+    r"\bv\.?\s+[A-Z]\w|\bvs\.?\s+[A-Z]\w|\bSCC\b|\bS\.?\s?C\.?\s?R\.?\b|\bAIR\b|\b\d{4}\s*SCC\b",
+)
+
+# "also_possible" carries the highest outcome-prediction risk, so it is allowlisted: a
+# bullet survives only if it OPENS with an approved impersonal stem (EN or HI). Anything
+# that isn't framed as "the law / a court may…" is dropped rather than trusted.
+_SAFE_STEMS = (
+    "the law allows", "the law provides", "the law permits", "a court may", "a court can",
+    "a court decides", "a court would", "courts may", "whether ", "it may be possible",
+    "depending on the facts", "in some cases", "the code allows", "the statute provides",
+    "कानून अनुमति", "कानून के अनुसार", "कानून यह", "अदालत", "यह अदालत", "तथ्यों के आधार",
+    "कुछ मामलों", "हो सकता है", "संहिता",
+)
+
+
+def _available_sections(chunks: list[RetrievedChunk]) -> set[str]:
+    """Upper-cased base section/article numbers present in the given chunks (the same
+    notion of 'available' the citation gate uses), for per-bullet grounding checks."""
+    av: set[str] = set()
+    for rc in chunks:
+        if rc.chunk.section:
+            av.add(_base_num(rc.chunk.section).upper())
+        if rc.chunk.article:
+            av.add(_base_num(rc.chunk.article).upper())
+    av.discard("")
+    return av
+
+
+def _bnss_sections(chunks: list[RetrievedChunk]) -> set[str]:
+    """Base section numbers that belong specifically to BNSS chunks — so 'what happens
+    next' procedure steps can only be grounded in the actual procedure code."""
+    av: set[str] = set()
+    for rc in chunks:
+        if (rc.chunk.act or "").upper() == "BNSS" and rc.chunk.section:
+            av.add(_base_num(rc.chunk.section).upper())
+    av.discard("")
+    return av
 
 
 PROMPT_TEMPLATE = """You are an AI legal assistant for Indian law.
@@ -160,6 +250,28 @@ SAFETY:
 - Do NOT cite any section number that is not present in the CONTEXT above.
 - Do NOT invent punishments. If unsure, lower the confidence.
 
+SPECIAL RULE — CASE ANALYSIS (the "analysis" object):
+Fill "analysis" ONLY in Mode A (strong, on-point context). In Mode B, set EVERY analysis array to [].
+Every item must be supported by the CONTEXT above; if you have no support for an array, return [] for it.
+  - situation: 1-3 plain sentences naming what the facts legally are (e.g. "This appears to involve cheating").
+    NO section numbers here. Never write "you committed"; use "This appears to involve…".
+  - applicable_law: one item per section, copied from a [LABEL], CURRENT (BNS/BNSS/BSA) first, with the
+    punishment exactly as written; mention any old section only as a parenthetical "(was IPC 420)".
+    Only sections that appear in the CONTEXT.
+  - what_happens_next: ordered procedure steps — include a step ONLY if its BNSS section is in the CONTEXT,
+    and name that BNSS section in the step. If no BNSS procedure section is in the CONTEXT, return [].
+  - do_now: 2-4 calm, concrete actions an ordinary person can take now. No section numbers, no promises
+    about the result.
+  - also_possible: options such as bail / settlement / compounding / civil remedy / a defence — each written
+    as an IMPERSONAL possibility beginning "The law allows…", "A court may…", or "Whether … is for the court
+    to decide". NEVER "you will…", "you are likely…", "you should get…", or "your case is strong".
+  - for_your_advocate: ingredients to prove (from the cited section), limitation, jurisdiction, and what to
+    research. Do NOT name any court case, party name, or citation — write "leading judgments on this offence".
+  - OUTCOMES: describe only what the STATUTE PROVIDES and what a COURT EXAMINES. NEVER predict this person's
+    result. Forbidden: "you will get", "you will be convicted/acquitted", "your sentence will be", "guaranteed".
+  - CLASSIFICATION: do NOT state whether an offence is cognizable / non-cognizable, bailable / non-bailable,
+    compoundable, or which court tries it — that information is not in your sources.
+
 STYLE:
 - Simple language for an Indian audience. One concrete actionable next step.
 
@@ -170,7 +282,15 @@ Return ONLY this JSON object (no prose before or after):
   "law_reference": "...exact code+section from a [LABEL] e.g. BNS/BNSS/BSA/IPC/CrPC/Article, or 'General Legal Guidance'...",
   "action": "...what user should do next...",
   "confidence": "high|medium|low",
-  "reasoning": "brief: 'Used BNS 318 from context' OR 'No strong context, used general principles'"
+  "reasoning": "brief: 'Used BNS 318 from context' OR 'No strong context, used general principles'",
+  "analysis": {{
+    "situation": ["plain sentence(s) on what the facts legally are — NO section numbers"],
+    "applicable_law": ["one bullet per section from a [LABEL], CURRENT first, with punishment; old section only as '(was IPC 420)'"],
+    "what_happens_next": ["ordered steps — ONLY if a BNSS section in CONTEXT supports the step, naming it; ELSE []"],
+    "do_now": ["2-4 concrete, calm steps — no section numbers, no result promises"],
+    "also_possible": ["bail / settlement / civil option / defence — begin 'The law allows…' or 'A court may…'; NEVER 'you will…'; [] if unsupported"],
+    "for_your_advocate": ["ingredients to prove, limitation, jurisdiction; NO case names — say 'leading judgments on this offence'"]
+  }}
 }}
 """
 
@@ -388,6 +508,12 @@ class RAGService:
         if confidence == "low" or not citation_verified:
             escalation = LEGAL_AID_ESCALATION_HI if hindi else LEGAL_AID_ESCALATION
 
+        # Rich case-analysis — built only on a strong, verified answer, and graded against
+        # EXACTLY the chunks the model saw (ordered[:_CONTEXT_CHUNKS]); None otherwise.
+        analysis = self._build_analysis(
+            raw.get("analysis"), ordered[:_CONTEXT_CHUNKS], hindi, confidence, citation_verified, law_reference
+        )
+
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         logger.info(
             "Answered in %dms | confidence=%s (llm_said=%s) | verified=%s",
@@ -408,9 +534,106 @@ class RAGService:
             escalation=escalation,
             current_law_note=current_law_note,
             citation_verified=citation_verified,
+            analysis=analysis,
             disclaimer=DISCLAIMER_HI if hindi else DISCLAIMER,
             response_time_ms=elapsed_ms,
         )
+
+    # ------------------------------------------------------------------ #
+    def _build_analysis(
+        self,
+        raw_analysis: object,
+        visible: list[RetrievedChunk],
+        hindi: bool,
+        confidence: Confidence,
+        citation_verified: bool,
+        law_reference: str,
+    ) -> CaseAnalysis | None:
+        """Turn the LLM's "analysis" object into a trust-safe CaseAnalysis — or None.
+
+        Master gate first: a rich block is earned ONLY by a high-confidence (Mode A),
+        citation-verified answer whose OWN cited section is present in the context the model
+        actually saw. Anything weaker → None (the citizen sees today's honest paragraph).
+        Then every bullet is deterministically scrubbed (drops ungrounded offence labels,
+        second-person outcome predictions, and any precedent-shaped token), and section-
+        citing bullets are re-checked against the visible context. Never raises."""
+        try:
+            if not isinstance(raw_analysis, dict):
+                return None
+            # --- MASTER SUPPRESSION GATE ---
+            if confidence != "high" or not citation_verified:
+                return None
+            ref = (law_reference or "").lower()
+            is_generic = (not ref) or any(g in ref for g in _GENERIC_REFS) or "article" in ref
+            if is_generic:
+                return None  # a generic/Mode-B headline never earns analysis
+            available = _available_sections(visible)
+            if not available:
+                return None
+            cited = {_base_num(t).upper() for t in _NUM_RE.findall(law_reference)}
+            cited.discard("")
+            if not (cited & available):
+                return None  # the headline's own section must be in the visible context
+
+            bnss = _bnss_sections(visible)
+
+            def clean(key: str) -> list[str]:
+                """Trim, cap, and drop ungrounded-classification / outcome-prediction bullets."""
+                items = raw_analysis.get(key)
+                if not isinstance(items, list):
+                    return []
+                out: list[str] = []
+                for it in items:
+                    s = _stringify(it)
+                    if not s:
+                        continue
+                    s = s[:_ANALYSIS_MAX_LEN].strip()
+                    if _CLASSIFICATION_RE.search(s) or _OUTCOME_PREDICTION_RE.search(s):
+                        continue
+                    out.append(s)
+                    if len(out) >= _ANALYSIS_MAX_ITEMS:
+                        break
+                return out
+
+            def cited_nums(s: str) -> set[str]:
+                nums = {_base_num(t).upper() for t in _NUM_RE.findall(s)}
+                nums.discard("")
+                return nums
+
+            situation = clean("situation")
+            do_now = clean("do_now")
+
+            # applicable_law: a bullet that names sections must have one present in context.
+            applicable_law = [
+                s for s in clean("applicable_law")
+                if not cited_nums(s) or (cited_nums(s) & available)
+            ]
+            # what_happens_next: each step must name a BNSS section that's in the context;
+            # otherwise drop it (no generic procedure dressed up as this user's case).
+            what_happens_next = [s for s in clean("what_happens_next") if cited_nums(s) & bnss]
+            # also_possible: allowlist — keep only impersonal "the law / a court may…" bullets.
+            also_possible = [
+                s for s in clean("also_possible")
+                if any(stem in s.lower()[:32] for stem in _SAFE_STEMS)
+            ]
+            # for_your_advocate: never let a precedent-shaped citation through.
+            for_your_advocate = [s for s in clean("for_your_advocate") if not _PRECEDENT_RE.search(s)]
+
+            if not any([situation, applicable_law, what_happens_next, do_now, also_possible, for_your_advocate]):
+                return None  # nothing survived scrubbing → fall back to the plain card
+
+            return CaseAnalysis(
+                outcome_framing=_OUTCOME_FRAMING_HI if hindi else _OUTCOME_FRAMING,
+                situation=situation,
+                applicable_law=applicable_law,
+                what_happens_next=what_happens_next,
+                do_now=do_now,
+                also_possible=also_possible,
+                for_your_advocate=for_your_advocate,
+            )
+        except Exception as e:  # never let analysis break a query — degrade to the plain card
+            logger.warning("Case-analysis build skipped: %s", e)
+            return None
 
     # ------------------------------------------------------------------ #
     def _standalone_query(self, query: str, history: list, hindi: bool) -> str:

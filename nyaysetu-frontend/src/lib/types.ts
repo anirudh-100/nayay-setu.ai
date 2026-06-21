@@ -16,6 +16,18 @@ export interface Citation {
   source_authority?: string | null;
 }
 
+// Structured case-analysis sections (mirrors backend CaseAnalysis). Present only on a
+// strong, verified answer; each list may be empty (an empty list renders as hidden).
+export interface CaseAnalysis {
+  outcome_framing: string;
+  situation: string[];
+  applicable_law: string[];
+  what_happens_next: string[];
+  do_now: string[];
+  also_possible: string[];
+  for_your_advocate: string[];
+}
+
 export interface AskResponse {
   answer: string;
   law_reference: string;
@@ -27,6 +39,7 @@ export interface AskResponse {
   escalation?: string | null;
   current_law_note?: string | null;
   citation_verified: boolean;
+  analysis?: CaseAnalysis | null;
   disclaimer: string;
   response_time_ms: number;
 }

@@ -8,6 +8,53 @@ import type { AskResponse } from "@/lib/types";
 import { ConfidenceBadge } from "./ConfidenceBadge";
 import { CitationCard } from "./CitationCard";
 
+/** One case-analysis section: a tinted box with a label and a bulleted (or numbered) list.
+ *  Renders nothing when empty, so suppressed/ungrounded sections simply disappear. */
+function AnalysisList({
+  label,
+  items,
+  tone = "default",
+  ordered = false,
+  caveat,
+}: {
+  label: string;
+  items?: string[];
+  tone?: "default" | "info" | "warn";
+  ordered?: boolean;
+  caveat?: string;
+}) {
+  if (!items || items.length === 0) return null;
+  const box =
+    tone === "warn"
+      ? "border-warning/30 bg-warning/10"
+      : tone === "info"
+      ? "border-primary/20 bg-primary-soft/40"
+      : "border-border bg-bg";
+  const labelColor = tone === "warn" ? "text-warning" : tone === "info" ? "text-primary" : "text-muted";
+  return (
+    <div className={`rounded-xl border p-3 ${box}`}>
+      <p className={`text-xs font-semibold uppercase tracking-wide ${labelColor}`}>{label}</p>
+      {ordered ? (
+        <ol className="mt-1.5 list-decimal space-y-1.5 pl-5 text-sm leading-relaxed text-ink">
+          {items.map((it, i) => (
+            <li key={i}>{it}</li>
+          ))}
+        </ol>
+      ) : (
+        <ul className="mt-1.5 space-y-1.5">
+          {items.map((it, i) => (
+            <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink">
+              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+              <span>{it}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {caveat && <p className="mt-2 text-[11px] italic leading-relaxed text-muted">{caveat}</p>}
+    </div>
+  );
+}
+
 export function AnswerCard({ response, question }: { response: AskResponse; question?: string }) {
   const { t, locale } = useI18n();
   const [voted, setVoted] = useState<null | "up" | "down">(null);
@@ -53,6 +100,32 @@ export function AnswerCard({ response, question }: { response: AskResponse; ques
         <div className="mt-3 flex gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm text-ink">
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-warning" aria-hidden />
           <p className="leading-relaxed">{t("verifyWarn")}</p>
+        </div>
+      )}
+
+      {/* Case analysis — present only on a strong, verified answer (else null) */}
+      {response.analysis && (
+        <div className="mt-3 space-y-3">
+          {/* Outcome framing — always shown, so "not a prediction" is unmissable */}
+          <div className="flex gap-2 text-xs italic leading-relaxed text-muted">
+            <Info size={14} className="mt-0.5 shrink-0 text-primary" aria-hidden />
+            <p>{response.analysis.outcome_framing || t("outcomeFramingNote")}</p>
+          </div>
+          <AnalysisList label={t("situationLabel")} items={response.analysis.situation} />
+          <AnalysisList label={t("doNowLabel")} items={response.analysis.do_now} tone="info" />
+          <AnalysisList label={t("applicableLawLabel")} items={response.analysis.applicable_law} />
+          <AnalysisList
+            label={t("whatHappensNextLabel")}
+            items={response.analysis.what_happens_next}
+            ordered
+          />
+          <AnalysisList label={t("alsoPossibleLabel")} items={response.analysis.also_possible} tone="info" />
+          <AnalysisList
+            label={t("advocateLabel")}
+            items={response.analysis.for_your_advocate}
+            tone="warn"
+            caveat={t("advocateCaveat")}
+          />
         </div>
       )}
 
