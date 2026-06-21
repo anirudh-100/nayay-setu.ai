@@ -147,6 +147,23 @@
       }
     },
     {
+      "code": "CPA",
+      "title": "Consumer Protection Act, 2019",
+      "unit": "Section",
+      "code_status": "current",
+      "effective_date": "2020-07-20",
+      "path": "data/acts/consumer_protection_act.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": true,
+      "provenance": {
+        "authority": "India Code (indiacode.nic.in) — Consumer Protection Act, 2019, Act 35 of 2019",
+        "source_url": "https://www.indiacode.nic.in/bitstream/123456789/15256/1/eng201935.pdf",
+        "retrieved_at": "2026-06-22",
+        "note": "Section text parsed verbatim from the official India Code PDF (scripts/ingest_cpa_2019.py). The pecuniary-jurisdiction figures in ss.34/47/58 carry an inline, attributed note with the CURRENT limits per the Consumer Protection (Jurisdiction of the District, State and National Commission) Rules, 2021, which superseded the enacted figures."
+      }
+    },
+    {
       "code": "Constitution",
       "title": "Constitution of India",
       "unit": "Article",
