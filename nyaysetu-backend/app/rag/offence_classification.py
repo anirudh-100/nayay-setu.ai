@@ -33,6 +33,20 @@ _COURT_HI = {
 }
 
 
+# Base sections the parsed First Schedule marks "unambiguous" but which the OFFICIAL
+# Schedule actually SPLITS into sub-sections with DIFFERENT classifications — so one label
+# for the whole family is unsafe. The coordinate parser anchors each sub-row separately and
+# only the first survives de-duplication, e.g. BNS 318 keeps 318(2) "cheating" (non-
+# cognizable / bailable) and drops 318(4) "cheating and inducing delivery of property"
+# (cognizable / non-bailable). Asserting 318(2)'s class for a cheating-with-delivery (the
+# IPC-420 family) victim wrongly implies police may refuse the FIR. Re-merging sub-rows in
+# the parser corrupts other sections (the PDF has cross-page continuation noise), so until a
+# clean machine-readable Schedule lets us key by sub-section we SUPPRESS these here. This is
+# suppression only (a known multi-class conflict), never a hand-authored label — verified
+# against the official BNSS First Schedule.
+_FORCE_AMBIGUOUS = {"318"}
+
+
 def _base(section: str) -> str:
     m = _BASE.search(section or "")
     return m.group(1).upper() if m else ""
@@ -57,7 +71,10 @@ class OffenceClassification:
                     cog, bail = (row.get("cognizable") or "").strip(), (row.get("bailable") or "").strip()
                     if not (cog and bail):
                         continue
-                    self._by_section[_base(row.get("section", ""))] = {
+                    base = _base(row.get("section", ""))
+                    if base in _FORCE_AMBIGUOUS:
+                        continue  # known sub-section conflict — suppress over mislabel
+                    self._by_section[base] = {
                         "cognizable": cog,
                         "bailable": bail,
                         "court": (row.get("court") or "").strip(),

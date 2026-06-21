@@ -96,6 +96,11 @@ _SECTION_WORD = r"(?:section|sec\.?|s\.?)"
 _NUM_RE = re.compile(r"(\d+[A-Za-z]?)")
 # Generic law_reference values that name no specific section to verify.
 _GENERIC_REFS = ("general legal guidance", "general indian law", "general")
+# Death-deeming / aggravated offences whose grounded classification must never be the
+# auto-headline: their applicability turns on a fact (a death) the section number alone
+# doesn't establish, so surfacing e.g. BNS 80 (Dowry Death, Court of Session) for a LIVING
+# dowry-cruelty victim over-states both gravity and trial forum. Suppress over mislabel.
+_NO_AUTO_CLASS = {"80"}
 
 # --------------------------------------------------------------------------- #
 # Case-analysis (situation → structured guidance) safety machinery.
@@ -592,25 +597,29 @@ class RAGService:
     # ------------------------------------------------------------------ #
     @staticmethod
     def _offence_classification(law_reference: str, hindi: bool) -> str:
-        """A grounded one-line offence classification (BNSS First Schedule) for the
-        PRIMARY cited offence — the first cited BNS section with an unambiguous entry,
-        named explicitly so the label is accurate even when other offences are cited too.
-        "" when no cited BNS section has an unambiguous classification (so conditional
-        offences like theft stay unlabelled rather than over-simplified)."""
+        """A grounded one-line offence classification (BNSS First Schedule) for the PRIMARY
+        (lead) cited BNS offence ONLY.
+
+        Returns "" when the lead offence has no unambiguous First-Schedule entry, or is a
+        death-deeming offence (_NO_AUTO_CLASS). Classifying ONLY the lead — never walking on
+        to a secondary section — is deliberate: the previous "first groundable section"
+        behaviour surfaced a lesser/secondary offence's lighter class whenever the real lead
+        offence was ambiguous (e.g. voyeurism 77 -> intimidation 351's "non-cognizable,
+        bailable") or fell through an ambiguous cruelty 85 to dowry-death 80. A conditional
+        or ambiguous lead now stays UNLABELLED rather than mislabelled."""
         try:
             secs = re.findall(
-                r"\bBNS\b\s*(?:Section|Sec\.?|S\.?)?\s*(\d+[A-Za-z]?)", law_reference or "", re.IGNORECASE
+                r"\bBNS\b\s*(?:Section|Sec\.?|S\.?|धारा)?\s*(\d+[A-Za-z]?)",
+                law_reference or "", re.IGNORECASE,
             )
             if not secs:
                 return ""
+            lead = secs[0]
+            if _base_num(lead) in _NO_AUTO_CLASS:
+                return ""
             from app.rag.offence_classification import OffenceClassification
 
-            oc = OffenceClassification.instance()
-            for s in secs:  # lead offence first; show the first one we can ground
-                desc = oc.describe(s, hindi, name=True)
-                if desc:
-                    return desc
-            return ""
+            return OffenceClassification.instance().describe(lead, hindi, name=True) or ""
         except Exception as e:
             logger.warning("Offence classification skipped: %s", e)
             return ""

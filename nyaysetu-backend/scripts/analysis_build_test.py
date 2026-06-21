@@ -149,14 +149,29 @@ check("classification: non-BNS ref (Article 21) -> empty",
 multi = svc._offence_classification("BNS Section 103 and BNS Section 318", False)
 check("classification: multi-offence uses the LEAD section (103), named",
       "103" in multi and "cognizable" in multi.lower())
-# But if the lead section is conditional (303) and the next is clean (318), use 318.
-mixed = svc._offence_classification("BNS Section 303 and BNS Section 318", False)
-check("classification: skips conditional lead (303) -> uses next clean (318)",
-      "318" in mixed and "non-cognizable" in mixed.lower())
+# Lead-only: a conditional/ambiguous lead (303 theft) SUPPRESSES the classification — we
+# never fall through to a secondary offence's (often lighter) class. This is the fix for the
+# audit's morphed-photo defect (lead voyeurism 77 had silently surfaced intimidation 351's
+# "non-cognizable, bailable") and the dowry defect (ambiguous 85 had fallen through to the
+# death offence 80). A theft-with-a-secondary-cheating headline now stays unlabelled.
+check("classification: conditional lead (303) -> suppressed, no fall-through to 318",
+      svc._offence_classification("BNS Section 303 and BNS Section 318", False) == "")
+# 318 (cheating) is itself suppressed now — its sub-sections (318(2) non-cognizable vs
+# 318(4) cognizable/non-bailable) classify differently, so one label is unsafe.
+check("classification: cheating 318 -> suppressed (sub-section conflict)",
+      svc._offence_classification("BNS Section 318", False) == "")
 check("classification: Hindi murder contains संज्ञेय and the section number",
       "संज्ञेय" in svc._offence_classification("BNS Section 103", True))
-# 15. Classification flows into the built analysis for a single clear offence (318 cheating).
-check("analysis.classification set for single clear offence (318)", bool(a and a.classification))
+# 15. Classification flows into the built analysis for a genuinely clear single offence
+#     (103 murder). The 318 happy-path analysis correctly carries NO banner (318 suppressed).
+BNS103 = chunk("BNS", "103", "Whoever commits murder shall be punished with death or imprisonment for life.")
+a103 = svc._build_analysis(
+    {"situation": ["A homicide is described."], "applicable_law": ["BNS Section 103 — murder"]},
+    [BNS103], list(PROC), False, "high", True, "BNS Section 103",
+)
+check("analysis.classification set for a clear single offence (103 murder)", bool(a103 and a103.classification))
+check("analysis.classification empty for the 318 happy path (sub-section conflict)",
+      bool(a) and a.classification == "")
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)
