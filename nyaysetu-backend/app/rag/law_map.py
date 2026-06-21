@@ -176,6 +176,18 @@ class LawMap:
                 out.extend(cmap.reverse.get(base, []))
         return out
 
+    def predecessor_ref(self, to_code: str, section: str) -> Optional[tuple[str, str]]:
+        """For a current section, return (from_code, old_section) of its predecessor — so a
+        note for a cited current section (e.g. BNS 103) can bridge from the right old one
+        (IPC 302), not whatever repealed section happened to be retrieved."""
+        base = _base_section(section)
+        for cmap in self._maps.values():
+            if cmap.to_code.upper() == (to_code or "").upper():
+                olds = cmap.reverse.get(base)
+                if olds:
+                    return (cmap.from_code, olds[0])
+        return None
+
     def verified_for(self, from_code: str) -> bool:
         cmap = self._maps.get((from_code or "").upper())
         return bool(cmap and cmap.verified)
@@ -196,24 +208,31 @@ class LawMap:
     # ------------------------------------------------------------------ #
     # Presentation helper
     # ------------------------------------------------------------------ #
-    def current_reference_note(self, from_code: str, section: str) -> Optional[str]:
-        """Human note bridging an old section to its current equivalent."""
+    def current_reference_note(self, from_code: str, section: str, hindi: bool = False) -> Optional[str]:
+        """Human note bridging an old section to its current equivalent (English or Hindi)."""
         cmap = self._maps.get((from_code or "").upper())
         if cmap is None:
             return None
         entry = cmap.forward.get(_base_section(section))
         if entry is None:
             return None
+        note = entry.get("note", "")
+        date = _format_date(cmap.transition_date)
         if entry.get("new") is None:
-            note = entry.get("note", "")
+            offence = entry.get("offence", "")
+            if hindi:
+                return f"{from_code} की धारा {section} ({offence}) का {cmap.to_code} में कोई सीधा समकक्ष नहीं है। {note}".strip()
+            return f"{from_code} Section {section} ({offence}) has no direct equivalent in the {cmap.to_code}. {note}".strip()
+        if hindi:
+            suffix = f" टिप्पणी: {note}" if note else ""
             return (
-                f"{from_code} Section {section} ({entry.get('offence', '')}) has no direct "
-                f"equivalent in the {cmap.to_code}. {note}".strip()
+                f"{from_code} की धारा {section} अब {date} से या उसके बाद के मामलों के लिए "
+                f"{cmap.to_code} की धारा {entry['new']} के अनुरूप है।{suffix}"
             )
-        suffix = f" Note: {entry['note']}" if entry.get("note") else ""
+        suffix = f" Note: {note}" if note else ""
         return (
             f"{from_code} Section {section} now corresponds to {cmap.to_code} Section "
-            f"{entry['new']} for matters on or after {_format_date(cmap.transition_date)}.{suffix}"
+            f"{entry['new']} for matters on or after {date}.{suffix}"
         )
 
     # ------------------------------------------------------------------ #

@@ -25,7 +25,9 @@ from app.rag.models import Citation, RetrievedChunk
 from app.rag.retriever import HybridRetriever
 from app.schemas.ask import (
     DISCLAIMER,
+    DISCLAIMER_HI,
     LEGAL_AID_ESCALATION,
+    LEGAL_AID_ESCALATION_HI,
     AskResponse,
     Confidence,
 )
@@ -49,6 +51,37 @@ _UNCERTAINTY_PHRASES: tuple[str, ...] = (
 
 _CONTEXT_CHUNKS = 6
 _MAX_CITATIONS = 5
+
+# --- Hindi (multilingual) ---
+# A citizen who is more comfortable in Hindi should be able to ask in Hindi and get a
+# trustworthy Hindi answer. We keep the strong English legal *retrieval* (translate the
+# query to English first) and ask the LLM to *answer* in Hindi while keeping every law
+# reference precise and standard — so the trust contract (citations, current-law,
+# abstention) is unchanged; only the prose language changes.
+_DEVANAGARI = re.compile(r"[ऀ-ॿ]")
+
+_HINDI_INSTRUCTION = """
+---
+LANGUAGE — ANSWER IN HINDI:
+Write "answer" and "action" in simple, clear Hindi (Devanagari) an ordinary person understands.
+Keep every law reference precise and recognizable: code names in standard form (BNS, BNSS, BSA, IPC, CrPC, Article)
+and section numbers as digits (you may use "धारा" for "Section"). Set "law_reference" to the standard English form
+(e.g. "BNS Section 103"). Keep "reasoning" in English (begin "Used ..." or "No strong context ...").
+"""
+
+_ABSTAIN_ANSWER_HI = (
+    "मुझे अपने कानूनी स्रोतों में इसका भरोसेमंद उत्तर देने का पर्याप्त आधार नहीं मिला। "
+    "ग़लत कानूनी जानकारी देने से बचने के लिए मैं अनुमान नहीं लगाना चाहूँगा। कृपया अधिक "
+    "विवरण के साथ दोबारा पूछें, या नीचे दी गई सहायता लें।"
+)
+_ABSTAIN_ACTION_HI = "अपनी स्थिति के लिए मुफ़्त कानूनी सहायता या किसी योग्य वकील से संपर्क करें।"
+_FALLBACK_ANSWER_HI = "आमतौर पर भारतीय कानून के अनुसार, इस प्रश्न के लिए तथ्यों और प्रावधानों को बारीकी से देखना होगा।"
+_FALLBACK_ACTION_HI = "अपनी स्थिति के अनुसार मार्गदर्शन के लिए किसी योग्य वकील से सलाह लें।"
+
+
+def _is_hindi(language: str, query: str) -> bool:
+    """Answer in Hindi if the UI asked for it OR the question itself is in Devanagari."""
+    return (language or "").strip().lower().startswith("hi") or bool(_DEVANAGARI.search(query or ""))
 # Cap how many current-law successor chunks we inject, so expansion enriches context
 # without crowding out the directly-retrieved sources.
 _MAX_EXPANSION = 4
@@ -288,33 +321,42 @@ class RAGService:
     def answer(self, query: str, language: str = "en") -> AskResponse:
         started = time.perf_counter()
         query = query.strip()
+        hindi = _is_hindi(language, query)
+        # Retrieve in English (the corpus + InLegalBERT are English); translate a
+        # Devanagari question first so retrieval stays strong.
+        search_query = self._to_english(query) if _DEVANAGARI.search(query) else query
 
-        results = self._retriever.retrieve(query)
+        results = self._retriever.retrieve(search_query)
         top_score = results[0].score if results else None
         logger.info(
-            "Retrieved %d chunks (top_score=%s) for query=%r",
+            "Retrieved %d chunks (top_score=%s) for query=%r (hindi=%s)",
             len(results),
             f"{top_score:.3f}" if top_score is not None else "none",
             query[:120],
+            hindi,
         )
 
         if not results or (top_score is not None and top_score < self._abstain_threshold):
-            return self._abstain(query, results, started)
+            return self._abstain(query, results, started, hindi)
 
         # Phase 2: ensure current law (BNS/BNSS/BSA) is in context for any repealed
         # reference in the question or the retrieved sources, so we can lead with it.
-        results = self._expand_current_law(results, query)
+        results = self._expand_current_law(results, search_query)
         ordered = _order_for_context(results)
 
         context = _format_context(ordered[:_CONTEXT_CHUNKS])
         prompt = PROMPT_TEMPLATE.format(context=context, query=query)
+        if hindi:
+            prompt += _HINDI_INSTRUCTION
         raw = self._llm.generate_json(prompt)
 
         answer = _stringify(raw.get("answer")) or (
+            _FALLBACK_ANSWER_HI if hindi else
             "Typically under Indian law, this question needs a closer look at the facts and provisions."
         )
         law_reference = _stringify(raw.get("law_reference")) or "General Indian law"
         action = _stringify(raw.get("action")) or (
+            _FALLBACK_ACTION_HI if hindi else
             "Consult a qualified lawyer for guidance specific to your situation."
         )
         reasoning = _stringify(raw.get("reasoning")) or "No strong context, used general principles."
@@ -335,11 +377,11 @@ class RAGService:
             logger.warning("Citation unverified: %r not in retrieved sources — downgrading.", law_reference)
             confidence = "low"
 
-        current_law_note = self._current_law_note(ordered, query)
+        current_law_note = self._current_law_note(ordered, search_query, hindi, law_reference)
         citations = self._dedupe_citations(ordered)
-        escalation = (
-            LEGAL_AID_ESCALATION if (confidence == "low" or not citation_verified) else None
-        )
+        escalation = None
+        if confidence == "low" or not citation_verified:
+            escalation = LEGAL_AID_ESCALATION_HI if hindi else LEGAL_AID_ESCALATION
 
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         logger.info(
@@ -361,9 +403,27 @@ class RAGService:
             escalation=escalation,
             current_law_note=current_law_note,
             citation_verified=citation_verified,
-            disclaimer=DISCLAIMER,
+            disclaimer=DISCLAIMER_HI if hindi else DISCLAIMER,
             response_time_ms=elapsed_ms,
         )
+
+    # ------------------------------------------------------------------ #
+    def _to_english(self, query: str) -> str:
+        """Translate a (Hindi) question into a short English search query via the LLM,
+        so retrieval against the English corpus stays strong. Falls back to the original
+        text on any failure — retrieval degrades gracefully rather than breaking."""
+        try:
+            raw = self._llm.generate_json(
+                "Translate this Indian legal question into a short English search query. "
+                'Return ONLY JSON: {"en": "<english text>"}.\n\nQUESTION: ' + query
+            )
+            en = _stringify(raw.get("en"))
+            if en:
+                logger.info("Translated query for retrieval: %r -> %r", query[:60], en[:60])
+                return en
+        except Exception as e:
+            logger.warning("Query translation failed (%s); retrieving with original text.", e)
+        return query
 
     # ------------------------------------------------------------------ #
     # Phase 2 helpers
@@ -469,17 +529,46 @@ class RAGService:
             return new_label
         return law_reference
 
-    def _current_law_note(self, results: list[RetrievedChunk], query: str) -> str | None:
-        """Bridge the first repealed section referenced (by the question or the retrieved
-        sources) to its current successor, with a caveat when the map is unverified."""
+    def _current_law_note(
+        self, results: list[RetrievedChunk], query: str, hindi: bool = False, law_reference: str = ""
+    ) -> str | None:
+        """Bridge old<->current law, anchored to the section actually cited.
+
+        Anchoring to the headline citation (not just the first repealed ref in retrieval)
+        keeps the note relevant: an answer citing BNS 103 gets the IPC 302->BNS 103 bridge,
+        not whatever unrelated repealed section happened to be retrieved alongside it."""
         from app.rag.law_map import LawMap
 
         law_map = LawMap.instance()
+        from_codes = {c.upper() for c in law_map.from_codes()}
+        to_codes = {c.upper() for c in law_map.to_codes()}
+
+        def build(code: str, sec: str) -> str | None:
+            note = law_map.current_reference_note(code, sec, hindi=hindi)
+            if note and not law_map.verified_for(code):
+                note += (
+                    " (यह मानचित्रण सांकेतिक है — आधिकारिक मूल अधिनियम से पुष्टि करें।)" if hindi
+                    else " (Mapping is indicative — confirm against the official bare act.)"
+                )
+            return note
+
+        # 1. Anchor to the headline citation.
+        m = re.match(r"\s*([A-Za-z]+)\D*(\d+[A-Za-z]?)", law_reference or "")
+        if m:
+            code, sec = m.group(1).upper(), m.group(2)
+            if code in from_codes:                       # cited a repealed section -> bridge forward
+                note = build(code, sec)
+                if note:
+                    return note
+            elif code in to_codes:                       # cited a current section -> bridge from its predecessor
+                pred = law_map.predecessor_ref(code, sec)
+                if pred and (note := build(pred[0], pred[1])):
+                    return note
+
+        # 2. Fallback: the first repealed reference anywhere in the question/sources.
         for code, sec in self._collect_repealed_refs(results, query, list(law_map.from_codes())):
-            note = law_map.current_reference_note(code, sec)
+            note = build(code, sec)
             if note:
-                if not law_map.verified_for(code):
-                    note += " (Mapping is indicative — confirm against the official bare act.)"
                 return note
         return None
 
@@ -499,26 +588,29 @@ class RAGService:
         return out
 
     # ------------------------------------------------------------------ #
-    def _abstain(self, query: str, results: list[RetrievedChunk], started: float) -> AskResponse:
+    def _abstain(
+        self, query: str, results: list[RetrievedChunk], started: float, hindi: bool = False
+    ) -> AskResponse:
         elapsed_ms = int((time.perf_counter() - started) * 1000)
-        logger.info("Abstained (weak retrieval) in %dms for query=%r", elapsed_ms, query[:120])
+        logger.info("Abstained (weak retrieval) in %dms for query=%r (hindi=%s)", elapsed_ms, query[:120], hindi)
         return AskResponse(
-            answer=(
+            answer=_ABSTAIN_ANSWER_HI if hindi else (
                 "I couldn't find a reliable basis in my legal sources to answer this "
                 "confidently. To avoid giving you wrong legal information, I'd rather not "
                 "guess. Please rephrase with more detail, or seek the help below."
             ),
             law_reference="General Legal Guidance",
-            action="Contact free legal aid or a qualified lawyer for your specific situation.",
+            action=_ABSTAIN_ACTION_HI if hindi else
+            "Contact free legal aid or a qualified lawyer for your specific situation.",
             confidence="low",
             reasoning="No strong context, used general principles.",
             # Abstaining means nothing scored as reliably relevant — don't dangle the
             # weak/below-threshold chunks as if they were sources for an answer.
             citations=[],
             abstained=True,
-            escalation=LEGAL_AID_ESCALATION,
+            escalation=LEGAL_AID_ESCALATION_HI if hindi else LEGAL_AID_ESCALATION,
             current_law_note=None,
             citation_verified=True,
-            disclaimer=DISCLAIMER,
+            disclaimer=DISCLAIMER_HI if hindi else DISCLAIMER,
             response_time_ms=elapsed_ms,
         )

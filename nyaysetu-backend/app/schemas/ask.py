@@ -27,6 +27,18 @@ LEGAL_AID_ESCALATION = (
     "(DLSA) or call the NALSA legal-aid helpline at 15100."
 )
 
+# Hindi versions of the trust strings, surfaced when the user asks in Hindi. The
+# disclaimer especially must be readable in the user's language — a Hindi-only reader
+# must understand this is information, not advice.
+DISCLAIMER_HI = (
+    "यह केवल सामान्य जानकारी के लिए है, कानूनी सलाह नहीं। अपनी विशेष स्थिति के लिए "
+    "किसी योग्य वकील से सलाह ज़रूर लें।"
+)
+LEGAL_AID_ESCALATION_HI = (
+    "मुफ़्त, आधिकारिक कानूनी सहायता के लिए अपने ज़िला विधिक सेवा प्राधिकरण (DLSA) से "
+    "संपर्क करें या नालसा (NALSA) हेल्पलाइन 15100 पर कॉल करें।"
+)
+
 
 class AskRequest(BaseModel):
     query: str = Field(..., min_length=3, max_length=2000)
