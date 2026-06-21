@@ -639,12 +639,20 @@ class RAGService:
     def _standalone_query(self, query: str, history: list, hindi: bool) -> str:
         """Resolve the user's question into a standalone English search query.
 
-        Condenses a follow-up using recent history (resolving 'that'/'it'/'the punishment')
-        and/or translates a Hindi question — so retrieval against the English corpus stays
-        strong. No history + English question => no LLM call (unchanged single-turn path).
-        Falls back to the original text on any failure."""
+        Three jobs, so retrieval against the English corpus stays strong:
+          - condense a follow-up using recent history ('what's the punishment for that?'),
+          - translate a Hindi question, and
+          - distil a lay NARRATIVE ('he took my money to invest and won't return it') into
+            the legal concepts that actually retrieve ('cheating, criminal breach of trust').
+        A described situation retrieves poorly verbatim — that's exactly when the case
+        analysis should fire, so we must rewrite it. A short English keyword question is
+        already a good query and skips the LLM call (fast single-turn path). Falls back to
+        the original text on any failure."""
         has_devanagari = bool(_DEVANAGARI.search(query))
-        if not history and not has_devanagari:
+        # A described situation is long and lay-worded; a keyword lookup is short. Only the
+        # former needs distilling, so the common short-question path stays a single call.
+        is_narrative = len(query.split()) >= 12
+        if not history and not has_devanagari and not is_narrative:
             return query
         try:
             if history:
@@ -653,14 +661,16 @@ class RAGService:
                 )
                 prompt = (
                     "Rewrite the user's LATEST message as a single standalone English legal "
-                    "search query. Use the conversation to resolve references like 'that', 'it', "
-                    "or 'the punishment'. If it is already standalone, just clean and translate it. "
+                    "search query naming the likely offence(s) or legal concept(s). Use the "
+                    "conversation to resolve references like 'that', 'it', or 'the punishment'. "
                     'Return ONLY JSON: {"q": "..."}.\n\nCONVERSATION:\n' + convo + "\nLATEST: " + query
                 )
             else:
                 prompt = (
-                    "Translate this Indian legal question into a short English search query. "
-                    'Return ONLY JSON: {"q": "..."}.\n\nQUESTION: ' + query
+                    "Turn this into a short English legal search query (3-12 words) naming the "
+                    "likely Indian offence(s) or legal concept(s) and key terms a statute book "
+                    'would use. Translate from Hindi if needed. Return ONLY JSON: {"q": "..."}.'
+                    "\n\nTEXT: " + query
                 )
             q = _stringify(self._llm.generate_json(prompt).get("q"))
             if q:
