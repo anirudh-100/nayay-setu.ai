@@ -10,14 +10,18 @@ export class ApiError extends Error {
   }
 }
 
-/** POST /ask — send a question, get a structured, cited answer. */
-export async function askQuestion(query: string, language: string): Promise<AskResponse> {
+/** POST /ask — send a question (with recent history), get a structured, cited answer. */
+export async function askQuestion(
+  query: string,
+  language: string,
+  history: { role: string; content: string }[] = []
+): Promise<AskResponse> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, language }),
+      body: JSON.stringify({ query, language, history }),
     });
   } catch {
     // Network/connection failure (backend not running, CORS, etc.)

@@ -12,7 +12,22 @@ import { DraftModal } from "./DraftModal";
 import { Home } from "./Home";
 
 let counter = 0;
-const nextId = () => `m${++counter}`;
+// Unique across sessions (timestamp) and within a session (counter) — so restored
+// messages never collide with new ones.
+const nextId = () => `m${Date.now().toString(36)}${++counter}`;
+
+const CHAT_KEY = "nyaysetu.chat";
+
+/** Recent settled turns, sent so the backend can resolve follow-ups ("what about that?"). */
+function buildHistory(messages: ChatMessage[]): { role: string; content: string }[] {
+  const turns: { role: string; content: string }[] = [];
+  for (const m of messages) {
+    if (m.pending || m.error) continue;
+    if (m.role === "user" && m.text) turns.push({ role: "user", content: m.text });
+    else if (m.role === "assistant" && m.response) turns.push({ role: "assistant", content: m.response.answer });
+  }
+  return turns.slice(-6);
+}
 
 export function ChatApp() {
   const { t } = useI18n();
@@ -23,18 +38,44 @@ export function ChatApp() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
+  // Restore the conversation on mount so a refresh doesn't wipe it.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CHAT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as ChatMessage[];
+        if (Array.isArray(parsed) && parsed.length) setMessages(parsed);
+      }
+    } catch {
+      /* ignore corrupt storage */
+    }
+  }, []);
+
+  // Persist settled messages (never removes here — only reset() clears, avoiding a mount race).
+  useEffect(() => {
+    const settled = messages.filter((m) => !m.pending);
+    if (settled.length) {
+      try {
+        window.localStorage.setItem(CHAT_KEY, JSON.stringify(settled.slice(-30)));
+      } catch {
+        /* ignore quota errors */
+      }
+    }
+  }, [messages]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = async (text: string) => {
+    const history = buildHistory(messages); // capture context before adding the new turn
     const userMsg: ChatMessage = { id: nextId(), role: "user", text };
     const pendingId = nextId();
     setMessages((prev) => [...prev, userMsg, { id: pendingId, role: "assistant", pending: true }]);
     setLoading(true);
 
     try {
-      const response = await askQuestion(text, locale);
+      const response = await askQuestion(text, locale, history);
       setMessages((prev) =>
         prev.map((m) => (m.id === pendingId ? { ...m, pending: false, response } : m))
       );
@@ -113,6 +154,11 @@ export function ChatApp() {
   const reset = () => {
     setMessages([]);
     setLoading(false);
+    try {
+      window.localStorage.removeItem(CHAT_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   const empty = messages.length === 0;

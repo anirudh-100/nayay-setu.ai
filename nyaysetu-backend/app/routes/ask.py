@@ -17,7 +17,7 @@ def get_rag_service() -> RAGService:
 @router.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest, service: RAGService = Depends(get_rag_service)) -> AskResponse:
     try:
-        return service.answer(request.query, request.language)
+        return service.answer(request.query, request.language, request.history)
     except LLMError as e:
         logger.error("LLM failure: %s", e)
         raise HTTPException(

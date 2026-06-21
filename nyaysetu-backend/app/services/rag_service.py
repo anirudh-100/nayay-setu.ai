@@ -318,13 +318,15 @@ class RAGService:
         self._abstain_threshold = float(getattr(settings, "min_rerank_score", -10.0))
 
     # ------------------------------------------------------------------ #
-    def answer(self, query: str, language: str = "en") -> AskResponse:
+    def answer(self, query: str, language: str = "en", history: list | None = None) -> AskResponse:
         started = time.perf_counter()
         query = query.strip()
+        history = list(history or [])
         hindi = _is_hindi(language, query)
-        # Retrieve in English (the corpus + InLegalBERT are English); translate a
-        # Devanagari question first so retrieval stays strong.
-        search_query = self._to_english(query) if _DEVANAGARI.search(query) else query
+        # Resolve the question into a standalone English search query — condense a follow-up
+        # using recent history ("what's the punishment for that?") and/or translate Hindi —
+        # so retrieval stays strong. History is used ONLY to disambiguate, never as a source.
+        search_query = self._standalone_query(query, history, hindi)
 
         results = self._retriever.retrieve(search_query)
         top_score = results[0].score if results else None
@@ -345,7 +347,10 @@ class RAGService:
         ordered = _order_for_context(results)
 
         context = _format_context(ordered[:_CONTEXT_CHUNKS])
-        prompt = PROMPT_TEMPLATE.format(context=context, query=query)
+        # For a follow-up, answer the resolved standalone question (so "that" is concrete);
+        # for a first turn, keep the user's original phrasing.
+        prompt_question = search_query if history else query
+        prompt = PROMPT_TEMPLATE.format(context=context, query=prompt_question)
         if hindi:
             prompt += _HINDI_INSTRUCTION
         raw = self._llm.generate_json(prompt)
@@ -408,21 +413,38 @@ class RAGService:
         )
 
     # ------------------------------------------------------------------ #
-    def _to_english(self, query: str) -> str:
-        """Translate a (Hindi) question into a short English search query via the LLM,
-        so retrieval against the English corpus stays strong. Falls back to the original
-        text on any failure — retrieval degrades gracefully rather than breaking."""
+    def _standalone_query(self, query: str, history: list, hindi: bool) -> str:
+        """Resolve the user's question into a standalone English search query.
+
+        Condenses a follow-up using recent history (resolving 'that'/'it'/'the punishment')
+        and/or translates a Hindi question — so retrieval against the English corpus stays
+        strong. No history + English question => no LLM call (unchanged single-turn path).
+        Falls back to the original text on any failure."""
+        has_devanagari = bool(_DEVANAGARI.search(query))
+        if not history and not has_devanagari:
+            return query
         try:
-            raw = self._llm.generate_json(
-                "Translate this Indian legal question into a short English search query. "
-                'Return ONLY JSON: {"en": "<english text>"}.\n\nQUESTION: ' + query
-            )
-            en = _stringify(raw.get("en"))
-            if en:
-                logger.info("Translated query for retrieval: %r -> %r", query[:60], en[:60])
-                return en
+            if history:
+                convo = "\n".join(
+                    f"{t.role}: {t.content[:500]}" for t in history[-6:] if getattr(t, "content", "")
+                )
+                prompt = (
+                    "Rewrite the user's LATEST message as a single standalone English legal "
+                    "search query. Use the conversation to resolve references like 'that', 'it', "
+                    "or 'the punishment'. If it is already standalone, just clean and translate it. "
+                    'Return ONLY JSON: {"q": "..."}.\n\nCONVERSATION:\n' + convo + "\nLATEST: " + query
+                )
+            else:
+                prompt = (
+                    "Translate this Indian legal question into a short English search query. "
+                    'Return ONLY JSON: {"q": "..."}.\n\nQUESTION: ' + query
+                )
+            q = _stringify(self._llm.generate_json(prompt).get("q"))
+            if q:
+                logger.info("Resolved query for retrieval: %r -> %r", query[:60], q[:80])
+                return q
         except Exception as e:
-            logger.warning("Query translation failed (%s); retrieving with original text.", e)
+            logger.warning("Query resolution failed (%s); retrieving with original text.", e)
         return query
 
     # ------------------------------------------------------------------ #
