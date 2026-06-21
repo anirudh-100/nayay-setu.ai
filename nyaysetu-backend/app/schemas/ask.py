@@ -40,11 +40,19 @@ LEGAL_AID_ESCALATION_HI = (
 )
 
 
+class ConversationTurn(BaseModel):
+    """One prior turn, sent so a follow-up question can be resolved into a standalone one."""
+    role: str = Field(default="", max_length=16)       # "user" | "assistant"
+    content: str = Field(default="", max_length=4000)
+
+
 class AskRequest(BaseModel):
     query: str = Field(..., min_length=3, max_length=2000)
-    # Reserved for the multilingual phase; ignored by the engine today but accepted
-    # so the frontend contract is stable.
     language: str = Field(default="en", max_length=8)
+    # Recent conversation so follow-ups ("what's the punishment for that?") can be
+    # resolved into a standalone question before retrieval. Used only to disambiguate —
+    # never as a source of legal facts. Capped to keep prompts small.
+    history: list[ConversationTurn] = Field(default_factory=list, max_length=12)
 
 
 class AskResponse(BaseModel):
