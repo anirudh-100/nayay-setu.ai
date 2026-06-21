@@ -49,24 +49,21 @@ That URL is your `INDEX_URL`.
 
 ## Step 1 — Backend on Hugging Face Spaces
 1. **Create a Space** → SDK: **Docker** (blank), name e.g. `nyaysetu-api`, visibility Public.
-2. **Push the backend** into the Space repo. The Space needs the contents of
-   `nyaysetu-backend/` at its root (the `Dockerfile` is already there). The index is
-   NOT pushed — it's fetched at boot.
-   ```powershell
-   git clone https://huggingface.co/spaces/<you>/nyaysetu-api hf-space
-   Copy-Item -Recurse -Force nyaysetu-backend\* hf-space\   # excludes .venv via .dockerignore at build; also delete .venv/models if copied
-   Remove-Item -Recurse -Force hf-space\.venv, hf-space\models -ErrorAction SilentlyContinue
-   cd hf-space
-   ```
-   Prepend this Space header to `README.md` (create it if absent):
-   ```
-   ---
-   title: NyaySetu API
-   sdk: docker
-   app_port: 7860
-   ---
-   ```
-   Then `git add -A; git commit -m "deploy backend"; git push`.
+2. **The Space holds only a `Dockerfile` + `README.md`** — NOT the backend code. The
+   Dockerfile `git clone`s the backend from GitHub (`nyaysetu-backend/`) at build time,
+   so you never copy app code into the Space. The canonical copy of those two files lives
+   in **`hf-space/`** in this repo — keep them in sync. To create/update the Space, paste
+   `hf-space/Dockerfile` and `hf-space/README.md` (add the Space front-matter shown in
+   `hf-space/README.md`) into the Space via its **Files** tab or git push. The index is
+   NOT in the image — it's fetched at boot from `INDEX_URL`.
+
+   > **Deploy gotcha (important):** Docker caches the `RUN git clone` layer by its command
+   > text, which never changes — so a plain rebuild silently re-ships the FIRST build's
+   > code (symptom: `/feedback` 404 after deploying new routes). `hf-space/Dockerfile`
+   > fixes this with an `ADD https://api.github.com/repos/.../commits/main …` line before
+   > the clone: its content changes when `main` moves, busting the cache so every push
+   > gets a fresh clone. **To ship a backend update: push to GitHub `main`, then edit the
+   > Space `Dockerfile` (or Factory rebuild) to trigger a build that re-clones.**
 3. **Set Space variables & secrets** (Settings → *Variables and secrets*):
    | Name | Kind | Value |
    |---|---|---|
