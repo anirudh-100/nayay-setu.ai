@@ -138,15 +138,22 @@ check("non-BNSS section does not ground a process step",
 
 # 14. Offence classification (BNSS First Schedule) — grounded, set in code, not the LLM.
 cls103 = svc._offence_classification("BNS Section 103", False)  # murder
-check("classification: murder (103) = cognizable/non-bailable/Sessions",
-      "cognizable" in cls103.lower() and "non-bailable" in cls103.lower() and "session" in cls103.lower())
+check("classification: murder (103) = cognizable/non-bailable/Sessions, names the section",
+      "cognizable" in cls103.lower() and "non-bailable" in cls103.lower()
+      and "session" in cls103.lower() and "103" in cls103)
 check("classification: theft (303) is conditional -> empty (suppressed)",
       svc._offence_classification("BNS Section 303", False) == "")
 check("classification: non-BNS ref (Article 21) -> empty",
       svc._offence_classification("Article 21", False) == "")
-check("classification: differing offences (103 + 318) -> empty (don't over-simplify)",
-      svc._offence_classification("BNS Section 103 and BNS Section 318", False) == "")
-check("classification: Hindi murder contains संज्ञेय",
+# Multi-offence headline: classify the PRIMARY (lead) section, named — not empty.
+multi = svc._offence_classification("BNS Section 103 and BNS Section 318", False)
+check("classification: multi-offence uses the LEAD section (103), named",
+      "103" in multi and "cognizable" in multi.lower())
+# But if the lead section is conditional (303) and the next is clean (318), use 318.
+mixed = svc._offence_classification("BNS Section 303 and BNS Section 318", False)
+check("classification: skips conditional lead (303) -> uses next clean (318)",
+      "318" in mixed and "non-cognizable" in mixed.lower())
+check("classification: Hindi murder contains संज्ञेय and the section number",
       "संज्ञेय" in svc._offence_classification("BNS Section 103", True))
 # 15. Classification flows into the built analysis for a single clear offence (318 cheating).
 check("analysis.classification set for single clear offence (318)", bool(a and a.classification))

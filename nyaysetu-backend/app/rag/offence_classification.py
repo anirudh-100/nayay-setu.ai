@@ -77,20 +77,27 @@ class OffenceClassification:
         """The unambiguous classification for a BNS base section, or None."""
         return self._by_section.get(_base(section))
 
-    def describe(self, section: str, hindi: bool = False) -> Optional[str]:
+    def describe(self, section: str, hindi: bool = False, name: bool = False) -> Optional[str]:
         """One grounded sentence ('This is a cognizable, non-bailable offence, triable by
-        the Court of Session.'), or None if the section has no unambiguous classification."""
+        the Court of Session.'), or None if the section has no unambiguous classification.
+
+        With ``name=True`` the sentence is attributed to the specific section ('Under BNS
+        Section 103, this is a …') so it stays accurate even when the answer also cites
+        other offences — the label is unmistakably about THAT section, not the situation."""
         c = self.classify(section)
         if not c:
             return None
         cog, bail, court = c["cognizable"], c["bailable"], c.get("court", "")
+        base = _base(section)
         if hindi:
-            parts = f"{_COG_HI.get(cog, cog)}, {_BAIL_HI.get(bail, bail)}"
-            s = f"यह एक {parts} अपराध है"
+            s = f"यह एक {_COG_HI.get(cog, cog)}, {_BAIL_HI.get(bail, bail)} अपराध है"
             if court:
                 s += f", जिसकी सुनवाई {_COURT_HI.get(court, court)} द्वारा होती है"
-            return s + "। (स्रोत: BNSS पहली अनुसूची)"
-        s = f"This is a {cog.lower()}, {bail.lower()} offence"
+            prefix = f"BNS धारा {base} के अनुसार, " if name else ""
+            return f"{prefix}{s}। (स्रोत: BNSS पहली अनुसूची)"
+        tail = ""
         if court:
-            s += f", triable by {'the ' if court.startswith('Court') else ''}{court}"
-        return s + ". (Source: BNSS First Schedule.)"
+            tail = f", triable by {'the ' if court.startswith('Court') else ''}{court}"
+        body = f"a {cog.lower()}, {bail.lower()} offence{tail}"
+        sentence = f"Under BNS Section {base}, this is {body}" if name else f"This is {body}"
+        return sentence + ". (Source: BNSS First Schedule.)"

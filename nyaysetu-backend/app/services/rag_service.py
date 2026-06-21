@@ -593,9 +593,10 @@ class RAGService:
     @staticmethod
     def _offence_classification(law_reference: str, hindi: bool) -> str:
         """A grounded one-line offence classification (BNSS First Schedule) for the
-        headline — only when EVERY cited BNS section resolves to the SAME unambiguous
-        classification. "" otherwise (no BNS section, no entry, or differing classes
-        across multiple cited offences — never over-simplify)."""
+        PRIMARY cited offence — the first cited BNS section with an unambiguous entry,
+        named explicitly so the label is accurate even when other offences are cited too.
+        "" when no cited BNS section has an unambiguous classification (so conditional
+        offences like theft stay unlabelled rather than over-simplified)."""
         try:
             secs = re.findall(
                 r"\bBNS\b\s*(?:Section|Sec\.?|S\.?)?\s*(\d+[A-Za-z]?)", law_reference or "", re.IGNORECASE
@@ -605,9 +606,10 @@ class RAGService:
             from app.rag.offence_classification import OffenceClassification
 
             oc = OffenceClassification.instance()
-            descs = [oc.describe(s, hindi) for s in secs]
-            if descs and all(d and d == descs[0] for d in descs):
-                return descs[0]
+            for s in secs:  # lead offence first; show the first one we can ground
+                desc = oc.describe(s, hindi, name=True)
+                if desc:
+                    return desc
             return ""
         except Exception as e:
             logger.warning("Offence classification skipped: %s", e)
