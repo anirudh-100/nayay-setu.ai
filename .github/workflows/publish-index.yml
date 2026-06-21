@@ -65,7 +65,7 @@ jobs:
         working-directory: nyaysetu-backend
         run: python scripts/build_index.py
 
-      - name: Zip index (contents at root: qdrant/ + bm25.pkl)
+      - name: "Zip index (contents at root: qdrant/ + bm25.pkl)"
         if: steps.check.outputs.ok == 'true'
         working-directory: nyaysetu-backend/models/index
         run: |
