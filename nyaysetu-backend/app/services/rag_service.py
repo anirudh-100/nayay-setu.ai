@@ -184,6 +184,14 @@ def _bnss_sections(chunks: list[RetrievedChunk]) -> set[str]:
     return av
 
 
+# The canonical BNSS criminal-process arc. An offence query ("he took my money")
+# retrieves the OFFENCE (BNS) but never the PROCEDURE (BNSS), so "what happens next" has
+# nothing to ground on. For a criminal matter we deterministically inject these real,
+# verified BNSS sections into context so the model can build the process steps from
+# statute — FIR → investigate → chargesheet → cognizance → charge → judgment.
+_BNSS_PROCESS_ARC: tuple[str, ...] = ("173", "175", "176", "193", "210", "251", "258")
+
+
 PROMPT_TEMPLATE = """You are an AI legal assistant for Indian law.
 
 ---
@@ -466,11 +474,22 @@ class RAGService:
         results = self._expand_current_law(results, search_query)
         ordered = _order_for_context(results)
 
-        context = _format_context(ordered[:_CONTEXT_CHUNKS])
+        visible = ordered[:_CONTEXT_CHUNKS]
+        context = _format_context(visible)
+        # For a criminal matter, inject the BNSS process arc as a SEPARATE context block so
+        # "what happens next" can be grounded without crowding the offence sections out of
+        # the main window. Empty (and harmless) for non-criminal matters.
+        proc_chunks = self._procedure_context(visible)
         # For a follow-up, answer the resolved standalone question (so "that" is concrete);
         # for a first turn, keep the user's original phrasing.
         prompt_question = search_query if history else query
         prompt = PROMPT_TEMPLATE.format(context=context, query=prompt_question)
+        if proc_chunks:
+            prompt += (
+                '\n\n---\nPROCEDURE CONTEXT (BNSS — how a criminal case proceeds; use ONLY '
+                'to fill the "what_happens_next" steps, each step naming its BNSS section):\n'
+                + _format_context(proc_chunks)
+            )
         if hindi:
             prompt += _HINDI_INSTRUCTION
         raw = self._llm.generate_json(prompt)
@@ -509,9 +528,9 @@ class RAGService:
             escalation = LEGAL_AID_ESCALATION_HI if hindi else LEGAL_AID_ESCALATION
 
         # Rich case-analysis — built only on a strong, verified answer, and graded against
-        # EXACTLY the chunks the model saw (ordered[:_CONTEXT_CHUNKS]); None otherwise.
+        # EXACTLY the chunks the model saw (offence context + injected procedure arc).
         analysis = self._build_analysis(
-            raw.get("analysis"), ordered[:_CONTEXT_CHUNKS], hindi, confidence, citation_verified, law_reference
+            raw.get("analysis"), visible, proc_chunks, hindi, confidence, citation_verified, law_reference
         )
 
         elapsed_ms = int((time.perf_counter() - started) * 1000)
@@ -540,10 +559,42 @@ class RAGService:
         )
 
     # ------------------------------------------------------------------ #
+    def _procedure_context(self, visible: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        """For a criminal matter, fetch the canonical BNSS process-arc sections so the
+        case analysis can ground 'what happens next' in real procedure text. Offence
+        queries never retrieve procedure on their own. Best-effort: [] for a non-criminal
+        matter or on any failure (the section then simply stays hidden)."""
+        try:
+            # Criminal signal: a BNS (penal code) offence is in the visible context.
+            if not any((rc.chunk.act or "").upper() == "BNS" for rc in visible):
+                return []
+            already = {
+                _base_num(rc.chunk.section or "")
+                for rc in visible
+                if (rc.chunk.act or "").upper() == "BNSS"
+            }
+            wanted = [s for s in _BNSS_PROCESS_ARC if s not in already]
+            if not wanted:
+                return []
+            from app.rag.vector_store import VectorStore
+
+            chunks = VectorStore.instance().fetch_by_reference(act="BNSS", sections=wanted, limit=len(wanted))
+            order = {s: i for i, s in enumerate(_BNSS_PROCESS_ARC)}
+            out = [RetrievedChunk(chunk=c, score=0.0) for c in chunks]
+            out.sort(key=lambda rc: order.get(_base_num(rc.chunk.section or ""), 99))
+            if out:
+                logger.info("Injected %d BNSS process-arc section(s) for 'what happens next'", len(out))
+            return out
+        except Exception as e:  # never let procedure injection break a query
+            logger.warning("Procedure-context injection skipped: %s", e)
+            return []
+
+    # ------------------------------------------------------------------ #
     def _build_analysis(
         self,
         raw_analysis: object,
         visible: list[RetrievedChunk],
+        proc: list[RetrievedChunk],
         hindi: bool,
         confidence: Confidence,
         citation_verified: bool,
@@ -575,7 +626,9 @@ class RAGService:
             if not (cited & available):
                 return None  # the headline's own section must be in the visible context
 
-            bnss = _bnss_sections(visible)
+            # Procedure steps ground against the injected BNSS process arc too (offence
+            # queries don't retrieve procedure, so without this 'what happens next' is empty).
+            bnss = _bnss_sections(visible) | _bnss_sections(proc)
 
             def clean(key: str) -> list[str]:
                 """Trim, cap, and drop ungrounded-classification / outcome-prediction bullets."""

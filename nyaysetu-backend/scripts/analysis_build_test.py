@@ -28,8 +28,11 @@ def chunk(act, section, text="x"):
 svc = RAGService(llm=object(), retriever=object())
 
 BNS318 = chunk("BNS", "318", "Whoever cheats shall be punished ... up to seven years and fine.")
-BNSS173 = chunk("BNSS", "173", "Information in cognizable cases ... FIR.")  # note: 'cognizable' literally present
-VISIBLE = [BNS318, BNSS173]
+BNSS173 = chunk("BNSS", "173", "Information in cognizable cases ... FIR.")
+# Realistic: an offence query puts only the OFFENCE (BNS) in the model-visible context; the
+# BNSS process arc arrives separately via _procedure_context (the `proc` argument).
+VISIBLE = [BNS318]
+PROC = [BNSS173]
 
 passed = failed = 0
 
@@ -44,8 +47,8 @@ def check(name, cond):
     print(f"[{mark}] {name}")
 
 
-def build(raw, *, conf="high", verified=True, ref="BNS Section 318", visible=VISIBLE, hindi=False):
-    return svc._build_analysis(raw, visible, hindi, conf, verified, ref)
+def build(raw, *, conf="high", verified=True, ref="BNS Section 318", visible=VISIBLE, proc=PROC, hindi=False):
+    return svc._build_analysis(raw, visible, list(proc), hindi, conf, verified, ref)
 
 
 FULL = {
@@ -78,9 +81,16 @@ check("happy path returns CaseAnalysis", a is not None)
 check("applicable_law drops fabricated section 999",
       a and a.applicable_law == ["BNS Section 318 — cheating — up to 7 years and fine (was IPC 420)"])
 
-# 3. what_happens_next: only steps citing a BNSS section in context survive.
-check("what_happens_next keeps only the BNSS-grounded step",
+# 3. what_happens_next: only steps citing a BNSS section survive — and the grounding
+#    comes from the INJECTED procedure arc (proc=[BNSS173]), not the offence context.
+check("what_happens_next keeps only the BNSS-grounded step (via injected procedure)",
       a and a.what_happens_next == ["File an FIR (BNSS Section 173)."])
+
+# 3b. With NO procedure injected, a BNSS step has nothing to ground on -> dropped,
+#     but the rest of the analysis still builds.
+no_proc = build(FULL, proc=[])
+check("what_happens_next empty when no procedure arc is injected",
+      no_proc is not None and no_proc.what_happens_next == [])
 
 # 4. also_possible: outcome prediction AND classification bullets dropped; safe stem kept.
 check("also_possible keeps only the impersonal, non-classification bullet",
