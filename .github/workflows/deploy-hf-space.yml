@@ -12,8 +12,13 @@ name: Deploy backend to HF Space
 on:
   push:
     branches: [main]
+    # CODE only. Data/index changes are handled by publish-index.yml (which rebuilds the
+    # index, uploads it, THEN factory-rebuilds) — so we don't trigger a rebuild here on
+    # data changes and briefly serve the old index.
     paths:
-      - "nyaysetu-backend/**"
+      - "nyaysetu-backend/app/**"
+      - "nyaysetu-backend/requirements.txt"
+      - "nyaysetu-backend/Dockerfile"
       - "hf-space/**"
       - ".github/workflows/deploy-hf-space.yml"
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab

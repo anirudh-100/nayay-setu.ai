@@ -1,0 +1,100 @@
+name: Rebuild and publish search index
+
+# When the index's SOURCE DATA changes (act CSVs, mappings, the QA/judgment sets) or the
+# loader/build logic changes, rebuild the Qdrant + BM25 index and publish it to the HF
+# dataset the Space downloads at boot — then factory-rebuild the Space so it re-pulls the
+# new index. This makes content/index updates as hands-free as code deploys.
+#
+# Needs the same HF_TOKEN repo secret as deploy-hf-space.yml (a HF *write* token). The
+# embedding pass on CPU can take a while; that's expected for an occasional content update.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "nyaysetu-backend/data/**"
+      - "nyaysetu-backend/app/rag/loaders.py"
+      - "nyaysetu-backend/scripts/build_index.py"
+
+concurrency:
+  group: publish-index
+  cancel-in-progress: true
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check HF_TOKEN is configured
+        id: check
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -n "$HF_TOKEN" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "HF_TOKEN secret not set — skipping index publish."
+          fi
+
+      - name: Cache Hugging Face model downloads
+        if: steps.check.outputs.ok == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-inlegalbert-v1
+
+      - name: Install dependencies
+        if: steps.check.outputs.ok == 'true'
+        working-directory: nyaysetu-backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install -r requirements.txt
+          pip install "huggingface_hub>=0.25"
+
+      - name: Build the index (Qdrant + BM25)
+        if: steps.check.outputs.ok == 'true'
+        working-directory: nyaysetu-backend
+        run: python scripts/build_index.py
+
+      - name: Zip index (contents at root: qdrant/ + bm25.pkl)
+        if: steps.check.outputs.ok == 'true'
+        working-directory: nyaysetu-backend/models/index
+        run: |
+          zip -r "$GITHUB_WORKSPACE/nyaysetu-index.zip" . -x "*.lock"
+          ls -lh "$GITHUB_WORKSPACE/nyaysetu-index.zip"
+
+      - name: Publish index to the HF dataset
+        if: steps.check.outputs.ok == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+          HfApi(token=os.environ["HF_TOKEN"]).upload_file(
+              path_or_fileobj="nyaysetu-index.zip",
+              path_in_repo="nyaysetu-index.zip",
+              repo_id="annieyyyy/nyaysetu-index",
+              repo_type="dataset",
+              commit_message="CI: rebuild search index",
+          )
+          print("Uploaded nyaysetu-index.zip to dataset annieyyyy/nyaysetu-index.")
+          PY
+
+      - name: Factory-rebuild the Space so it re-downloads the new index
+        if: steps.check.outputs.ok == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          curl -sf -X POST -H "Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/api/spaces/annieyyyy/nyaysetu-api/restart?factory=true" \
+            && echo "Space factory rebuild triggered — it will boot and pull the new index."
