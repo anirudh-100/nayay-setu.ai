@@ -50,7 +50,8 @@
   "errorTitle": "Something went wrong",
   "errorNetwork": "Couldn't reach the legal assistant. Make sure the backend is running, then try again.",
   "errorGeneric": "The assistant is temporarily unavailable. Please try again in a moment.",
-  "footerNote": "Information, not legal advice. Runs on local, private AI.",
+  "footerNote": "Information, not legal advice — verify before you rely on it.",
+  "aboutLink": "About & limits",
   "responseTime": "Answered in {ms} ms",
   "draftLaunch": "Draft a letter or complaint",
   "draftMenuTitle": "What do you want to draft?",
@@ -66,5 +67,25 @@
   "draftDocLabel": "Your document (ready to use)",
   "draftCopy": "Copy",
   "draftCopied": "Copied",
-  "draftBasedOn": "Based on"
+  "draftBasedOn": "Based on",
+  "about": {
+    "title": "About & limitations",
+    "back": "← Back",
+    "whatTitle": "What this is",
+    "whatBody": "NyaySetu is a free assistant that helps people in India understand the law in plain language — answering questions and explaining documents, with citations to the exact current-law sections (BNS / BNSS / BSA) and Supreme Court judgments they come from.",
+    "howTitle": "How it works",
+    "howBody": "Your question is matched against a library of Indian legal sources; an AI then writes the answer using only what it found, and every section it cites is checked back against those sources. When it isn't confident, it says so and points you to free legal aid instead of guessing.",
+    "limitsTitle": "Important limits — please read",
+    "limits": [
+      "This is legal information, not legal advice — and using it does not create a lawyer–client relationship.",
+      "AI can make mistakes. Check anything important against the official bare act or with a lawyer before you act on it.",
+      "It cannot replace a lawyer for your specific situation, represent you, or guarantee any outcome.",
+      "Laws and sources change; some information may be out of date."
+    ],
+    "privacyTitle": "Your privacy",
+    "privacyBody": "There is no login or account. Your question is sent to the AI engine only to generate your answer. Please avoid sharing sensitive personal details you wouldn't want processed. We do not sell your data.",
+    "helpTitle": "Need a real lawyer?",
+    "helpBody": "For free, official legal help, contact your District Legal Services Authority (DLSA) or call the NALSA legal-aid helpline at 15100.",
+    "reviewNote": "This is a plain-language summary; a formal Privacy Policy and Terms, reviewed by a legal professional, will follow."
+  }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { askQuestion, analyzeFile, draftDocument, ApiError } from "@/lib/api";
@@ -147,7 +148,12 @@ export function ChatApp() {
             loading={loading}
             showExamples={false}
           />
-          <p className="mt-2 text-center text-[11px] text-muted">{t("footerNote")}</p>
+          <p className="mt-2 text-center text-[11px] text-muted">
+            {t("footerNote")}{" · "}
+            <Link href="/about" className="underline underline-offset-2 hover:opacity-80">
+              {t("aboutLink")}
+            </Link>
+          </p>
         </div>
       </main>
 
