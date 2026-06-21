@@ -1,0 +1,45 @@
+name: Deploy backend to HF Space
+
+# Auto-deploy: when backend code (or the Space's Dockerfile) changes on main, trigger a
+# factory rebuild of the Hugging Face Space so it re-clones the latest code. This removes
+# the manual "Settings -> Factory rebuild" step after every push.
+#
+# ONE-TIME SETUP: add a repo secret HF_TOKEN (a Hugging Face *write* access token from
+# https://huggingface.co/settings/tokens) under GitHub repo Settings -> Secrets and
+# variables -> Actions -> New repository secret. Until that secret exists, this workflow
+# runs but safely skips (so it never fails noisily).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "nyaysetu-backend/**"
+      - "hf-space/**"
+      - ".github/workflows/deploy-hf-space.yml"
+  workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HF_TOKEN is configured
+        id: check
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -n "$HF_TOKEN" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "HF_TOKEN secret not set — skipping auto-deploy. Add it in Settings > Secrets to enable."
+          fi
+      - name: Trigger HF Space factory rebuild
+        if: steps.check.outputs.ok == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "Triggering factory rebuild of annieyyyy/nyaysetu-api ..."
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${HF_TOKEN}" \
+            "https://huggingface.co/api/spaces/annieyyyy/nyaysetu-api/restart?factory=true" \
+            && echo "" && echo "Factory rebuild triggered. Watch it at https://huggingface.co/spaces/annieyyyy/nyaysetu-api"
