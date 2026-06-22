@@ -86,6 +86,28 @@ _FALLBACK_ACTION_HI = "अपनी स्थिति के अनुसार
 def _is_hindi(language: str, query: str) -> bool:
     """Answer in Hindi if the UI asked for it OR the question itself is in Devanagari."""
     return (language or "").strip().lower().startswith("hi") or bool(_DEVANAGARI.search(query or ""))
+
+
+# A lay person describes a situation in the first/third person ("the shopkeeper sold ME a
+# defective mixer", "I bought a fridge and it arrived broken", "they won't refund my
+# money"). Such prose names no statute and reranks deeply negative verbatim, so it needs
+# the rewrite even when it's a touch under the 12-word narrative bar. Pure keyword lookups
+# ("grievous hurt punishment", "knife attack ICU") carry none of these markers.
+_NARRATIVE_RE = re.compile(
+    r"\b(?:i|we|me|my|us|our|he|she|they|him|her|them|his|their)\b"
+    r"|\bthe\s+\w+\s+(?:sold|gave|took|charged|refus|deni|damag|lost|broke|cheat|deliver|"
+    r"replac|return|paid|promis|sent|kept|won)",
+    re.IGNORECASE,
+)
+
+
+def _is_lay_narrative(query: str) -> bool:
+    """True if the text reads like a described situation (first/third-person storytelling)
+    rather than a keyword lookup — the case where verbatim retrieval fails and a distilling
+    rewrite is needed."""
+    return bool(_NARRATIVE_RE.search(query or ""))
+
+
 # Cap how many current-law successor chunks we inject, so expansion enriches context
 # without crowding out the directly-retrieved sources.
 _MAX_EXPANSION = 4
@@ -461,7 +483,13 @@ class RAGService:
         # so retrieval stays strong. History is used ONLY to disambiguate, never as a source.
         search_query = self._standalone_query(query, history, hindi)
 
-        results = self._retriever.retrieve(search_query)
+        # Robust retrieval: the lay-narrative rewrite that rescues a poorly-retrieving
+        # situation ("the shopkeeper sold me a defective mixer and won't refund") is
+        # NONDETERMINISTIC — one sampling produces a strong statute-matching query, the next
+        # a weak one that reranks below the abstain bar and would (wrongly) abstain. We make
+        # the decision stable by, when the first rewrite lands below threshold, trying one
+        # fresh rewrite AND the original text, then keeping the best-scoring merged set.
+        results, search_query = self._robust_retrieve(query, search_query, history, hindi)
         top_score = results[0].score if results else None
         logger.info(
             "Retrieved %d chunks (top_score=%s) for query=%r (hindi=%s)",
@@ -562,6 +590,96 @@ class RAGService:
             disclaimer=DISCLAIMER_HI if hindi else DISCLAIMER,
             response_time_ms=elapsed_ms,
         )
+
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _merge_results(*result_lists: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        """Union retrieval result sets, de-duped by chunk id, keeping the MAX score seen
+        for each chunk; sorted best-first. Used to combine the rewrite and original-query
+        retrievals so the strongest evidence for a chunk wins regardless of which phrasing
+        surfaced it."""
+        best: dict[str, RetrievedChunk] = {}
+        for results in result_lists:
+            for rc in results:
+                cid = rc.chunk.id
+                kept = best.get(cid)
+                if kept is None or rc.score > kept.score:
+                    best[cid] = rc
+        return sorted(best.values(), key=lambda rc: rc.score, reverse=True)
+
+    def _robust_retrieve(
+        self, query: str, search_query: str, history: list, hindi: bool
+    ) -> tuple[list[RetrievedChunk], str]:
+        """Retrieve robustly against query-rewrite variance.
+
+        The first attempt uses the rewrite already computed by the caller. If its top
+        rerank score clears the abstain bar, we're done (the fast, common path — no extra
+        work). Otherwise the rewrite *may* simply be a weak sampling of a non-deterministic
+        rewriter (a lay consumer narrative reranks deeply negative raw, and only a good
+        rewrite rescues it). So we make ONE cheap recovery pass with at most one extra
+        rewrite:
+          - retrieve with the ORIGINAL text (free of rewrite variance, no LLM call), and
+          - draw ONE STRONG recovery rewrite (_recovery_query) and retrieve with it,
+        then keep the best-scoring MERGED set (union by chunk id, max score). Because the
+        merge keeps the max score per chunk across attempts, if ANY phrasing clears the bar
+        the merged top clears it — removing the ~50/50 flakiness WITHOUT lowering the
+        (correctly calibrated) abstain threshold. A genuinely off-topic query has no
+        phrasing that reranks above 0 (and _recovery_query returns the original text for a
+        non-legal query, so we never manufacture a statute match for junk) — junk keeps
+        abstaining on every run.
+
+        Returns the chosen (results, search_query) so the caller can keep prompting with the
+        phrasing that actually retrieved.
+        """
+        results = self._retriever.retrieve(search_query)
+        top = results[0].score if results else None
+        if top is not None and top >= self._abstain_threshold:
+            return results, search_query
+
+        logger.info(
+            "Rewrite retrieval weak (top=%s < %.2f) - recovering with original + strong recovery rewrite",
+            f"{top:.3f}" if top is not None else "none",
+            self._abstain_threshold,
+        )
+
+        attempts: list[tuple[list[RetrievedChunk], str]] = [(results, search_query)]
+
+        # 1. The original text, with no rewrite variance at all. Cheap and deterministic.
+        try:
+            orig = self._retriever.retrieve(query)
+            attempts.append((orig, query))
+        except Exception as e:
+            logger.warning("Original-query retrieval failed during recovery: %s", e)
+
+        # 2. One STRONG recovery rewrite. Rather than just re-sampling the same prompt (which
+        #    flakes the same way), use a stricter prompt engineered to LEAD with the governing
+        #    Act and STACK its formal terms — the phrasing shape that reranks well and stably
+        #    (a "Consumer Protection Act deficiency in service defective goods unfair trade
+        #    practice consumer complaint"-style query scores ~+3, not the lay narrative's -6).
+        try:
+            alt = self._recovery_query(query, history, hindi)
+            if alt.strip() not in {search_query.strip(), query.strip()}:
+                alt_results = self._retriever.retrieve(alt)
+                attempts.append((alt_results, alt))
+        except Exception as e:
+            logger.warning("Recovery-rewrite retrieval failed: %s", e)
+
+        # Keep the attempt whose own top score is highest, but MERGE every attempt into it so
+        # a chunk that scored well under any phrasing is available (max score per chunk id).
+        def attempt_top(a: tuple[list[RetrievedChunk], str]) -> float:
+            return a[0][0].score if a[0] else float("-inf")
+
+        best_attempt = max(attempts, key=attempt_top)
+        merged = self._merge_results(*[a[0] for a in attempts])
+        merged = merged[: self._retriever.top_k]
+        new_top = merged[0].score if merged else None
+        logger.info(
+            "Recovery: best single top=%s, merged top=%s (chose query=%r)",
+            f"{attempt_top(best_attempt):.3f}" if best_attempt[0] else "none",
+            f"{new_top:.3f}" if new_top is not None else "none",
+            best_attempt[1][:80],
+        )
+        return merged, best_attempt[1]
 
     # ------------------------------------------------------------------ #
     def _procedure_context(self, visible: list[RetrievedChunk]) -> list[RetrievedChunk]:
@@ -742,7 +860,16 @@ class RAGService:
         has_devanagari = bool(_DEVANAGARI.search(query))
         # A described situation is long and lay-worded; a keyword lookup is short. Only the
         # former needs distilling, so the common short-question path stays a single call.
-        is_narrative = len(query.split()) >= 12
+        # A lay narrative isn't always >=12 words ("the shopkeeper sold me a defective mixer
+        # and refuses to refund" is 11) — yet it retrieves DEEPLY negative verbatim because
+        # it names no statute. So we also distil a SHORTER text that *reads* like a narrative:
+        # first/third-person storytelling (I/me/my/we, or "the <party> <verb>ed me/my…"). A
+        # terse keyword lookup ("knife attack ICU", "grievous hurt punishment") has no such
+        # signal and still skips the LLM (fast path). Junk that happens to match ("which
+        # smartphone should I buy") is harmless: it reranks far below the abstain bar either
+        # way, so distilling it never makes it answer.
+        words = query.split()
+        is_narrative = len(words) >= 12 or (len(words) >= 7 and _is_lay_narrative(query))
         if not history and not has_devanagari and not is_narrative:
             return query
         try:
@@ -778,6 +905,57 @@ class RAGService:
         except Exception as e:
             logger.warning("Query resolution failed (%s); retrieving with original text.", e)
         return query
+
+    # ------------------------------------------------------------------ #
+    def _recovery_query(self, query: str, history: list, hindi: bool) -> str:
+        """A STRONG, statute-leading rewrite used only when the first rewrite retrieved
+        below the abstain bar.
+
+        The default rewrite asks for a terse 4-15-word query, which on a lay narrative
+        sometimes omits the governing Act and reranks negative. This recovery prompt instead
+        forces the shape that reranks high and stably: LEAD with the exact Indian Act/code,
+        then STACK its formal statutory terms (the corpus is statute text, so term overlap is
+        what the cross-encoder rewards). Falls back to the default rewrite, then the original
+        text, on any failure — never raises."""
+        try:
+            convo = ""
+            if history:
+                convo = "\n\nCONVERSATION (resolve 'that'/'it'/'the punishment' from it):\n" + "\n".join(
+                    f"{t.role}: {t.content[:300]}" for t in history[-6:] if getattr(t, "content", "")
+                )
+            prompt = (
+                "You convert a person's LEGAL PROBLEM into one strong English search query "
+                "for an Indian STATUTE database.\n"
+                "FIRST decide: does the text describe an actual legal matter — a dispute, a "
+                "harm, a right, an offence, a contract/grievance someone could take to a court, "
+                "tribunal, police, or consumer forum?\n"
+                "- If NO (it is shopping advice, a product recommendation, a recipe, general "
+                "chit-chat, or anything with no legal grievance), return {\"q\": \"\"} — an "
+                "EMPTY string. Do NOT invent a law for a non-legal question.\n"
+                "- If YES, build the query: (1) START with the exact governing Indian Act/code "
+                "name in full (e.g. 'Consumer Protection Act', 'Bharatiya Nyaya Sanhita', "
+                "'Transfer of Property Act', 'Negotiable Instruments Act'); (2) THEN list 5-9 "
+                "formal statutory terms — NOT lay words. Consumer example: 'Consumer Protection "
+                "Act deficiency in service defective goods unfair trade practice consumer "
+                "complaint compensation refund'. Crime example: 'Bharatiya Nyaya Sanhita "
+                "cheating dishonest inducement delivery of property'. No sentences, no "
+                "pronouns, no story — just the Act name followed by terms.\n"
+                "Translate from Hindi if needed. Return ONLY JSON: {\"q\": \"...\"}."
+                + convo + "\n\nTEXT: " + query
+            )
+            q = _stringify(self._llm.generate_json(prompt).get("q"))
+            if q:
+                logger.info("Recovery rewrite: %r -> %r", query[:60], q[:90])
+                return q
+            # Empty q == the model judged this not a legal matter. Honour that: do NOT fall
+            # through to a rewrite that would manufacture a statute query for junk. Return the
+            # original so junk keeps reranking far below the abstain bar (stays abstained).
+            logger.info("Recovery rewrite judged non-legal (empty q) for %r — keeping original.", query[:60])
+            return query
+        except Exception as e:
+            logger.warning("Recovery rewrite failed (%s); falling back to default rewrite.", e)
+        # Fall back to a default rewrite (still better than the original lay narrative).
+        return self._standalone_query(query, history, hindi)
 
     # ------------------------------------------------------------------ #
     # Phase 2 helpers
