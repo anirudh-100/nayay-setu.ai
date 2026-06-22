@@ -175,6 +175,131 @@ _PRECEDENT_RE = re.compile(
     r"\bv\.?\s+[A-Z]\w|\bvs\.?\s+[A-Z]\w|\bSCC\b|\bS\.?\s?C\.?\s?R\.?\b|\bAIR\b|\b\d{4}\s*SCC\b",
 )
 
+# --------------------------------------------------------------------------- #
+# Reporter-citation scrub (fabrication-adjacent risk the audit flagged once).
+# A precise LAW-REPORT citation string — "(2024) 10 SCC 1", "[2024] 1 S.C.R. 1134",
+# "AIR 2024 SC 567" — appended by the LLM but NOT present verbatim in any retrieved
+# source chunk is an invented precedent reference. Case NAMES from the corpus are fine;
+# only the precise reporter token (or its enclosing parenthetical) is at risk. We strip
+# such a token from the user-facing 'answer'/'reasoning' UNLESS it appears verbatim in a
+# visible source chunk's text. Deterministic, surgical, never raises.
+#
+# Each pattern captures the full reporter token, e.g.:
+#   SCC  : "(2024) 10 SCC 1"        and bare "2024 SCC 1" / "(2024) 10 S.C.C. 1"
+#   SCR  : "[2024] 1 S.C.R. 1134"   (square or round brackets, dotted or not)
+#   AIR  : "AIR 2024 SC 567"        (AIR <year> <court> <num>)
+# Case-insensitive, tolerant of internal spacing (incl. dotted "S.C.C." / "S.C.R.").
+_REPORTER_CITATION_RES: tuple[re.Pattern[str], ...] = (
+    # SCR — bracketed year then "S.C.R." / "SCR": "[2024] 1 S.C.R. 1134", "(2024) SCR 5"
+    re.compile(
+        r"[\[(]\s*\d{4}\s*[\])]\s*(?:\d+\s+)?S\.?\s?C\.?\s?R\.?\s*\d+",
+        re.IGNORECASE,
+    ),
+    # SCC — bracketed year then "SCC": "(2024) 10 SCC 1", "[2024] 10 S.C.C. 1"
+    re.compile(
+        r"[\[(]\s*\d{4}\s*[\])]\s*(?:\d+\s+)?S\.?\s?C\.?\s?C\.?\s*\d+",
+        re.IGNORECASE,
+    ),
+    # AIR — "AIR 2024 SC 567" (court abbrev. 2-4 letters: SC, Del, Bom, All, …)
+    re.compile(
+        r"\bA\.?\s?I\.?\s?R\.?\s*\d{4}\s*[A-Za-z]{2,4}\s*\d+",
+        re.IGNORECASE,
+    ),
+    # Bare SCC/SCR without brackets: "2024 SCC 1", "2024 10 SCR 5"
+    re.compile(
+        r"\b\d{4}\s+(?:\d+\s+)?S\.?\s?C\.?\s?[CR]\.?\s*\d+",
+        re.IGNORECASE,
+    ),
+)
+
+# Collapse any run of whitespace so a citation that the LLM spaced differently than the
+# source ("S.C.R.  1134" vs "S.C.R. 1134") still matches verbatim-ish against the chunk.
+_WS_RE = re.compile(r"\s+")
+
+
+def _norm_citation(s: str) -> str:
+    """Lower-cased, whitespace-collapsed form for verbatim-tolerant presence checks."""
+    return _WS_RE.sub(" ", (s or "")).strip().lower()
+
+
+def _tidy_after_scrub(text: str) -> str:
+    """Repair punctuation left dangling after a citation token is excised, so the
+    sentence stays readable. Drops empty () / [] husks, doubled spaces, and a space
+    before sentence punctuation; never touches sentence content."""
+    # Empty parenthetical husks left behind, e.g. "the Court held (  )." -> "the Court held."
+    text = re.sub(r"\(\s*[,;]?\s*\)", "", text)
+    text = re.sub(r"\[\s*[,;]?\s*\]", "", text)
+    # "see ( , )" style leftovers handled above; now collapse spacing.
+    text = _WS_RE.sub(" ", text)
+    # Space before terminal/clausal punctuation, and doubled punctuation.
+    text = re.sub(r"\s+([,.;:)\]])", r"\1", text)
+    text = re.sub(r"([(\[])\s+", r"\1", text)
+    text = re.sub(r"\(\s*\)", "", text)
+    text = re.sub(r",\s*,", ",", text)
+    text = re.sub(r"\s*,\s*\.", ".", text)
+    return text.strip()
+
+
+def _scrub_reporter_citations(text: str, sources: list[RetrievedChunk]) -> str:
+    """Remove precise law-report citation strings (SCC / SCR / AIR) NOT present verbatim
+    in any retrieved source chunk, leaving the surrounding sentence readable.
+
+    A citation token is KEPT only if its whitespace-collapsed, case-folded form is a
+    substring of some visible source chunk's text — i.e. the corpus actually contains it.
+    Otherwise the token is excised (along with an immediately-enclosing parenthetical when
+    that parenthetical held only the citation) and the residue tidied. Defensive: any
+    failure returns the input unchanged (we never raise, and never weaken the answer)."""
+    try:
+        if not text:
+            return text
+        haystack = " ".join(_norm_citation(rc.chunk.text) for rc in (sources or []))
+
+        def is_grounded(token: str) -> bool:
+            return _norm_citation(token) in haystack
+
+        # Collect (start, end) spans to remove, widening to swallow a parenthetical that
+        # wrapped ONLY the citation (e.g. " (AIR 2024 SC 567)" -> "").
+        spans: list[tuple[int, int]] = []
+        for rx in _REPORTER_CITATION_RES:
+            for m in rx.finditer(text):
+                if is_grounded(m.group(0)):
+                    continue
+                start, end = m.start(), m.end()
+                # If the citation sits inside a parenthetical that contains nothing else of
+                # substance, remove the whole "(...)" including a leading space.
+                lp = text.rfind("(", 0, start)
+                rp = text.find(")", end)
+                if lp != -1 and rp != -1:
+                    inner = text[lp + 1:rp]
+                    # only the citation (+ light connective words) lived in the parens
+                    residue = inner[: start - lp - 1] + inner[end - lp - 1:]
+                    if re.fullmatch(r"[\s,;:]*(?:see|cf\.?|e\.g\.?|citing)?[\s,;:]*", residue, re.IGNORECASE):
+                        start = lp
+                        if start > 0 and text[start - 1] == " ":
+                            start -= 1
+                        end = rp + 1
+                spans.append((start, end))
+
+        if not spans:
+            return text
+
+        # Merge overlapping spans, then excise from the end so indices stay valid.
+        spans.sort()
+        merged: list[tuple[int, int]] = []
+        for s, e in spans:
+            if merged and s <= merged[-1][1]:
+                merged[-1] = (merged[-1][0], max(merged[-1][1], e))
+            else:
+                merged.append((s, e))
+        out = text
+        for s, e in reversed(merged):
+            out = out[:s] + out[e:]
+        return _tidy_after_scrub(out)
+    except Exception as exc:  # never let scrubbing break a query
+        logger.warning("Reporter-citation scrub skipped: %s", exc)
+        return text
+
+
 # "also_possible" carries the highest outcome-prediction risk, so it is allowlisted: a
 # bullet survives only if it OPENS with an approved impersonal stem (EN or HI). Anything
 # that isn't framed as "the law / a court may…" is dropped rather than trusted.
@@ -537,6 +662,14 @@ class RAGService:
             "Consult a qualified lawyer for guidance specific to your situation."
         )
         reasoning = _stringify(raw.get("reasoning")) or "No strong context, used general principles."
+
+        # Reporter-citation scrub: never surface a precise law-report citation string
+        # (SCC/SCR/AIR) that the LLM appended but that isn't present verbatim in a source
+        # the user can actually see. Graded against EXACTLY the visible source chunks (the
+        # citations the answer is allowed to lean on) + the injected procedure arc.
+        scrub_sources = visible + proc_chunks
+        answer = _scrub_reporter_citations(answer, scrub_sources)
+        reasoning = _scrub_reporter_citations(reasoning, scrub_sources)
 
         llm_confidence = _stringify(raw.get("confidence")).lower() or "?"
         confidence = _enforce_confidence(reasoning, answer)
