@@ -586,6 +586,69 @@ def _current_ref_in_note(note: str, to_codes: list[str]) -> tuple[str, str] | No
     return None
 
 
+# Pull a current-code (BNS/BNSS/BSA) section named in a free-text reference string, e.g.
+# "BNS Section 307 (was IPC 307)" -> ("BNS", "307"). Returns the FIRST/lead current ref —
+# the headline the answer leads with. Mirrors _current_ref_in_note but lead-anchored.
+def _lead_current_ref(text: str, to_codes: list[str]) -> tuple[str, str] | None:
+    if not text:
+        return None
+    best: tuple[int, str, str] | None = None
+    for code in to_codes:
+        c = re.escape(code)
+        m = re.search(rf"\b{c}\b[\s.]*(?:section|sec\.?|s\.?|धारा)?\s*(\d+[A-Za-z]?)", text, re.IGNORECASE)
+        if m and (best is None or m.start() < best[0]):
+            best = (m.start(), code, m.group(1))
+    return (best[1], best[2]) if best else None
+
+
+def _current_law_guard_violation(law_reference: str) -> tuple[str, str, str] | None:
+    """The grave-offence current-law guard: detect a headline citation whose CURRENT
+    (BNS/BNSS/BSA) lead section is internally CONTRADICTED by a repealed section named in
+    the SAME reference string, per the curated LawMap.
+
+    The fragile, high-stakes case this protects against: an attempt-on-life fact pattern
+    (victim alive + intent to kill = IPC 307 -> BNS 109) that the small model sometimes
+    headlines as "BNS Section 307" — which is a *theft* offence (Theft after preparation…,
+    per data/bns/bns_sections.csv, the successor of IPC 382, NOT IPC 307). When the model
+    writes a headline like "BNS Section 307 (was IPC 307)", that is provably self-
+    contradictory: LawMap says IPC 307's successor is BNS 109, not BNS 307. We detect ONLY
+    that mapping contradiction — purely from the curated table, never from offence keywords —
+    so the check can never mislabel a case whose framing happens to mention a weapon or the
+    word "kill".
+
+    Returns (current_code, current_section, repealed_ref) describing the contradiction when
+    the SAME reference names a current lead section AND a repealed section whose verified 1:1
+    successor is a DIFFERENT base section than that lead. Returns None otherwise (the common,
+    consistent case — e.g. "BNS 307 (was IPC 382)" or "BNS 103 (was IPC 302)" both check
+    out). Never raises."""
+    try:
+        from app.rag.law_map import LawMap
+
+        law_map = LawMap.instance()
+        to_codes = list(law_map.to_codes())
+        lead = _lead_current_ref(law_reference, to_codes)
+        if not lead:
+            return None
+        lead_code, lead_sec = lead[0], _base_num(lead[1])
+        if not lead_sec:
+            return None
+        for code, sec in _scan_repealed_refs(law_reference, list(law_map.from_codes())):
+            entry = law_map.successor(code, sec)
+            if not (entry and entry.get("new")):
+                continue
+            # The repealed section maps to a DIFFERENT current code/section than the headline
+            # claims — and the headline reuses the repealed section's OWN number on the wrong
+            # code (the IPC 307 -> BNS 307 footgun). Both conditions = a provable contradiction.
+            succ_code = (entry.get("to_code") or "").upper()
+            succ_base = _base_num(entry["new"])
+            if succ_code == lead_code.upper() and succ_base and succ_base != lead_sec:
+                return (lead_code, lead_sec, f"{code} {sec}")
+        return None
+    except Exception as exc:  # never let the guard break a query
+        logger.warning("Current-law guard skipped: %s", exc)
+        return None
+
+
 # --------------------------------------------------------------------------- #
 class RAGService:
     def __init__(
@@ -685,6 +748,21 @@ class RAGService:
         citation_verified = _verify_citation(law_reference, ordered)
         if not citation_verified:
             logger.warning("Citation unverified: %r not in retrieved sources — downgrading.", law_reference)
+            confidence = "low"
+
+        # Grave-offence current-law guard: a headline that is internally CONTRADICTED by the
+        # curated repealed->current map (e.g. "BNS 307 (was IPC 307)" — IPC 307's successor is
+        # BNS 109, a theft section being asserted as attempt-to-murder) is a misclassification
+        # signal as serious as an unverified citation. We do NOT silently rewrite the offence
+        # (that risks asserting the wrong section the other way); we downgrade to low confidence
+        # so the rich analysis block (which needs high confidence) is SUPPRESSED and the citizen
+        # is escalated to legal aid — failing safe rather than vouching for a contradictory map.
+        guard = _current_law_guard_violation(law_reference)
+        if guard:
+            logger.warning(
+                "Current-law guard tripped: headline %r contradicts %s->%s mapping — downgrading.",
+                law_reference, guard[2], guard[0],
+            )
             confidence = "low"
 
         current_law_note = self._current_law_note(ordered, search_query, hindi, law_reference)
@@ -859,6 +937,13 @@ class RAGService:
         bailable") or fell through an ambiguous cruelty 85 to dowry-death 80. A conditional
         or ambiguous lead now stays UNLABELLED rather than mislabelled."""
         try:
+            # Grave-offence current-law guard: if the headline is internally inconsistent
+            # with the curated repealed->current map (the IPC 307 -> BNS 307 attempt-on-life
+            # footgun), suppress the grounded classification rather than assert a label for a
+            # section the answer evidently cited by mistake.
+            if _current_law_guard_violation(law_reference):
+                logger.info("Offence classification suppressed: current-law guard tripped for %r", law_reference)
+                return ""
             secs = re.findall(
                 r"\bBNS\b\s*(?:Section|Sec\.?|S\.?|धारा)?\s*(\d+[A-Za-z]?)",
                 law_reference or "", re.IGNORECASE,
