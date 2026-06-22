@@ -758,9 +758,17 @@ class RAGService:
                 )
             else:
                 prompt = (
-                    "Turn this into a short English legal search query (3-12 words) naming the "
-                    "likely Indian offence(s) or legal concept(s) and key terms a statute book "
-                    'would use. Translate from Hindi if needed. Return ONLY JSON: {"q": "..."}.'
+                    "Rewrite this into a short English legal search query (4-15 words) that a "
+                    "statute book or case index would match. Name the most relevant Indian "
+                    "Act/code AND the precise legal concept(s) — across ALL areas of law, not "
+                    "just crimes:\n"
+                    "- consumer (defective goods, deficient service, refund, non-delivery, "
+                    "warranty, e-commerce) => e.g. 'Consumer Protection Act deficiency in "
+                    "service defective goods unfair trade practice consumer complaint';\n"
+                    "- crime => the offence + code, e.g. 'cheating BNS', 'grievous hurt';\n"
+                    "- tenancy/labour/family/civil => the cause of action and its statute.\n"
+                    "Prefer formal statutory terms over lay words. Translate from Hindi if "
+                    'needed. Return ONLY JSON: {"q": "..."}.'
                     "\n\nTEXT: " + query
                 )
             q = _stringify(self._llm.generate_json(prompt).get("q"))
