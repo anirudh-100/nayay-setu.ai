@@ -164,6 +164,40 @@
       }
     },
     {
+      "code": "CoW",
+      "title": "Code on Wages, 2019",
+      "unit": "Section",
+      "code_status": "current",
+      "effective_date": "2025-11-21",
+      "path": "data/acts/code_on_wages.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": true,
+      "provenance": {
+        "authority": "India Code (indiacode.nic.in) — Code on Wages, 2019 (Act 29 of 2019), text as in force from 21 Nov 2025",
+        "source_url": "https://www.indiacode.nic.in/bitstream/123456789/15793/1/aA2019-29.pdf",
+        "retrieved_at": "2026-06-24",
+        "note": "One of the four Labour Codes brought into force on 21 Nov 2025. Per s.69 it REPEALED the Payment of Wages Act 1936, Minimum Wages Act 1948, Payment of Bonus Act 1965 and Equal Remuneration Act 1976 — so this is the CURRENT wage/bonus/minimum-wage law. Parsed verbatim from the official India Code PDF (scripts/ingest_act_pdf.py); s.39 (set-on/set-off of allocable surplus) was not captured (its header was not at a line start in the PDF extraction)."
+      }
+    },
+    {
+      "code": "IRC",
+      "title": "Industrial Relations Code, 2020",
+      "unit": "Section",
+      "code_status": "current",
+      "effective_date": "2025-11-21",
+      "path": "data/acts/industrial_relations_code.csv",
+      "url_template": "ik",
+      "maps_to_act": null,
+      "verified": true,
+      "provenance": {
+        "authority": "India Code (indiacode.nic.in) — Industrial Relations Code, 2020 (Act 35 of 2020), text as in force from 21 Nov 2025",
+        "source_url": "https://www.indiacode.nic.in/bitstream/123456789/22040/1/A2020-35.pdf",
+        "retrieved_at": "2026-06-24",
+        "note": "One of the four Labour Codes brought into force on 21 Nov 2025. Per s.104 it REPEALED the Trade Unions Act 1926, Industrial Employment (Standing Orders) Act 1946 and Industrial Disputes Act 1947 — so this is the CURRENT law on retrenchment, dismissal, layoff, standing orders and industrial-dispute resolution. Parsed verbatim from the official India Code PDF; s.92 was not captured (header not at a line start in the PDF extraction)."
+      }
+    },
+    {
       "code": "Constitution",
       "title": "Constitution of India",
       "unit": "Article",
