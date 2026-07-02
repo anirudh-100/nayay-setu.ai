@@ -1,0 +1,46 @@
+# ============================================================================
+# NyaySetu legal model — Ollama Modelfile
+# ----------------------------------------------------------------------------
+# Serves the distilled Qwen3-4B student (fine-tuned in
+# training/nyaysetu_finetune_qwen3_4b.ipynb) as the local Ollama model
+# "nyaysetu-legal", replacing the generic `mistral` generator.
+#
+# HOW TO USE:
+#   1. Place nyaysetu-legal-qwen3-4b-q4_k_m.gguf (exported by the notebook)
+#      in THIS directory, next to this Modelfile.
+#   2. Create the model:
+#        cd nyaysetu-backend/training
+#        ollama create nyaysetu-legal -f Modelfile
+#   3. Point the backend at it — in nyaysetu-backend/.env set:
+#        LLM_PROVIDER=ollama
+#        OLLAMA_MODEL=nyaysetu-legal
+#      then restart the API. app/services/llm_service.py already calls Ollama's
+#      /api/generate with format=json, so no code change is needed.
+#
+# Quick smoke test after step 2:
+#   ollama run nyaysetu-legal "Return only JSON: {\"ok\": true}"
+# ============================================================================
+
+FROM ./nyaysetu-legal-qwen3-4b-q4_k_m.gguf
+
+# Low temperature: the backend needs stable, verifiable JSON with exact section
+# numbers — matches the temperature the OllamaClient also requests per call.
+PARAMETER temperature 0.2
+
+# 8192-token context: matches the max_seq_len the model was fine-tuned with and
+# is large enough for the full RAG prompt (context chunks + rules + question).
+PARAMETER num_ctx 8192
+
+# Stop at the end of the assistant turn (ChatML) so generations never run on.
+PARAMETER stop "<|im_end|>"
+
+# Qwen3 ChatML template. The backend sends one fully-built prompt string to
+# /api/generate; this wraps it exactly like the user turn the model saw during
+# fine-tuning (train_on_responses_only learned only the assistant JSON after
+# "<|im_start|>assistant\n").
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""

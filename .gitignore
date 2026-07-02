@@ -35,6 +35,10 @@ Thumbs.db
 # fetched raw source HTML/PDF for ingestion (re-fetchable, bulky)
 nyaysetu-backend/data/_raw_sources/
 
+# distillation artifacts: generated seed/teacher data (not source truth; keeping them
+# out also avoids needlessly triggering publish-index CI, which watches data/**)
+nyaysetu-backend/data/distill/
+
 # build logs
 nyaysetu-backend/build_index_log.txt
 nyaysetu-backend/install_log.txt
