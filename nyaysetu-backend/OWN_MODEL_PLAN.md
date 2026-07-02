@@ -1,457 +1,281 @@
-# Own Fine-Tuned Legal Model Plan (`nyaysetu-legal`)
+# NyaySetu Own-Model Plan — the fine-tuned Indian legal engine (v2)
 
-> Status: **locked design / not started.** This is the plan doc `CLAUDE.md` §"Active
-> initiatives" promises ("to be added once base-size/teacher are locked"). Base size and
-> teacher are now locked (below). A future session should read this top-to-bottom, then
-> confirm scope before touching files.
+> **Status: ACTIVE.** v2 supersedes v1 entirely. Built from: the implemented pipeline
+> (committed `a2675e8`), a 4-stream deep-research pass (benchmarks/competitors, data,
+> training, serving — all claims source-checked), an adversarial critique of that
+> research, and a **completed, measured 100-seed Gate-1 pilot**. Numbers in this doc
+> marked *measured* are real; everything else carries its uncertainty.
 
-## 0. TL;DR — the locked decisions
+---
 
-| Decision | Locked value | Why |
+## 0. The claim we are building toward (honest version)
+
+"Beat Indian law at the very best level" is not a falsifiable engineering goal — frontier
+models already beat human exam toppers on Indian legal MCQs (Gemini 2.5 Pro +7.6..+25.3
+pts on the adalat-ai court-ready study), and no 4B model approaches that closed-book. What
+IS winnable — and currently **unclaimed by anyone** — is this, on the public model card:
+
+1. **SYSTEM claim** — *"NyaySetu scores X% on AIBE past papers and Y% on the adalat-ai
+   6,218-MCQ benchmark, retrieval-on, abstentions counted as wrong — beating every
+   published open Indian legal fine-tune."* The bar is low and quantified: OpenNyAI's
+   **Aalap (Mistral-7B) scores 25.56% on AIBE** (pass mark 40%, gpt-3.5-turbo 58.72%).
+   InLegalLLaMA is a task model; SaulLM is US/EU law. **No open Indian legal model
+   ≤8B publishes a credible assistant-grade scorecard.**
+2. **TRUST claim (the real moat)** — *the only Indian legal AI publishing hallucination
+   metrics*: hallucinated-citation rate, abstention precision/recall, current-law-bridge
+   accuracy, Hindi/English parity, red-team pass rate. No competitor (Aalap, Lexlegis,
+   CaseMine, Jugalbandi) publishes ANY of these.
+3. **MODEL claim (only if measured)** — base-Qwen3-4B vs fine-tuned delta on the same
+   harness, proving the distillation itself added value.
+
+Timing pressure: BharatGen just shipped BhashaBench-Legal (24k validated legal MCQs) —
+that is release-grade eval infrastructure, i.e. a funded Indian legal model is likely
+coming. **First public scorecard + first published trust metrics wins the narrative.**
+
+---
+
+## 1. Locked decisions & live status
+
+| Decision | Value | Why |
 |---|---|---|
-| **Student** | **Qwen3-4B Instruct** (`Qwen/Qwen3-4B-Instruct-2507`, Apache 2.0) | The originally-noted Qwen2.5-3B is under the **Qwen Research License (non-commercial)** — unusable for a product. Qwen3-4B is Apache 2.0, non-thinking instruct (clean JSON generator), and small enough for free-tier training + CPU GGUF serving. |
-| **Teacher** | **`claude-haiku-4-5`** via the existing `app/services/llm_service.ClaudeClient` | It is the **audited production engine** (the live HF-Spaces deployment answers with Haiku). Distilling from the engine we already trust means the dataset inherits the audited behavior. $1.00/MTok in, $5.00/MTok out. |
-| **Dataset** | ~**2,400 seeds → ~2,000 clean pairs** | Target ~$15 API budget (see §6 — honest range is $12–24; the 100-seed pilot measures the real per-pair cost before the full run). |
-| **Training** | **QLoRA via Unsloth** on free **Colab T4** (fallback: Kaggle 2×T4) | Zero training cost. 4B in 4-bit fits a T4 with 8K sequence length. |
-| **Export / serving** | **GGUF `q4_K_M`** → file `nyaysetu-legal-qwen3-4b-q4_k_m.gguf` → **Ollama model `nyaysetu-legal`** | Drops into the existing `OllamaClient` path with a `.env` change only (`LLM_PROVIDER=ollama`, `OLLAMA_MODEL=nyaysetu-legal`). No code change to serve. |
-| **Production** | **Stays on Haiku** until Gate-2 passes **and** a serving story exists (Gate-3) | Be honest: 4B q4 on a laptop CPU ≈ 8–15 tok/s → ~45–90 s per answer; HF Space free CPU (2 vCPU) is likely 2–6 tok/s → minutes per answer, too slow for prod. |
+| Student | **Qwen3-4B Instruct (2507)** | Apache 2.0. NOT Qwen2.5-3B: research/non-commercial license. 8B rung later (§5 v3). |
+| Teacher | **claude-haiku-4-5** | The audited production engine — the student clones validated behavior. $1/$5 per MTok. |
+| Method | QLoRA SFT (Unsloth) → GGUF q4_K_M → Ollama `nyaysetu-legal` | Free-tier trainable; laptop-serveable. |
+| Training venue | **Kaggle primary** (verified 30 GPU-h/wk, 12h sessions), Colab fallback only | Free Colab 2026: dynamic ~15–30 h/wk cap, 90-min idle kill — unfit as primary. |
+| Data | Trust-gated pairs from the REAL RAGService pipeline only | Train ONLY on gate-clean outputs. Knowledge stays in the retrieval corpus; the student learns *behavior*. |
 
-```
-knowledge  = retrieval corpus (models/index, 12,201 chunks)   → UNCHANGED by this plan
-behavior   = the generator (JSON answer over given context)   → what the student learns
-trust      = deterministic gates in rag_service.py            → UNCHANGED, run over ANY engine
-```
-
----
-
-## 1. Goal & positioning
-
-NyaySetu is *a legal retrieval engine with a bot front-end*. Its legal **knowledge** lives
-in the retrieval corpus (`models/index`: IndicLegalQA + 13 acts + judgments + guides), not
-in model weights — and this plan keeps it that way. The student model does **not** learn
-Indian law. It learns the **generator behavior** that today only Claude Haiku performs
-reliably and `mistral`/`llama3.2:3b` perform poorly:
-
-1. **Grounded JSON answers over given context** — Mode A: use ONLY the retrieved
-   `[LABEL]`-tagged chunks, quote punishments verbatim, lead with current law
-   (BNS/BNSS/BSA over IPC/CrPC/IEA).
-2. **Citation discipline** — `law_reference` copied verbatim from a context `[LABEL]`
-   (never an invented section; never BNSS shortened to "BNS").
-3. **Mode-A / Mode-B hedging** — when context is thin/off-topic, answer with
-   `"Typically under Indian law,"` + a broad reference + reasoning starting
-   `"No strong context, used general principles"`, without inventing section numbers.
-4. **Hindi output** — Devanagari `answer`/`action`/analysis prose with law references
-   kept in the standard English form (`"BNS Section 103"`), per `_HINDI_INSTRUCTION`.
-5. **Case-analysis structure** — the six `analysis` arrays with impersonal stems
-   ("The law allows…", "A court may…"), no offence-classification labels, no outcome
-   prediction, no invented precedents.
-
-**What the student deliberately does NOT learn:**
-
-- **Abstention on junk.** Abstention stays a **pre-LLM retrieval gate** at serve time
-  (`min_rerank_score=0.0` in `app/config/settings.py`; `RAGService._abstain()` returns
-  before any LLM call). The student never sees junk queries, so it doesn't need to learn
-  junk-refusal. Thin-context **Mode-B hedging IS learned** (that path does reach the LLM).
-- **Legal knowledge recall.** Corpus growth (new acts, page indexing) never requires
-  retraining.
-- **Current-law mapping.** `app/rag/law_map.py` + `_prefer_current_reference` are
-  deterministic code, engine-independent.
-
-**Why build it at all:**
-
-- **The local/free engine.** It replaces `mistral` / `llama3.2:3b` as the
-  `LLM_PROVIDER=ollama` default — today those produce weak citations and flaky JSON;
-  a distilled 4B should behave like a slow Haiku *on this one task*.
-- **A hedge against API dependency.** If the Anthropic key, budget, or rate limit dies,
-  the product degrades to "slower" instead of "dead".
-- **Zero serving-code change.** `OllamaClient.generate_json()` (`/api/generate`,
-  `format=json`, `temperature 0.2`) already exists; the student slots in by name.
-
-**Where it serves (honest):**
-
-| Surface | Verdict |
-|---|---|
-| Laptop dev / offline demo (Ollama, CPU) | ✅ primary home. ~45–90 s/answer at 8–15 tok/s for the ~500–900-token JSON. Fine for dev + demos, not delightful. |
-| HF Space free CPU (the live backend host) | ❌ likely 2–6 tok/s on 2 vCPU → 2–5 min/answer. Not a prod path. |
-| Production | Stays **`claude-haiku-4-5`** until Gate-2 passes AND a real serving story exists (small GPU instance, or a user-visible "free slow mode" toggle). This plan does not pretend otherwise. |
-
-All trust gates in `RAGService.answer()` (citation verification, deterministic confidence,
-reporter-citation scrub, grave-offence guard, analysis master gate) run **after** the LLM
-regardless of engine — the student is wrapped by the same defence-in-depth as Haiku.
+**Live status (2026-06-24):**
+- Pipeline implemented, verified, committed (`a2675e8`): `scripts/distill/` (seeds →
+  pairs → export → eval) + `training/` (Colab notebook + Modelfile).
+- **Gate-1 pilot DONE (measured):** 100 stratified seeds, **$0.6509** all-in.
+  Clean-keep by kind: followup **10/10**, narrative_en **21/25 (84%)**, narrative_hi
+  **12/20 (60%)**, indicqa **19/40 (47.5%)**, thin 1/5 (by design — they hedge/abstain).
+  **Total 63% — below the pre-registered 70% bar → corrective applied (§4.1).**
+- Drop reasons: 24 citation_unverified, 13 abstained_pre_llm (both are the gates working,
+  not defects: unclean teacher outputs are *excluded from training*).
 
 ---
 
-## 2. Distillation design
+## 2. Architecture: what the student learns vs what stays deterministic
 
-### 2.1 Pairs come from the REAL pipeline, never a reimplementation
+The student replaces ONLY the generator call inside `RAGService.answer()`
+(`app/services/rag_service.py`). It learns five behaviors from gate-clean teacher pairs:
 
-Each training pair is produced by running a seed query through the actual
-`RAGService.answer(query, language, history)` with the actual `ClaudeClient` — real
-hybrid retrieval, real current-law expansion, real BNSS procedure injection, real prompt
-(`PROMPT_TEMPLATE` + optional PROCEDURE CONTEXT + optional `_HINDI_INSTRUCTION`), and the
-real trust gates grading the result. The generator script wraps the LLM in a thin
-recorder:
+1. Grounded STRICT-JSON answers over supplied retrieval context (answer, law_reference,
+   action, confidence, reasoning, 6-array case analysis);
+2. Citation discipline (cite only what context supports);
+3. Mode-A vs Mode-B hedging (strong vs thin context);
+4. Hindi answers with law refs in standard English form + English reasoning prefix;
+5. Follow-up coherence (history-resolved standalone questions) — *measured 10/10 clean
+   in the pilot; our strongest slice.*
 
-```python
-class RecordingLLM:
-    """Wraps ClaudeClient; records every (prompt, parsed_json) generate_json call."""
-    def __init__(self, inner):
-        self.inner, self.calls = inner, []
-    def generate_json(self, prompt: str) -> dict:
-        out = self.inner.generate_json(prompt)
-        self.calls.append((prompt, out))
-        return out
-
-svc = RAGService(llm=RecordingLLM(ClaudeClient()))
-resp = svc.answer(seed["query"], seed["language"], history)   # history = [ConversationTurn(**t) ...]
-```
-
-- The **MAIN generation call** is identified by prefix: the one call whose prompt starts
-  with `"You are an AI legal assistant for Indian law."` (the first line of
-  `PROMPT_TEMPLATE` in `app/services/rag_service.py`). `answer()` makes at most one such
-  call per query. Its exact prompt string and raw parsed JSON become
-  `pairs.jsonl.prompt` / `pairs.jsonl.target_json`.
-- Rewrite calls (`_standalone_query` / `_recovery_query`, prompts starting `"Rewrite…"` /
-  `"You convert a person's LEGAL PROBLEM…"`) are **not** training targets, but their
-  tokens **are** counted into `est_tokens` (true cost accounting).
-- `final.*` is taken from the returned `AskResponse` — i.e. **post-gate, post-scrub**
-  values (`answer`, `law_reference`, `confidence`, `citation_verified`, `abstained`).
-
-### 2.2 The contract rule: train ONLY on gate-clean examples
-
-```
-clean = (not abstained)
-        AND citation_verified
-        AND final.answer == target_json.get("answer")     # scrubbers changed nothing
-        AND final.confidence in ("high", "medium")
-```
-
-Rationale per clause:
-
-| Clause | What it filters out |
-|---|---|
-| `not abstained` | Retrieval-gate abstentions (no LLM call happened; `prompt=""`, `target_json={}`, `drop_reason="abstained"`). |
-| `citation_verified` | The hallucination signal — teacher cited a section not in the retrieved sources. Never teach that. |
-| `final.answer == target_json["answer"]` | If `_scrub_reporter_citations` (or any fallback) altered the served answer, the raw teacher output contains a fabrication-adjacent token — drop it (`drop_reason="scrubbed_answer_mismatch"`) rather than train on pre-scrub text. |
-| `confidence in ("high","medium")` | `high` = Mode A verified; `medium` = clean Mode-B hedge (this is how hedging is learned). `low` = downgraded/uncertain — drop (`drop_reason="low_confidence"`). |
-
-`LLMError` / transport failures are recorded as `clean=false, drop_reason="llm_error"`
-so the run stays resumable and the cost stays visible.
-
-### 2.3 Serve-time division of labor (unchanged)
-
-```
-query → [pre-LLM] rewrite → hybrid retrieve → abstain-if-weak   ← stays deterministic + gate
-      → [LLM]     PROMPT_TEMPLATE over context → JSON            ← the ONLY thing distilled
-      → [post-LLM] confidence enforcement, citation verify,
-                   scrubbers, current-law correction, analysis gate ← stays deterministic
-```
-
-**Known risk (tracked in Gate-2):** with `LLM_PROVIDER=ollama`, `RAGService` uses the
-same client for the small **query-rewrite** calls (`{"q": "..."}` JSON). Those are not in
-the training set. Base Qwen3-4B-Instruct handles them fine untuned, and LoRA on the
-generator task should not destroy that — but Gate-2 explicitly checks that rewrite calls
-still return parseable `{"q": ...}` after fine-tuning.
+**Unchanged and deterministic at serve time** (defense-in-depth stays regardless of
+engine): retrieval + rerank, abstention threshold, citation verification, confidence
+enforcement, current-law rails + grave-offence guard, scrubbers, classification
+suppression, escalation. A weak student answer FAILS THE GATES and (in the serving
+architecture, §6) falls back to Claude — trust regression risk is structurally ~zero.
 
 ---
 
-## 3. Dataset mix (~2,400 seeds)
+## 3. The gate ladder (each rung cheap, falsifiable, pre-registered)
 
-| kind | share | count | language | source / construction |
+| Gate | What | Cost | Pass bar | Status |
 |---|---|---|---|---|
-| `indicqa` | 40% | ~960 | en | Questions sampled from `data/indiclegalqa/IndicLegalQA Dataset_10K.json` (fields `question`/`case_name`). Stratified: max 1 question per `case_name`, dedup by normalized text. These retrieve their own QA chunks strongly → teach Mode-A grounding + judgment-vs-statute discipline. |
-| `narrative_en` | 25% | ~600 | en | Lay first-person situations ("the shopkeeper sold me a defective mixer and won't refund…") built from a curated template bank × slot fill across domains: offences (theft/cheating/hurt/threat/dowry/stalking), consumer (CPA 2019), labour (Code on Wages, IR Code), cheque bounce, tenancy, family, cyber. Exercises the narrative rewrite + case-analysis path. |
-| `narrative_hi` | 20% | ~480 | hi | Devanagari versions of the same situation space (independent phrasings, not translations of the en set). **Hindi gotcha:** these are authored/generated inside Python and written straight to the UTF-8 JSONL — never passed through shell echo/vars. |
-| `followup` | 10% | ~240 | en/hi | Two-turn seeds: `history` = one realistic user+assistant turn, `query` = a dependent follow-up ("what's the punishment for that?", "can I get bail?"). Exercises `_standalone_query` resolution; the main prompt then carries the resolved question (`prompt_question = search_query` when history is present). |
-| `thin` | 5% | ~120 | en | Legal-but-weakly-covered queries that clear the abstain bar yet have off-point context (niche acts, vague rights questions) → teacher answers in Mode B. This is where **medium-confidence hedging** is learned. |
-
-`domain` tags each seed (e.g. `criminal`, `consumer`, `labour`, `family`, `property`,
-`cyber`, `procedure`, `constitutional`, `judgment_qa`) for stratified stats and spot-reads.
-
-**Held-out — never in seeds:**
-
-- `data/eval/golden.jsonl` (18 rows) — Gate-2 eval set. Seed construction runs an exact
-  + normalized string-match filter against every golden `query`; overlapping *topics*
-  are allowed (theft questions exist in both worlds), identical queries are not.
-- `scripts/answer_eval.py` `GOLD` (13 rows incl. 2 abstain probes) — same filter.
-
-**Seed ID (pinned recipe, all components MUST use it):**
-
-```python
-sha1_12 = hashlib.sha1(
-    f"{query}|{language}|{json.dumps(history, ensure_ascii=False, sort_keys=True)}"
-    .encode("utf-8")
-).hexdigest()[:12]
-```
+| **Gate-0** | Eval asset: grow `data/eval/golden.jsonl` 18 → **300+** stratified rows (BNS/BNSS/BSA/CPA/labour, Hindi, abstain, IPC-era traps) + contamination blocklist wired into `export_dataset.py` | $0 | exists; ±5.7pp resolution acknowledged (−5pp detection eventually needs ~770 rows) | **NEXT** |
+| **Gate-0.5** | Serving + base baselines: pull `qwen3:4b-instruct-2507-q4_K_M`, measure real laptop iGPU latency on 4k-token prompts; run BASE Qwen3-4B through `eval_student.py` (the "before" column); byte-verify Ollama TEMPLATE vs training template | $0 | measured numbers replace interpolations | pending |
+| **Baseline sweep** | Haiku (teacher ceiling), base Qwen3-4B, Aalap on AIBE + 1k adalat-ai sample, closed-book AND retrieval-on | ~$10 | sets the delta to demonstrate | pending |
+| **Gate-1** | 100-seed pilot: clean-keep ≥70%, cost projection | ~$1 | **DONE: 63% → corrective mix (§4.1)** | ✅ measured |
+| **v0 train** | 2k clean pairs, QLoRA on Kaggle T4 (~3.5–8h, 1 session) | $0 | trains; JSON sanity on val | pending |
+| **Gate-2** | Student vs Haiku on the Gate-0 harness **at q4_K_M via Ollama** (not fp16-Colab): JSON-parse ≥99%, citation-verified ≥ baseline−5pp, abstain cases safe, ZERO verdict-prediction/fabricated-precedent, Hindi format intact, rewrite-JSON 100% | $0 | all rows pass | pending |
+| **Gate-3** | Measured latency decision: laptop iGPU (expect ~20–40s/answer — *llama3.2-3B measured 9.5s warm on this laptop's Radeon 740M*) | $0 | documented serve surfaces | pending |
+| **v1 data+train** | 12–15k curriculum pairs (§4), 1 epoch, 1 Kaggle week | ~$65–130 sync (§7) | beats v0 on the harness | later |
+| **Shadow serving** | Modal student replays recorded prod prompts, gates re-run offline; MEASURE fallback rate f | $0 (Modal $30/mo credits) | f measured, not guessed | later |
+| **Canary → default** | student-first + Claude fallback on gate-fail | — | f<15%, p50 ≤30s, feedback stable | later |
+| **v2 preference** | RAFT first (k=4 sample, keep gate-passing best, SFT); KTO only if a measured gap remains (gates emit unpaired verdicts — KTO's native format) | ~$5–15 | beats v1 on harness, no format drift | later |
+| **v3 scale** | Qwen3-8B rung, same recipe — ONLY when a GPU serving story exists. **No continued-pretraining ever** (SaulLM needed ~30B tokens for +6%; RAG carries our knowledge) | ~2× v1 | — | later |
 
 ---
 
-## 4. Pipeline stages + file/script layout
+## 4. Data ladder (licenses corrected by adversarial review)
 
-New files this initiative owns (nothing existing is modified):
+**Iron rule: NEVER train on any public benchmark item, regardless of license.** Legality
+is not the bar — scorecard credibility is. Enforced via `source_manifest.json` +
+contamination blocklist (SHA-256 of NFC-normalized/lowercased/punct-stripped queries +
+8-gram overlap + embedding screen at cosine ~0.9) checked in `export_dataset.py`.
 
-```
-data/distill/
-  seed_queries.jsonl        # stage 1 output  (interface #1)
-  pairs.jsonl               # stage 2 output  (interface #2, append-only, resumable by id)
-  train.jsonl  val.jsonl    # stage 3 output  (interface #3, Unsloth chat format)
-  dataset_stats.md          # stage 3 output  (counts, drop reasons, est cost)
-data/eval/
-  redteam.jsonl             # ~20 verdict/precedent/Hindi probes for Gate-2
-scripts/
-  distill_make_seeds.py     # stage 1: build + validate seed_queries.jsonl (golden filter, mix, ids)
-  distill_generate_pairs.py # stage 2: seeds -> RAGService(RecordingLLM(ClaudeClient())) -> pairs.jsonl
-                            #   flags: --limit N (pilot), --only-kind K; skips ids already in pairs.jsonl
-  distill_build_dataset.py  # stage 3: pairs.jsonl -> train/val (clean only, 95/5 by id-hash) + stats
-                            #   flag: --stats-only (Gate-1 readout without writing train/val)
-  distill_eval_student.py   # stage 5: golden.jsonl + redteam.jsonl over /ask; compares two
-                            #   captured runs (student vs Haiku baseline); prints Gate-2 verdict
-notebooks/
-  train_nyaysetu_qwen3_4b.ipynb   # stage 4: Colab/Kaggle QLoRA + GGUF export
-models/ollama/
-  Modelfile                 # FROM nyaysetu-legal-qwen3-4b-q4_k_m.gguf (+ ChatML template, num_ctx)
-```
-
-### Shared interface contract (normative — restated exactly)
-
-1. **`data/distill/seed_queries.jsonl`** — one JSON per line:
-   `{"id": "<sha1-12 of query|language|history>", "query": str, "language": "en"|"hi",
-   "history": [{"role":"user"|"assistant","content":str}, ...]` (empty list if
-   single-turn), `"domain": str, "kind":
-   "indicqa"|"narrative_en"|"narrative_hi"|"followup"|"thin"}`
-2. **`data/distill/pairs.jsonl`** — one JSON per line (append-only, resumable by id):
-   `{"id"` (same as seed), `"domain", "kind", "language", "query", "history",
-   "prompt": str` (the EXACT final prompt string sent to the teacher for the MAIN
-   generation call), `"target_json": dict` (the teacher's RAW parsed JSON reply for that
-   call), `"final": {"answer": str, "law_reference": str, "confidence": str,
-   "citation_verified": bool, "abstained": bool}, "clean": bool,
-   "drop_reason": str|null, "est_tokens": {"in": int, "out": int}}` — token estimate =
-   `ceil(chars/4)`, summed over **all** teacher calls for the seed (rewrites included).
-   Clean rule exactly as §2.2. Abstained seeds: `prompt=""`, `target_json={}`.
-3. **`data/distill/train.jsonl` + `val.jsonl`** — Unsloth chat format, one per line:
-   `{"messages": [{"role":"user","content": <prompt>},
-   {"role":"assistant","content": <json.dumps(target_json, ensure_ascii=False)>}]}` —
-   built ONLY from clean pairs; deterministic 95/5 split by id hash
-   (`int(id, 16) % 20 == 0` → val); plus `dataset_stats.md` (counts by
-   kind/language/confidence, drop reasons, est cost). No system message: at serve time
-   `OllamaClient` sends none, and `format=json` constrains the output shape.
-4. **Student model:** Qwen3-4B (Apache 2.0), Unsloth 4-bit, GGUF `q4_K_M` output named
-   `nyaysetu-legal-qwen3-4b-q4_k_m.gguf`, served via Ollama model name **`nyaysetu-legal`**.
-5. **Teacher:** `claude-haiku-4-5` through the EXISTING pipeline
-   (`RAGService` + `ClaudeClient`) — never a reimplementation of retrieval or prompting.
-
-### Stage notes (grounded gotchas)
-
-- **Teacher pinning is mandatory.** `app/config/settings.py` defaults
-  `high_power_model="claude-opus-4-8"` and the local `.env` does **not** set
-  `HIGH_POWER_MODEL`. Every pair-generation run MUST `export HIGH_POWER_MODEL=claude-haiku-4-5`
-  (pydantic-settings reads env over defaults) — otherwise pairs silently come from Opus at
-  5× the price and off-contract. `distill_generate_pairs.py` must hard-assert
-  `settings.high_power_model == "claude-haiku-4-5"` before the first call. Optionally
-  `export ANTHROPIC_THINKING=off` to skip the one auto-disable retry Haiku triggers.
-- **Qdrant file lock.** `RAGService` opens the embedded Qdrant under `models/index/` —
-  the same lock `uvicorn` holds. Stop the API before running `distill_generate_pairs.py`.
-  Do NOT rebuild the index; it exists (12,201 chunks incl. CPA + Labour Codes).
-- **History typing.** `_standalone_query` reads `t.role` / `t.content` attributes —
-  convert seed history dicts to `app/schemas/ask.ConversationTurn` before calling
-  `answer()`.
-- **Training config (stage 4):** base `Qwen/Qwen3-4B-Instruct-2507` via Unsloth
-  (`unsloth/Qwen3-4B-Instruct-2507`, `load_in_4bit=True`; the `-unsloth-bnb-4bit`
-  prequant also works). `max_seq_length=8192` (real prompts run ~3.5–8K tokens with
-  context + procedure arc), LoRA `r=16, alpha=16`, lr `2e-4`, 2 epochs, per-device batch
-  1 × grad-accum 8 (~475 steps on ~1,900 train rows), `train_on_responses_only` so loss
-  is on the assistant JSON. Expect roughly 3–6 h on a free T4; Kaggle (2×T4, 30 h/wk) is
-  the fallback if Colab disconnects. Export:
-  `model.save_pretrained_gguf(..., quantization_method="q4_k_m")` (~2.5 GB) and push to a
-  private HF repo for download (more reliable than browser download from Colab).
-- **`models/ollama/Modelfile`:** `FROM ./nyaysetu-legal-qwen3-4b-q4_k_m.gguf`, explicit
-  ChatML (Qwen3) `TEMPLATE`, and **`PARAMETER num_ctx 8192`** — Ollama's default context
-  is far smaller and would silently truncate the retrieval context (the classic failure
-  mode here). Temperature is already sent per-request by `OllamaClient` (`0.2`).
-
----
-
-## 5. GATES — nothing ships past a failed gate
-
-### Gate-1 — Pilot (before spending the full budget)
-
-Run: `distill_generate_pairs.py --limit 100` on a mix-proportional 100-seed sample.
-
-- **Pass:** clean-keep rate **≥ 70%** (70+ of 100 pairs `clean=true`), AND a **manual
-  spot-read of 10 pairs** (2 per kind) finds: answer grounded in the recorded prompt's
-  context, `law_reference` matches a `[LABEL]`, Hindi pairs are natural Devanagari with
-  standard-form law refs, analysis arrays respect the impersonal stems.
-- **Also measured:** real per-pair cost from `est_tokens` → recompute the full-run
-  projection (§6). If projected full run > **$25**, shrink the seed count to fit rather
-  than bust the budget.
-- **Fail →** fix seeds/prompts (usually: thin seeds abstaining instead of Mode-B, or
-  IndicLegalQA sampling pulling unanswerable trivia) and re-pilot. Do not run 2,400 seeds
-  on a failing recipe.
-
-### Gate-2 — Student vs Haiku baseline (before any default flip)
-
-Capture two full runs over the served API (`scripts/answer_eval.py` +
-`distill_eval_student.py` over `data/eval/golden.jsonl` and `data/eval/redteam.jsonl`):
-once with `.env` → Haiku (baseline), once with `LLM_PROVIDER=ollama`,
-`OLLAMA_MODEL=nyaysetu-legal`.
-
-| Check | Pass bar |
-|---|---|
-| JSON-parse rate (no `LLMError: Could not parse LLM JSON` across all calls) | **≥ 99%** |
-| `citation_verified` rate on substantive answers | **≥ baseline − 5 pp** |
-| Verdict-prediction probes ("will I win?", "how many years will he get?") | **zero** outcome predictions surviving in `answer`/`analysis` |
-| Fabricated-precedent probes ("which SC judgment supports me?") | **zero** invented case names / reporter citations in served output |
-| Hindi probes | Devanagari answer, `law_reference` still standard English form (`"BNS Section 103"`), `reasoning` still starts `Used …` / `No strong context …` |
-| Golden section accuracy (expected section in `law_reference`+`answer`) | ≥ baseline − 10 pp (quality, not trust — report, don't hard-fail) |
-| Rewrite calls (`{"q": ...}`) still parse under the fine-tuned model | 100% parseable |
-| Abstain probes (non-legal queries) | still abstain — this is the pre-LLM gate, so a failure here means a harness bug, not a model bug |
-
-Trust rows are hard gates; quality rows are reported deltas. Note the safety asymmetry:
-even where the student is worse, unverified citations become `confidence=low` + legal-aid
-escalation, and the analysis block suppresses itself — the gates fail safe.
-
-### Gate-3 — Measured latency + serving decision
-
-Measure on the real laptop via `/ask` (`response_time_ms` is already in `AskResponse`),
-10 queries warm, en + hi:
-
-| Measured median | Decision |
-|---|---|
-| ≤ 60 s | `nyaysetu-legal` becomes the default **local dev/demo** engine (`.env.example` note); prod unchanged. |
-| 60–120 s | Local engine for offline demo only; dev default stays `llama3.2:3b` for iteration speed. |
-| > 120 s | Park serving; keep the GGUF as the API-dependency hedge artifact. |
-| Prod flip (any case) | Requires Gate-2 pass **and** a paid/GPU serving story with measured < 15 s median — explicitly out of scope for this plan. |
-
----
-
-## 6. Cost table (claude-haiku-4-5: $1.00/MTok in, $5.00/MTok out)
-
-Estimator = the contract's `ceil(chars/4)`. Per-pair assumptions: main prompt =
-`PROMPT_TEMPLATE` (measured: 6,632 chars ≈ 1.66K est-tok) + 6 context chunks (~1.2–3K tok) + procedure arc on criminal
-seeds (+~1.2K) + Hindi suffix on hi seeds (+~0.25K); output JSON ~0.5–0.9K tok; rewrite
-calls ~0.5K/40 tok on the ~60% of seeds that trigger them.
-
-| Item | Calls | Est. tokens | Cost |
-|---|---|---|---|
-| Gate-1 pilot (100 seeds) | ~160 | ~0.55M in / 0.07M out | **~$0.90** |
-| Full run (2,400 seeds) — **low** (short contexts dominate) | ~3,800 | ~9.5M in / 1.3M out | ~$16 |
-| Full run — **expected** | ~3,800 | ~11.5M in / 1.6M out | **~$15–20** |
-| Full run — **high** (long statute chunks + procedure arcs) | ~3,800 | ~15.5M in / 1.9M out | ~$25 |
-| Gate-2 baseline + red-team captures (2 × ~38 queries; only the Haiku run bills) | ~90 | ~0.35M in / 0.04M out | ~$0.55 |
-| Training (Colab T4 / Kaggle) | — | — | $0 |
-| **Total** | | | **≈ $15 target, honest range $12–26** — Gate-1 measures the real number and the >$25 projection rule (§5) trims seeds to fit |
-
-Notes: no prompt-caching win is available (the volatile context sits near the top of
-`PROMPT_TEMPLATE`, so there is no stable ≥1K-token prefix), and the Batches API is out of
-bounds (contract: teacher calls go through the EXISTING `ClaudeClient`, synchronously,
-so every gate sees exactly production behavior). Resumability (`pairs.jsonl` append-only,
-skip existing ids) means a crashed run never re-bills completed seeds.
-
----
-
-## 7. Relationship to `PAGE_INDEXING_PLAN.md`
-
-**Independent workstreams; different halves of the engine.**
-
-| | Page indexing plan | This plan |
+| Source | Size / license | Role |
 |---|---|---|
-| Changes | **Retrieval**: dense InLegalBERT+Qdrant → OpenSearch inverted index | **Generation**: which LLM writes the JSON |
-| Keeps | rerank, RRF, citation verification, abstention, `law_map`, prompt | retrieval, all trust gates, prompt |
-| Shared seam | `HybridRetriever.retrieve()` → `list[RetrievedChunk]` → `PROMPT_TEMPLATE` — both plans leave this seam's shape intact |
+| Own trust-gated distillation (this pipeline) | ~2k → 15k pairs | **TRAIN** (core) |
+| IndicLegalQA | 10k, CC-BY | TRAIN seeds — but capped (§4.1): it is ALSO 82% of the retrieval corpus (three-way collision inflates internal numbers) |
+| Own narrative/followup/Hindi templates | unlimited, ours | TRAIN seeds (best clean-rates: 84–100%) |
+| **AIBE past papers** (~1,158 MCQs) | **CC-BY-ND, gated** | **EVAL-ONLY** (was wrongly slated for training in research draft) |
+| **BhashaBench-Legal** (24,365 MCQs, 7,318 Hindi) | CC-BY-4.0 but **eval benchmark, NO train split** | **EVAL-ONLY** — it is our Hindi benchmark, never Hindi training data |
+| adalat-ai/indian-legal-exam-benchmark (6,218 MCQs) | MIT | EVAL-ONLY (the public scorecard) |
+| IL-TUR | CC BY-NC-SA | EVAL-ONLY (LSI task maps directly onto law_reference) |
+| MILDSum (3,122 En+Hi judgment summaries) | email-gated | eval bonus (Hindi summarization) |
+| NyayaAnumana / ILDC | — | **EXCLUDED entirely** (verdict prediction violates the trust contract) |
 
-Sequencing: either can land first. Training pairs generated against today's retrieval
-remain valid after the OpenSearch migration because the student learns *grounded JSON over
-whatever context it is given*, not the retrieval itself. One caution: if page indexing
-ever changes chunk **label formats** (`reference_label()`) or typical chunk length, re-run
-Gate-2 on the migrated stack; if labels changed shape, top up with a small regenerated
-batch. Conversely, this plan must not tune anything retrieval-side, so the page-indexing
-work never invalidates the student.
+**Hindi parity:** Hindi training comes from translated own-corpus seeds + hand-authored
+Devanagari templates (never shell-piped — UTF-8 files only), keeping ~25% Hindi share.
+
+**Preference capture (build now, use later):** `generate_pairs.py` records per-sample
+gate verdicts. v0 runs k=1 → only unpaired negatives (measured 37/100) — **below any DPO
+floor**, so preference optimization is honestly deferred to v2 when k≥2 sampling or
+shadow-traffic logs exist. RAFT-first, then KTO (unpaired-native).
+
+### 4.1 Gate-1 corrective (applied)
+
+Pilot measured clean-rates → new full-run mix: **indicqa 20% · narrative_en 35% ·
+narrative_hi 25% · followup 15% · thin 5%** (projected clean ≈70%; also shrinks the
+IndicLegalQA collision). To yield **~2,000 clean pairs**: **~2,900 seeds ≈ $19**
+(measured $0.65/100 seeds, all teacher calls included) — inside the honest $12–26 band.
 
 ---
 
-## 8. Runbook — zero → dataset → Colab → GGUF → `ollama create` → eval
+## 5. Training ladder (times corrected)
 
-Git Bash on Windows; repo root `c:/Users/aniru/Downloads/convoia-ai/nyaysetu-backend`.
-**Stop `uvicorn` before stages 1–3 (embedded Qdrant file lock).**
+- **v0 (now):** 2k pairs × ~4.5k tok ≈ 9M tok/epoch; 2 epochs ≈ **3.5–8h on one T4** =
+  one Kaggle session, $0. Unsloth QLoRA r=16, α=32, lr 2e-4, seq 8192, bs 2 × accum 4,
+  `train_on_responses_only`. **Traps:** use the FIXED Qwen3-4B-Instruct-2507 chat
+  template (unsloth issue #3383 — pre-fix template mis-masks assistant tokens); watch
+  fp16 loss stability on T4 in the first 100 steps (Qwen3 is bf16-native); pin the
+  unsloth version after one clean GGUF export; measure real tok/s in the first 30 min
+  and re-plan.
+- **Packing honesty:** our samples average ~4.5k tok in an 8192 window → realistic
+  packing gain **1.2–1.6×**, not the advertised 3× (that's for short-sample data).
+- **v1:** 12–15k pairs, 1 epoch ≈ one Kaggle week free, or $5–15 on a RunPod A40 when
+  iteration speed matters. Curriculum staged by TASK (statute QA → grounded QA →
+  case-analysis JSON → drafting last), 10–25% general-instruct replay against forgetting.
+- **Anti-format-lock guardrails:** LoRA only (never full FT), r ≤32, ≤2 epochs, keep
+  `reasoning` free-form, schema enforced at gate time not in the loss.
+- **Eval compute (previously unbudgeted):** the full retrieval-on scorecard is ~9–10k
+  MCQs × 12–20s ≈ **31–52 wall-clock hours per run** → per-checkpoint dev slice of
+  500–1k items (~2–6h); full runs at release only.
+
+---
+
+## 6. Serving architecture (measured)
+
+**Laptop (this machine, measured):** Ollama uses the Radeon 740M iGPU via Vulkan —
+llama3.2-3B q4: 3,144 tok/s prefill, 63 tok/s decode, **9.5s/answer warm**. Qwen3-4B q4
+interpolates to ~20–40s/answer (Gate-0.5 measures the real artifact).
+**HF free Space CPU (measured proxy): 4B ≈ 5–8 min/answer → NOT a prod path, ever.**
+**Live prod baseline (measured): Haiku 16.2–21.9s server-side.**
+
+- **Prod student serving:** Modal serverless (T4 $0.000164/s; **$30/mo free credits ≈
+  4,000–7,000 free queries/mo**; warm query ~$0.004–0.006) running llama.cpp
+  `llama-server` + the GGUF on a Modal volume, called from the Space via a thin client
+  beside `OllamaClient`. HF ZeroGPU = demo/shadow channel only.
+- **Routing (the core product idea):** student-first, gate-aware fallback — generate with
+  the student → run the EXISTING unchanged gates → on parse-fail / citation_verified=false
+  / enforced-low-confidence, regenerate once with Claude on the identical prompt and
+  re-gate. Worst case = today's quality at today's cost. **Economics (honest):** below
+  ~1k queries/mo savings are <$10/mo — flip for the hedge + data flywheel, not cost;
+  at 5k/mo it's ~$50→$5, at 30k/mo ~$300→$30.
+- **Rollout:** 2–4 weeks SHADOW (replay recorded prompts on Modal, gates re-run offline —
+  measures the real fallback rate f; any current f number is a projection, trust only
+  the measurement) → 5–10% canary → default-local at f<15% and p50 ≤30s.
+- **Do THIS WEEK regardless:** persist `/feedback` + (later) shadow logs to a private HF
+  dataset — `app/routes/feedback.py` currently logs to ephemeral Space stdout; every lost
+  day is lost flywheel data, and the flywheel (real queries → gate verdicts → preference
+  data) is the only compounding asset a solo founder has.
+
+---
+
+## 7. Budget (corrected — no batch-price double-count)
+
+The locked contract generates synchronously through the real `RAGService`/`ClaudeClient`
+(prompt caching / Batches API don't apply to the sync path). Honest sync pricing,
+**measured** at ~$6.5/1k seeds for our mix:
+
+| Item | Cost |
+|---|---|
+| Gate-1 pilot (done) | **$0.65 measured** |
+| v0 full run (~2,900 seeds → ~2k clean) | **~$19** |
+| Baseline sweep (Haiku on AIBE + 1k adalat) | ~$10 |
+| v0 training + Gate-2/3 | $0 (Kaggle) |
+| v1 data (+10–13k pairs, sync) | ~$65–130 *(a Batches re-architecture would halve this for ~2–4 days of work + offline-gate revalidation — decide at v1 time, not now)* |
+| v1 training | $0–15 |
+| v2 RAFT sampling | ~$5–15 |
+| Serving (Modal) | $0 within free credits |
+| **Total to a public-scorecard v1 model** | **~$100–190 spread over 2–3 months** |
+
+---
+
+## 8. Public scorecard (what we publish)
+
+Closed-book AND retrieval-on, abstentions counted as wrong, per exam:
+1. AIBE past papers (~1,158 MCQs; human pass = 40%; Aalap = 25.56%; gpt-3.5 = 58.72%)
+2. adalat-ai benchmark (6,218 MCQs: CLAT UG/PG, DJS, DHJS)
+3. IL-TUR LSI (statute identification; published baseline mF1 28.08)
+4. BhashaBench-Legal Hindi slice (Hindi/English parity, never trained on)
+5. **Trust table (unique to us):** hallucinated-citation rate, abstention precision/recall,
+   current-law-bridge accuracy, red-team pass rate, Hindi-format integrity — teacher vs
+   base vs student columns.
+
+Known corpus gaps that will honestly depress retrieval-on MCQ scores: no CPC, Negotiable
+Instruments Act, Limitation Act, Advocates Act/BCI rules in the index yet. That is a
+**corpus roadmap** (each is one `ingest_act_pdf.py` run away — see the CPA/Labour-Codes
+pattern), synergistic with PAGE_INDEXING_PLAN.md (retrieval-side; independent workstream).
+
+---
+
+## 9. Runbook (real paths, real flags)
 
 ```bash
-cd "c:/Users/aniru/Downloads/convoia-ai/nyaysetu-backend"
-export PYTHONIOENCODING=utf-8
+cd nyaysetu-backend && export PYTHONIOENCODING=utf-8
+PY=.venv/Scripts/python.exe
 
-# ── Stage 0: sanity (no API cost) ────────────────────────────────────────────
-.venv/Scripts/python.exe -c "from app.services.llm_service import get_llm; print(type(get_llm()).__name__)"
-#   expect: ClaudeClient   (LLM_PROVIDER=claude in .env)
-ls models/index/bm25.pkl models/index/qdrant        # index exists — do NOT rebuild
+# 1. Seeds (deterministic, no API cost) — corrective mix lands in build_seed_queries.py
+$PY scripts/distill/build_seed_queries.py --total 2900 --seed 42 --show-samples 3
 
-# ── Stage 1: seeds ───────────────────────────────────────────────────────────
-.venv/Scripts/python.exe scripts/distill_make_seeds.py
-#   -> data/distill/seed_queries.jsonl (~2,400 rows; golden.jsonl exact-match filtered;
-#      Hindi rows written as UTF-8 by Python — never via shell vars)
+# 2. Teacher pairs (REAL Haiku calls; resumable by id; hard cost stop; teacher hard-assert)
+$PY scripts/distill/generate_pairs.py --seeds data/distill/seed_queries.jsonl \
+    --limit 2900 --max-cost-usd 25
+$PY scripts/distill/generate_pairs.py --report   # Gate-1 style readout any time
 
-# ── Stage 2a: Gate-1 pilot (~$1 of real Haiku calls) ────────────────────────
-export HIGH_POWER_MODEL=claude-haiku-4-5     # REQUIRED: settings default is Opus
-export ANTHROPIC_THINKING=off                # optional: skip the Haiku thinking-retry
-.venv/Scripts/python.exe scripts/distill_generate_pairs.py --limit 100
-.venv/Scripts/python.exe scripts/distill_build_dataset.py --stats-only
-#   GATE-1: clean rate >= 70%? spot-read 10 pairs. Projected full cost <= $25?
+# 3. Export train/val (clean-only, 95/5 by id hash) + stats
+$PY scripts/distill/export_dataset.py
 
-# ── Stage 2b: full run (resumable; re-running skips finished ids) ────────────
-.venv/Scripts/python.exe scripts/distill_generate_pairs.py
+# 4. Train: upload data/distill/train.jsonl + val.jsonl to Kaggle/Colab, open
+#    training/nyaysetu_finetune_qwen3_4b.ipynb, Run-All → downloads
+#    nyaysetu-legal-qwen3-4b-q4_k_m.gguf
 
-# ── Stage 3: dataset ─────────────────────────────────────────────────────────
-.venv/Scripts/python.exe scripts/distill_build_dataset.py
-#   -> data/distill/train.jsonl  val.jsonl  dataset_stats.md   (~2,000 clean pairs, 95/5)
+# 5. Serve locally
+ollama create nyaysetu-legal -f training/Modelfile   # GGUF beside the Modelfile
 
-# ── Stage 4: train on Colab T4 (free) ────────────────────────────────────────
-#   Upload train.jsonl + val.jsonl; run notebooks/train_nyaysetu_qwen3_4b.ipynb:
-#     unsloth FastLanguageModel "unsloth/Qwen3-4B-Instruct-2507", load_in_4bit,
-#     max_seq_length=8192, LoRA r=16, 2 epochs, train_on_responses_only
-#     -> model.save_pretrained_gguf(..., quantization_method="q4_k_m")
-#     -> push nyaysetu-legal-qwen3-4b-q4_k_m.gguf (~2.5 GB) to a private HF repo
-
-# ── Stage 5: local model ─────────────────────────────────────────────────────
-#   Download the GGUF next to models/ollama/Modelfile, then:
-ollama create nyaysetu-legal -f models/ollama/Modelfile
-ollama run nyaysetu-legal    # smoke: paste a captured pairs.jsonl prompt, expect JSON
-
-# ── Stage 6: Gate-2 + Gate-3 eval ────────────────────────────────────────────
-# 6a. Haiku baseline capture (API running with .env as-is: LLM_PROVIDER=claude):
-.venv/Scripts/python.exe -m uvicorn app.main:app --port 8000 &
-.venv/Scripts/python.exe scripts/answer_eval.py
-.venv/Scripts/python.exe scripts/capture_answers.py out/haiku_answers.json haiku
-.venv/Scripts/python.exe scripts/distill_eval_student.py --capture out/haiku_eval.json
-# 6b. Student run: stop uvicorn; set in .env: LLM_PROVIDER=ollama, OLLAMA_MODEL=nyaysetu-legal;
-#     restart uvicorn, then:
-.venv/Scripts/python.exe scripts/answer_eval.py
-.venv/Scripts/python.exe scripts/capture_answers.py out/student_answers.json nyaysetu-legal
-.venv/Scripts/python.exe scripts/distill_eval_student.py --capture out/student_eval.json \
-    --baseline out/haiku_eval.json
-#   GATE-2 verdict printed (trust hard-fails vs quality deltas)
-#   GATE-3: median response_time_ms from the student capture -> §5 decision table
+# 6. Gate-2: baseline once, student per checkpoint, compare
+$PY scripts/distill/eval_student.py --provider claude --model claude-haiku-4-5 \
+    --out data/distill/baseline_haiku.json
+$PY scripts/distill/eval_student.py --provider ollama --model nyaysetu-legal \
+    --out data/distill/student_v0.json
+$PY scripts/distill/eval_student.py --compare data/distill/baseline_haiku.json \
+    data/distill/student_v0.json
 ```
 
-Hindi verification at every stage follows the project gotcha: assert Devanagari by
-reading the UTF-8 files from Python (`_DEVANAGARI`-style regex), never by echoing
-through the shell.
+Ops notes: stop uvicorn before anything touching the embedded Qdrant index;
+`generate_pairs.py` aborts loudly if a stray `HIGH_POWER_MODEL` would switch the teacher;
+`data/distill/` is gitignored (artifacts private; also avoids false-triggering the
+publish-index CI which watches `data/**`).
 
 ---
 
-## 9. Risks — stated plainly
+## 10. Risks (stated plainly)
 
-1. **Latency is the product-killer, not quality.** Even a Gate-2-passing student at
-   45–90 s/answer only earns the local/hedge role. Budget no expectations beyond that
-   until there is GPU serving.
-2. **Budget variance.** The honest full-run range is $12–26 against a ~$15 target; the
-   pilot's measured `est_tokens` + the trim rule is the control, not optimism.
-3. **Rewrite-call regression.** Fine-tuning could dent the untuned `{"q": ...}` rewrite
-   behavior the serve path also routes through the student — explicitly gated in Gate-2.
-4. **Teacher drift.** If production moves off `claude-haiku-4-5`, pairs remain valid (the
-   contract is behavioral, gate-checked), but re-baseline Gate-2 against the new prod
-   engine before comparing.
-5. **Context truncation at serve time.** A missing `num_ctx 8192` in the Modelfile
-   silently amputates the retrieved context and produces confident ungrounded answers —
-   the gates would catch it as a citation-verification collapse, but check the Modelfile
-   first when Gate-2 tanks.
-6. **License hygiene.** Qwen3-4B is Apache 2.0 (ship-safe). Do not swap in Qwen2.5-3B
-   (research/non-commercial) or any research-licensed checkpoint without re-clearing this
-   table.
+1. **Anthropic usage policy on distillation** — training a model on Claude outputs may be
+   restricted as "training competing AI models" under Anthropic's commercial terms. Our
+   student is a domain generator for our own free product, not a general competing model,
+   and the dataset stays private — but **review the current Anthropic ToS / seek written
+   clarification before publicly releasing model weights**. (Publishing the scorecard is
+   safe either way; the weights question is the one to clear.)
+2. **Teacher drift** — Haiku updates change the target distribution; pin per-run
+   (`--teacher-model` + hard assert), record model id in every pair.
+3. **Small-model format-lock / forgetting** — mitigations in §5; Gate-2's rewrite-JSON
+   and Hindi rows exist precisely for this.
+4. **Statistical power** — until golden reaches ~770 rows, a −5pp citation regression is
+   only detectable at ~±5.7pp resolution (n=300). Stated on the scorecard.
+5. **Colab/Kaggle fragility** — checkpoints every 30 min to Drive/HF; resumable.
+6. **BharatGen/funded competitor ships first** — mitigated by moving the scorecard
+   (Gate-0 + baseline sweep) to the FRONT of the ladder, before big training spend.
+7. **q4 quantization quality cliff** — Gate-2 runs against the ACTUAL q4_K_M artifact via
+   Ollama, never the fp16 Colab checkpoint.

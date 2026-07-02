@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Build data/distill/seed_queries.jsonl — the seed-query set for distillation.
 
-Fully deterministic (NO LLM calls). ~2,400 seeds (--total, default 2400) with mix:
+Fully deterministic (NO LLM calls). Mix (Gate-1 corrective — OWN_MODEL_PLAN.md §4.1):
 
-    indicqa      40%   consumer-grade questions derived from the IndicLegalQA dataset
-    narrative_en 25%   hand-authored lay-narrative templates (10 audit domains) + slots
-    narrative_hi 20%   hand-authored Devanagari templates (UTF-8 literals in THIS file)
-    followup     10%   two-turn seeds (narrative turn-1 + static assistant reply + follow-up)
+    indicqa      20%   consumer-grade questions derived from the IndicLegalQA dataset
+    narrative_en 35%   hand-authored lay-narrative templates (10 audit domains) + slots
+    narrative_hi 25%   hand-authored Devanagari templates (UTF-8 literals in THIS file)
+    followup     15%   two-turn seeds (narrative turn-1 + static assistant reply + follow-up)
     thin          5%   legal-ish weak-context queries (obscure / state-specific / vague)
 
 Shared seed contract (one JSON per line):
@@ -71,11 +71,17 @@ DEFAULT_OUT = ROOT / "data" / "distill" / "seed_queries.jsonl"
 INDICQA_JSON = ROOT / "data" / "indiclegalqa" / "IndicLegalQA Dataset_10K.json"
 GOLDEN_JSONL = ROOT / "data" / "eval" / "golden.jsonl"
 
+# Gate-1 corrective mix (see OWN_MODEL_PLAN.md §4.1). The 100-seed pilot MEASURED
+# clean-keep rates: followup 10/10, narrative_en 84%, narrative_hi 60%, indicqa 47.5%,
+# thin 20% (by design). indicqa is down-weighted both for its low clean yield AND the
+# three-way collision (it is already 82% of the retrieval corpus and eval-adjacent);
+# the high-yield behaviors closest to real citizen usage are up-weighted. Projected
+# clean ≈70%; ~2,900 seeds → ~2,000 clean pairs ≈ $19.
 MIX = [  # (kind, fraction) — order also fixes largest-remainder tie-breaks
-    ("indicqa", 0.40),
-    ("narrative_en", 0.25),
-    ("narrative_hi", 0.20),
-    ("followup", 0.10),
+    ("indicqa", 0.20),
+    ("narrative_en", 0.35),
+    ("narrative_hi", 0.25),
+    ("followup", 0.15),
     ("thin", 0.05),
 ]
 
